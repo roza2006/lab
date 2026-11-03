@@ -66,7 +66,7 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] 仓库重置与目录骨架
 - [x] R1-A：README、目录规范、文档索引
 - [ ] R1-B：需求范围与角色
-- [ ] R1-C：用例清单
+- [x] R1-C：用例清单（`docs/requirements/use-cases.md`，v1.0 待评审）
 - [x] R1-D：领域模型（`docs/design/domain-model.md`，v0.1 待评审）
 - [ ] R1-E：数据库表清单
 - [ ] R1-F：测试计划与协作模板

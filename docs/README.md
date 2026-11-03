@@ -48,3 +48,14 @@ process/sprint-*.md + test/test-report.md
 - 数据库迁移使用 `V001__init.sql`、`V002__core.sql` 顺序命名；
 - 测试用例编号：`FT-xx` 功能、`ST-xx` 安全、`SM-xx` 状态机、`PT-xx` 性能；
 - 每份文档在文首写“版本 / 更新日期 / 负责人”，便于评审追溯。
+
+## 4. 数据库文档（R1-E）
+
+| 文件（仓库根目录相对） | 内容 | 负责人 | 状态 |
+|---|---|---|---|
+| `database/schema.sql` | 24 张表 DDL 草案：主外键、索引、CHECK 枚举、安全列 | E | R1 草案 v0.1 待评审 |
+| `database/README.md` | 数据库目录说明、本地验证步骤、与报告的差异 | E | R1 |
+| `docs/database/table-list.md` | 24 张表清单与核心表字段要点 | E | R1 |
+| `docs/database/er.md` | 表关系说明与核心 ER 图（Mermaid） | E | R1（R2 定稿并入 `design/er.md`） |
+| `docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | E | R1 |
+| `scripts/check_schema.py` | 无数据库环境下的静态结构自检 | E | R1 |

@@ -3,6 +3,18 @@
 > 对应报告 3.2 节与图 3-5。字段级定义见 [`database/schema.sql`](../../database/schema.sql)，
 > 表清单见 [`table-list.md`](./table-list.md)。
 
+## 0. 成品图
+
+![核心 ER 图](./diagrams/er-core.png)
+
+- 位图（可直接插入报告）：[`diagrams/er-core.png`](./diagrams/er-core.png)，2600 × 1480
+- 矢量（可在 draw.io / Visio / Inkscape 中修改）：[`diagrams/er-core.svg`](./diagrams/er-core.svg)
+- 生成脚本：[`scripts/render_er_diagram.py`](../../scripts/render_er_diagram.py)（改数据后重跑即可复现）
+
+图中标注 14 张核心表的主键（PK）、外键（FK）、唯一键（UK）与 15 条关系基数；
+9 张支撑表在底部单独列出，只做逻辑关联，不建物理外键。
+本文第 3 节的 Mermaid 图是可编辑的关系源，二者内容一致。
+
 ## 1. 关系总述
 
 系统的数据关系可以概括为一条主链：

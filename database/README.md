@@ -11,8 +11,11 @@
 | `schema.sql` | 24 张表的 DDL 草案（含表注释、字段注释、索引、CHECK 约束） | R1 草案 v0.1，待评审 |
 | `../docs/database/table-list.md` | 24 张表的中文名、类别、主键、关键字段、关联关系 | R1 |
 | `../docs/database/er.md` | 表关系说明与核心 ER 图（Mermaid，对应报告图 3-5） | R1 |
+| `../docs/database/diagrams/er-core.png` | ER 图成品位图（2600×1480），可直接插入报告 | R1 |
+| `../docs/database/diagrams/er-core.svg` | ER 图矢量源文件，可用 draw.io / Visio 修改 | R1 |
 | `../docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | R1 |
 | `../scripts/check_schema.py` | 无数据库环境下的静态结构自检脚本 | R1 |
+| `../scripts/render_er_diagram.py` | ER 图生成脚本，表结构变更后重跑即可更新图 | R1 |
 
 > 第 2 轮起新增 `seed.sql`（演示种子数据）与 `migrations/V002__core.sql` 等
 > Flyway 版本化脚本；届时 `schema.sql` 转为 baseline，不再直接对生产库执行。

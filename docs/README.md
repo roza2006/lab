@@ -56,6 +56,9 @@ process/sprint-*.md + test/test-report.md
 | `database/schema.sql` | 24 张表 DDL 草案：主外键、索引、CHECK 枚举、安全列 | E | R1 草案 v0.1 待评审 |
 | `database/README.md` | 数据库目录说明、本地验证步骤、与报告的差异 | E | R1 |
 | `docs/database/table-list.md` | 24 张表清单与核心表字段要点 | E | R1 |
-| `docs/database/er.md` | 表关系说明与核心 ER 图（Mermaid） | E | R1（R2 定稿并入 `design/er.md`） |
+| `docs/database/er.md` | 表关系说明与核心 ER 图（成品图 + Mermaid 源） | E | R1（R2 定稿并入 `design/er.md`） |
+| `docs/database/diagrams/er-core.png` | ER 图位图，2600×1480，可直接插入报告 | E | R1 |
+| `docs/database/diagrams/er-core.svg` | ER 图矢量源文件，可用 draw.io 修改 | E | R1 |
 | `docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | E | R1 |
 | `scripts/check_schema.py` | 无数据库环境下的静态结构自检 | E | R1 |
+| `scripts/render_er_diagram.py` | ER 图生成脚本（改结构后重跑即可更新图） | E | R1 |

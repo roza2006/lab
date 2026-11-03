@@ -7,7 +7,7 @@
 | 目录/文件 | 内容 | 计划负责人 | 状态 |
 |---|---|---|---|
 | `requirements/requirements.md` | 项目范围、角色、约束、非功能需求 | B | 待 R1 |
-| `requirements/use-cases.md` | 29 个用例、优先级、权限边界 | C | 待 R1 |
+| `requirements/use-cases.md` | 29 个用例、优先级、权限边界 | C | 已提交（R1-C，v1.0 待评审） |
 | `design/domain-model.md` | 聚合根、实体、值对象、关系 | D | 已提交（R1-D，v0.1 待评审） |
 | `design/architecture.md` | DDD 分层、模块化单体、架构决策 | A | 待 R2 |
 | `design/api-contract.md` | 认证/问诊/处方 API 契约 | B | 待 R2 |

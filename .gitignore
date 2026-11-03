@@ -1,0 +1,36 @@
+﻿# Java
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+
+# Node
+node_modules/
+dist/
+.vite/
+*.local
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Secrets / runtime
+.env
+.env.*
+*.pem
+*.key
+uploads/
+logs/
+*.log
+
+# Office temp
+~$*
+
+# Local backup bundles
+backup/
+*.bundle
+

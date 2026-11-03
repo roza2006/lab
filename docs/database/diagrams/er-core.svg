@@ -1,0 +1,555 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2600" height="1480" viewBox="0 0 2600 1480">
+  <title>智慧医疗在线问诊与处方流转平台 · 核心 ER 图</title>
+  <desc>R1-E 数据库设计：14 张核心表与 9 张支撑表，含主外键与基数标注。</desc>
+  <rect width="2600" height="1480" fill="#FFFFFF"/>
+  <text x="100" y="78" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="46" font-weight="bold" fill="#1F4E79" text-anchor="start">智慧医疗在线问诊与处方流转平台 · 核心 ER 图</text>
+  <text x="100" y="118" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="normal" fill="#7A8B9A" text-anchor="start">第 1 轮 E｜数据库设计基线 v0.1｜14 张核心表 + 9 张支撑表｜完整 24 表字段见 database/schema.sql</text>
+  <polyline points="100,138 2500,138" fill="none" stroke="#DEEAF6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="400,277 520,277" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="413.0,268.0 413.0,286.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="509.0" cy="277.0" r="5" fill="#FFFFFF" stroke="#2E75B6" stroke-width="2"/>
+  <polyline points="493.0,286.0 493.0,268.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="250,410 250,480" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="259.0,423.0 241.0,423.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="250.0" cy="469.0" r="5" fill="#FFFFFF" stroke="#2E75B6" stroke-width="2"/>
+  <polyline points="241.0,453.0 259.0,453.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="250,780 250,710" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="241.0,767.0 259.0,767.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="250.0,723.0 257.0,710.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="250.0,723.0 250,710" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="250.0,723.0 243.0,710.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="820,277 940,277" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="833.0,268.0 833.0,286.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="927.0,277.0 940.0,284.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="927.0,277.0 940,277" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="927.0,277.0 940.0,270.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="310,480 985,410" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="322.0023001432712,469.7070513811235 323.8590095576999,487.6110350202573" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="972.0693451495144,411.3409567993096 985.7220536611667,416.9626603041076" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="972.0693451495144,411.3409567993096 985,410" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="972.0693451495144,411.3409567993096 984.2779463388333,403.0373396958924" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1090,410 706,480" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1078.8247851815481,421.18546260829 1075.5967313825454,403.4772817680471" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="718.7892417179532,477.66862781183147 704.7446457448323,473.11348522879445" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="718.7892417179532,477.66862781183147 706,480" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="718.7892417179532,477.66862781183147 707.2553542551677,486.88651477120555" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1180,410 1105,480" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1176.6371457660828,425.44963466886594 1164.3554172596025,412.2906398404943" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="1113.0416079506715" cy="472.4944992460399" r="5" fill="#FFFFFF" stroke="#2E75B6" stroke-width="2"/>
+  <polyline points="1118.5976279893173,454.99790982609386 1130.8793564957975,468.1569046544655" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1240,277 1360,277" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1253.0,268.0 1253.0,286.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1347.0,277.0 1360.0,284.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1347.0,277.0 1360,277" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1347.0,277.0 1360.0,270.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1510,410 1510,480" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1519.0,423.0 1501.0,423.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1510.0,467.0 1503.0,480.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1510.0,467.0 1510,480" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1510.0,467.0 1517.0,480.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1360,606 1240,849" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1354.2438559380898,617.656191725368 1366.2764109290442,609.0994621871823" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1354.2438559380898,617.656191725368 1360,606" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1354.2438559380898,617.656191725368 1353.7235890709558,602.9005378128177" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1237.6864728674245,833.3587854625404 1253.8258152563958,841.3288310867237" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="940,923 820,923" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="927.0,923.0 940.0,930.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="927.0,923.0 940,923" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="927.0,923.0 940.0,916.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="833.0,914.0 833.0,932.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1660,277 1780,277" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1673.0,268.0 1673.0,286.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="1769.0" cy="277.0" r="5" fill="#FFFFFF" stroke="#2E75B6" stroke-width="2"/>
+  <polyline points="1753.0,286.0 1753.0,268.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1930,480 1930,410" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1921.0,467.0 1939.0,467.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1930.0,423.0 1937.0,410.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1930.0,423.0 1930,410" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1930.0,423.0 1923.0,410.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="2080,277 2200,277" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="2093.0,268.0 2093.0,286.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="2189.0" cy="277.0" r="5" fill="#FFFFFF" stroke="#2E75B6" stroke-width="2"/>
+  <polyline points="2173.0,286.0 2173.0,268.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1780,606 1660,872" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1782.8579749900466,621.5509478475194 1766.4503200112183,614.1489982330104" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="1665.3458524993675,860.1500269597351 1653.6192452860112,869.1214640388021" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1665.3458524993675,860.1500269597351 1660,872" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="1665.3458524993675,860.1500269597351 1666.3807547139888,874.8785359611979" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="105" y="186" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="100" y="180" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="100" y="180" width="300" height="56" rx="12" ry="12" fill="#1F4E79"/>
+  <rect x="100" y="220" width="300" height="16" rx="0" ry="0" fill="#1F4E79"/>
+  <text x="116" y="211" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">用户账号</text>
+  <text x="116" y="229" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">sys_user</text>
+  <text x="116" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="352" y="247" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="369.0" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="342" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="102" y="272" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="110,272 390,272" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">username</text>
+  <rect x="352" y="279" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="369.0" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="342" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <polyline points="110,304 390,304" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">phone_hash</text>
+  <rect x="352" y="311" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="369.0" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="342" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">CHAR(64)</text>
+  <rect x="102" y="336" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="110,336 390,336" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">role_code</text>
+  <text x="386" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(32)</text>
+  <polyline points="110,368 390,368" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">status</text>
+  <text x="386" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">TINYINT</text>
+  <rect x="525" y="186" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="520" y="180" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="520" y="180" width="300" height="56" rx="12" ry="12" fill="#1F4E79"/>
+  <rect x="520" y="220" width="300" height="16" rx="0" ry="0" fill="#1F4E79"/>
+  <text x="536" y="211" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">患者档案</text>
+  <text x="536" y="229" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">patient_profile</text>
+  <text x="536" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="772" y="247" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="789.0" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="762" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="522" y="272" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="530,272 810,272" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">user_id</text>
+  <rect x="772" y="279" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="789.0" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="762" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="530,304 810,304" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id_card_hash</text>
+  <rect x="772" y="311" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="789.0" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="762" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">CHAR(64)</text>
+  <rect x="522" y="336" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="530,336 810,336" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">allergy_history</text>
+  <text x="806" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(1000)</text>
+  <polyline points="530,368 810,368" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">consent_status</text>
+  <text x="806" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">TINYINT</text>
+  <rect x="945" y="186" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="940" y="180" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="940" y="180" width="300" height="56" rx="12" ry="12" fill="#2F8F83"/>
+  <rect x="940" y="220" width="300" height="16" rx="0" ry="0" fill="#2F8F83"/>
+  <text x="956" y="211" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">问诊会话</text>
+  <text x="956" y="229" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">consultation_session</text>
+  <text x="956" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="1192" y="247" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="1209.0" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="1182" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="942" y="272" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="950,272 1230,272" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">patient_id</text>
+  <rect x="1192" y="279" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="1209.0" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="1182" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="950,304 1230,304" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">doctor_id</text>
+  <rect x="1192" y="311" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="1209.0" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="1182" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="942" y="336" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="950,336 1230,336" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">status</text>
+  <text x="1226" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(24)</text>
+  <polyline points="950,368 1230,368" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">version</text>
+  <text x="1226" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">INT</text>
+  <rect x="1365" y="186" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="1360" y="180" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1360" y="180" width="300" height="56" rx="12" ry="12" fill="#BF9000"/>
+  <rect x="1360" y="220" width="300" height="16" rx="0" ry="0" fill="#BF9000"/>
+  <text x="1376" y="211" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">电子处方</text>
+  <text x="1376" y="229" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">prescription</text>
+  <text x="1376" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="1612" y="247" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="1629.0" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="1602" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="1362" y="272" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1370,272 1650,272" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">rx_no</text>
+  <rect x="1612" y="279" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="1629.0" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="1602" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(32)</text>
+  <polyline points="1370,304 1650,304" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">session_id</text>
+  <rect x="1612" y="311" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="1629.0" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="1602" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="1362" y="336" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1370,336 1650,336" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">status</text>
+  <text x="1646" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(32)</text>
+  <polyline points="1370,368 1650,368" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">version</text>
+  <text x="1646" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">INT</text>
+  <rect x="1785" y="186" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="1780" y="180" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1780" y="180" width="300" height="56" rx="12" ry="12" fill="#2E75B6"/>
+  <rect x="1780" y="220" width="300" height="16" rx="0" ry="0" fill="#2E75B6"/>
+  <text x="1796" y="211" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">处方流转单</text>
+  <text x="1796" y="229" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">circulation_order</text>
+  <text x="1796" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="2032" y="247" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="2049.0" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="2022" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="1782" y="272" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1790,272 2070,272" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1796" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">rx_id</text>
+  <rect x="2032" y="279" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="2049.0" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="2022" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="1790,304 2070,304" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1796" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">pharmacy_id</text>
+  <rect x="2032" y="311" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="2049.0" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="2022" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="1782" y="336" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1790,336 2070,336" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1796" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">status</text>
+  <text x="2066" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(24)</text>
+  <polyline points="1790,368 2070,368" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1796" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">idempotency_key</text>
+  <rect x="2032" y="375" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="2049.0" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="2022" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <rect x="2205" y="186" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="2200" y="180" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="2200" y="180" width="300" height="56" rx="12" ry="12" fill="#2E75B6"/>
+  <rect x="2200" y="220" width="300" height="16" rx="0" ry="0" fill="#2E75B6"/>
+  <text x="2216" y="211" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">发药核销</text>
+  <text x="2216" y="229" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">dispense_record</text>
+  <text x="2216" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="2452" y="247" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="2469.0" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="2442" y="261" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="2202" y="272" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="2210,272 2490,272" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="2216" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">circulation_id</text>
+  <rect x="2452" y="279" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="2469.0" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="2442" y="293" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="2210,304 2490,304" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="2216" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">operator_id</text>
+  <rect x="2452" y="311" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="2469.0" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="2442" y="325" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="2202" y="336" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="2210,336 2490,336" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="2216" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">batch_no</text>
+  <text x="2486" y="357" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <polyline points="2210,368 2490,368" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="2216" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">redeemed_at</text>
+  <text x="2486" y="389" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">DATETIME(3)</text>
+  <rect x="105" y="486" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="100" y="480" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="100" y="480" width="300" height="56" rx="12" ry="12" fill="#1F4E79"/>
+  <rect x="100" y="520" width="300" height="16" rx="0" ry="0" fill="#1F4E79"/>
+  <text x="116" y="511" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">医生档案</text>
+  <text x="116" y="529" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">doctor_profile</text>
+  <text x="116" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="352" y="547" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="369.0" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="342" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="102" y="572" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="110,572 390,572" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">user_id</text>
+  <rect x="352" y="579" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="369.0" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="342" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="110,604 390,604" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">department_id</text>
+  <rect x="352" y="611" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="369.0" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="342" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="102" y="636" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="110,636 390,636" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">license_no</text>
+  <rect x="352" y="643" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="369.0" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="342" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <polyline points="110,668 390,668" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">rx_right</text>
+  <text x="386" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">TINYINT</text>
+  <rect x="525" y="486" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="520" y="480" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="520" y="480" width="300" height="56" rx="12" ry="12" fill="#2F8F83"/>
+  <rect x="520" y="520" width="300" height="16" rx="0" ry="0" fill="#2F8F83"/>
+  <text x="536" y="511" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">问诊消息</text>
+  <text x="536" y="529" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">consultation_message</text>
+  <text x="536" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="772" y="547" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="789.0" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="762" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="522" y="572" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="530,572 810,572" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">session_id</text>
+  <rect x="772" y="579" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="789.0" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="762" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="530,604 810,604" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">sender_id</text>
+  <text x="806" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="522" y="636" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="530,636 810,636" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">client_msg_id</text>
+  <rect x="772" y="643" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="789.0" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="762" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <polyline points="530,668 810,668" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">sent_at</text>
+  <text x="806" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">DATETIME(3)</text>
+  <rect x="945" y="486" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="940" y="480" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="940" y="480" width="300" height="56" rx="12" ry="12" fill="#2F8F83"/>
+  <rect x="940" y="520" width="300" height="16" rx="0" ry="0" fill="#2F8F83"/>
+  <text x="956" y="511" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">电子病历</text>
+  <text x="956" y="529" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">medical_record</text>
+  <text x="956" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="1192" y="547" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="1209.0" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="1182" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="942" y="572" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="950,572 1230,572" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">session_id</text>
+  <rect x="1192" y="579" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="1209.0" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="1182" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="950,604 1230,604" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">diagnosis</text>
+  <text x="1226" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(1000)</text>
+  <rect x="942" y="636" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="950,636 1230,636" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">signed_at</text>
+  <text x="1226" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">DATETIME(3)</text>
+  <polyline points="950,668 1230,668" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">signed_hash</text>
+  <text x="1226" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">CHAR(64)</text>
+  <rect x="1365" y="486" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="1360" y="480" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1360" y="480" width="300" height="56" rx="12" ry="12" fill="#BF9000"/>
+  <rect x="1360" y="520" width="300" height="16" rx="0" ry="0" fill="#BF9000"/>
+  <text x="1376" y="511" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">处方明细</text>
+  <text x="1376" y="529" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">prescription_item</text>
+  <text x="1376" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="1612" y="547" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="1629.0" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="1602" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="1362" y="572" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1370,572 1650,572" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">prescription_id</text>
+  <rect x="1612" y="579" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="1629.0" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="1602" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="1370,604 1650,604" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">drug_id</text>
+  <rect x="1612" y="611" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="1629.0" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="1602" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="1362" y="636" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1370,636 1650,636" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">dosage</text>
+  <text x="1646" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">DECIMAL(10,3)</text>
+  <polyline points="1370,668 1650,668" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">days</text>
+  <text x="1646" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">INT</text>
+  <rect x="1785" y="486" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="1780" y="480" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1780" y="480" width="300" height="56" rx="12" ry="12" fill="#2E75B6"/>
+  <rect x="1780" y="520" width="300" height="16" rx="0" ry="0" fill="#2E75B6"/>
+  <text x="1796" y="511" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">合作药房</text>
+  <text x="1796" y="529" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">pharmacy</text>
+  <text x="1796" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="2032" y="547" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="2049.0" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="2022" y="561" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="1782" y="572" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1790,572 2070,572" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1796" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">pharmacy_code</text>
+  <rect x="2032" y="579" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="2049.0" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="2022" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(32)</text>
+  <polyline points="1790,604 2070,604" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1796" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">license_no</text>
+  <rect x="2032" y="611" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="2049.0" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="2022" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <rect x="1782" y="636" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1790,636 2070,636" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1796" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">license_expire_at</text>
+  <text x="2066" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">DATE</text>
+  <polyline points="1790,668 2070,668" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1796" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">status</text>
+  <text x="2066" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">TINYINT</text>
+  <rect x="105" y="786" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="100" y="780" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="100" y="780" width="300" height="56" rx="12" ry="12" fill="#1F4E79"/>
+  <rect x="100" y="820" width="300" height="16" rx="0" ry="0" fill="#1F4E79"/>
+  <text x="116" y="811" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">科室</text>
+  <text x="116" y="829" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">department</text>
+  <text x="116" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="352" y="847" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="369.0" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="342" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="102" y="872" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="110,872 390,872" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">dept_code</text>
+  <rect x="352" y="879" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="369.0" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="342" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(32)</text>
+  <polyline points="110,904 390,904" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">dept_name</text>
+  <text x="386" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <rect x="102" y="936" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="110,936 390,936" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">parent_id</text>
+  <rect x="352" y="943" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="369.0" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="342" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="110,968 390,968" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="116" y="989" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">status</text>
+  <text x="386" y="989" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">TINYINT</text>
+  <rect x="525" y="786" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="520" y="780" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="520" y="780" width="300" height="56" rx="12" ry="12" fill="#BF9000"/>
+  <rect x="520" y="820" width="300" height="16" rx="0" ry="0" fill="#BF9000"/>
+  <text x="536" y="811" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">药品分类</text>
+  <text x="536" y="829" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">drug_category</text>
+  <text x="536" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="772" y="847" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="789.0" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="762" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="522" y="872" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="530,872 810,872" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">category_code</text>
+  <rect x="772" y="879" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="789.0" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="762" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(32)</text>
+  <polyline points="530,904 810,904" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">category_name</text>
+  <text x="806" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <rect x="522" y="936" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="530,936 810,936" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">parent_id</text>
+  <rect x="772" y="943" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="789.0" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="762" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="530,968 810,968" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="536" y="989" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">status</text>
+  <text x="806" y="989" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">TINYINT</text>
+  <rect x="945" y="786" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="940" y="780" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="940" y="780" width="300" height="56" rx="12" ry="12" fill="#BF9000"/>
+  <rect x="940" y="820" width="300" height="16" rx="0" ry="0" fill="#BF9000"/>
+  <text x="956" y="811" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">药品目录</text>
+  <text x="956" y="829" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">drug</text>
+  <text x="956" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="1192" y="847" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="1209.0" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="1182" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="942" y="872" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="950,872 1230,872" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">drug_code</text>
+  <rect x="1192" y="879" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="1209.0" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="1182" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <polyline points="950,904 1230,904" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">category_id</text>
+  <rect x="1192" y="911" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="1209.0" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="1182" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="942" y="936" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="950,936 1230,936" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">controlled_level</text>
+  <text x="1226" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(16)</text>
+  <polyline points="950,968 1230,968" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="956" y="989" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">status</text>
+  <text x="1226" y="989" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">TINYINT</text>
+  <rect x="1365" y="786" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
+  <rect x="1360" y="780" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1360" y="780" width="300" height="56" rx="12" ry="12" fill="#2E75B6"/>
+  <rect x="1360" y="820" width="300" height="16" rx="0" ry="0" fill="#2E75B6"/>
+  <text x="1376" y="811" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">药师档案</text>
+  <text x="1376" y="829" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#DCE9F5" text-anchor="start">pharmacist_profile</text>
+  <text x="1376" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">id</text>
+  <rect x="1612" y="847" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="1629.0" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="1602" y="861" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="1362" y="872" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1370,872 1650,872" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">user_id</text>
+  <rect x="1612" y="879" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="1629.0" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="1602" y="893" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <polyline points="1370,904 1650,904" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">pharmacy_id</text>
+  <rect x="1612" y="911" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="1629.0" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="1602" y="925" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <rect x="1362" y="936" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
+  <polyline points="1370,936 1650,936" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">license_no</text>
+  <rect x="1612" y="943" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="1629.0" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="1602" y="957" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
+  <polyline points="1370,968 1650,968" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
+  <text x="1376" y="989" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">review_right</text>
+  <text x="1646" y="989" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">TINYINT</text>
+  <text x="100" y="1082" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="20" font-weight="bold" fill="#5B6B7A" text-anchor="start">支撑表（9 张 · 逻辑关联，不建物理外键；字段见 schema.sql）</text>
+  <rect x="430" y="1104" width="300" height="86" rx="10" ry="10" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="430" y="1104" width="6" height="86" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="450" y="1140" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">角色</text>
+  <text x="450" y="1166" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">sys_role</text>
+  <rect x="790" y="1104" width="300" height="86" rx="10" ry="10" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="790" y="1104" width="6" height="86" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="810" y="1140" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">权限点</text>
+  <text x="810" y="1166" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">sys_permission</text>
+  <rect x="1150" y="1104" width="300" height="86" rx="10" ry="10" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1150" y="1104" width="6" height="86" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="1170" y="1140" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">用户角色</text>
+  <text x="1170" y="1166" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">sys_user_role</text>
+  <rect x="1510" y="1104" width="300" height="86" rx="10" ry="10" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1510" y="1104" width="6" height="86" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="1530" y="1140" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">角色权限</text>
+  <text x="1530" y="1166" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">sys_role_permission</text>
+  <rect x="1870" y="1104" width="300" height="86" rx="10" ry="10" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1870" y="1104" width="6" height="86" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="1890" y="1140" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">审计日志</text>
+  <text x="1890" y="1166" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">audit_log</text>
+  <rect x="610" y="1216" width="300" height="86" rx="10" ry="10" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="610" y="1216" width="6" height="86" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="630" y="1252" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">知情同意</text>
+  <text x="630" y="1278" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">consent_record</text>
+  <rect x="970" y="1216" width="300" height="86" rx="10" ry="10" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="970" y="1216" width="6" height="86" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="990" y="1252" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">通知</text>
+  <text x="990" y="1278" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">notification</text>
+  <rect x="1330" y="1216" width="300" height="86" rx="10" ry="10" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1330" y="1216" width="6" height="86" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="1350" y="1252" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">事务发件箱</text>
+  <text x="1350" y="1278" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">outbox_event</text>
+  <rect x="1690" y="1216" width="300" height="86" rx="10" ry="10" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1690" y="1216" width="6" height="86" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="1710" y="1252" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">幂等记录</text>
+  <text x="1710" y="1278" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">idempotency_record</text>
+  <polyline points="100,1352 160,1352" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <text x="168" y="1358" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#1F2D3D" text-anchor="start">1 : N 一对多</text>
+  <polyline points="330,1352 390,1352" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <text x="398" y="1358" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#1F2D3D" text-anchor="start">1 : 0..1 一对零或一</text>
+  <rect x="700" y="1338" width="34" height="18" rx="4" ry="4" fill="#BF9000"/>
+  <text x="717" y="1352" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">PK</text>
+  <text x="742" y="1358" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#1F2D3D" text-anchor="start">主键</text>
+  <rect x="830" y="1338" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="847" y="1352" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
+  <text x="872" y="1358" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#1F2D3D" text-anchor="start">外键</text>
+  <rect x="960" y="1338" width="34" height="18" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="977" y="1352" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
+  <text x="1002" y="1358" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#1F2D3D" text-anchor="start">唯一键</text>
+  <text x="100" y="1396" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">线端标注：竖线「│」＝ 1，分叉「&lt;」＝ 多，圆圈「○」＝ 可为空（0..1）；卡片内 PK/FK/UK 为键类型。</text>
+  <text x="100" y="1426" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 关联药师档案。为保持图面清晰，这两条关系以文字说明代替连线。</text>
+  <text x="2500" y="1426" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="end">R1-E · v0.1</text>
+</svg>

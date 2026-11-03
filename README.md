@@ -67,7 +67,7 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R1-A：README、目录规范、文档索引
 - [ ] R1-B：需求范围与角色
 - [ ] R1-C：用例清单
-- [ ] R1-D：领域模型
+- [x] R1-D：领域模型（`docs/design/domain-model.md`，v0.1 待评审）
 - [ ] R1-E：数据库表清单
 - [ ] R1-F：测试计划与协作模板
 - [ ] R2–R6：架构、编码、测试、发布

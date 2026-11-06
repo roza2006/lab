@@ -1,0 +1,1008 @@
+openapi: 3.0.3
+info:
+  title: 互联网医院在线问诊与处方流转平台 API
+  description: |
+    平台 v1 版本 HTTP API 契约，覆盖认证、图文问诊、电子处方与药师审核三个业务域。
+    契约设计说明见 docs/design/api-contract.md。
+  version: 1.0.0
+  contact:
+    name: 李梓语（角色 B：问诊域、处方域负责人）
+servers:
+  - url: http://localhost:8080/api/v1
+    description: 本地开发环境
+tags:
+  - name: Auth
+    description: 认证与访问
+  - name: Consultation
+    description: 图文问诊会话与消息
+  - name: Prescription
+    description: 电子处方
+  - name: Review
+    description: 药师处方审核
+security:
+  - bearerAuth: []
+
+paths:
+  # ---------- 认证域 ----------
+  /auth/register/patient:
+    post:
+      tags: [Auth]
+      summary: 患者注册
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRegisterRequest'
+      responses:
+        '201':
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+
+  /auth/register/staff:
+    post:
+      tags: [Auth]
+      summary: 医生/药师注册（含执业资质）
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffRegisterRequest'
+      responses:
+        '201':
+          description: 注册成功，账号待管理员资质审核
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: 账号密码登录
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登录成功，返回 JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: 登出
+      responses:
+        '200':
+          description: 登出成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: 获取当前登录用户
+      responses:
+        '200':
+          description: 当前用户信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+
+  # ---------- 问诊域 ----------
+  /consultations:
+    get:
+      tags: [Consultation]
+      summary: 问诊会话列表
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ConsultationStatus'
+          description: 按会话状态过滤；医生常用 WAITING 查询待接诊
+      responses:
+        '200':
+          description: 分页会话列表（元素为 Consultation）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+    post:
+      tags: [Consultation]
+      summary: 患者发起复诊问诊
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultationCreateRequest'
+      responses:
+        '201':
+          description: 会话创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consultation'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+
+  /consultations/{id}:
+    get:
+      tags: [Consultation]
+      summary: 会话详情
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 会话详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consultation'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+
+  /consultations/{id}/accept:
+    post:
+      tags: [Consultation]
+      summary: 医生接诊
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 接诊成功，会话进入 IN_PROGRESS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consultation'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+
+  /consultations/{id}/messages:
+    get:
+      tags: [Consultation]
+      summary: 消息历史
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: 分页消息列表（元素为 Message）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+    post:
+      tags: [Consultation]
+      summary: 发送消息
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageSendRequest'
+      responses:
+        '201':
+          description: 消息发送成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+        '429':
+          $ref: '#/components/responses/RateLimited429'
+
+  /consultations/{id}/end:
+    post:
+      tags: [Consultation]
+      summary: 结束会话
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: 会话已结束
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consultation'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+
+  # ---------- 处方域 ----------
+  /consultations/{id}/prescriptions:
+    post:
+      tags: [Prescription]
+      summary: 医生在会话内开具处方
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrescriptionCreateRequest'
+      responses:
+        '201':
+          description: 处方创建成功（DRAFT）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+
+  /prescriptions:
+    get:
+      tags: [Prescription]
+      summary: 处方列表
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/PrescriptionStatus'
+          description: 按处方状态过滤
+      responses:
+        '200':
+          description: 分页处方列表（元素为 Prescription，已按角色做归属过滤）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+
+  /prescriptions/review-queue:
+    get:
+      tags: [Review]
+      summary: 药师待审核队列
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: 待审核处方分页列表（PENDING_REVIEW）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+
+  /prescriptions/{id}:
+    get:
+      tags: [Prescription]
+      summary: 处方详情
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+      responses:
+        '200':
+          description: 处方详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+    put:
+      tags: [Prescription]
+      summary: 修改草稿/驳回态处方
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrescriptionCreateRequest'
+      responses:
+        '200':
+          description: 修改成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+
+  /prescriptions/{id}/submit:
+    post:
+      tags: [Prescription]
+      summary: 提交处方审核
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+      responses:
+        '200':
+          description: 提交成功，状态 PENDING_REVIEW
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prescription'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+
+  /prescriptions/{id}/cancel:
+    post:
+      tags: [Prescription]
+      summary: 撤销处方
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+      responses:
+        '200':
+          description: 撤销成功（CANCELLED）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimpleResult'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+
+  /prescriptions/{id}/reviews:
+    get:
+      tags: [Review]
+      summary: 审核记录
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+      responses:
+        '200':
+          description: 审核记录列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+
+  /prescriptions/{id}/reviews/approve:
+    post:
+      tags: [Review]
+      summary: 药师审核通过（电子签名）
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+      responses:
+        '200':
+          description: 审核通过（APPROVED）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+
+  /prescriptions/{id}/reviews/reject:
+    post:
+      tags: [Review]
+      summary: 药师驳回（必填意见）
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+      responses:
+        '200':
+          description: 驳回成功（REJECTED）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PathId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+      description: 问诊会话 ID
+    PrescriptionId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+      description: 处方 ID
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    SizeParam:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    BadRequest400:
+      description: 请求格式错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized401:
+      description: 未认证或令牌失效
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden403:
+      description: 无权限或越权访问
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound404:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict409:
+      description: 资源状态不允许该操作
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ValidationError422:
+      description: 字段校验失败
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    RateLimited429:
+      description: 触发限流
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServerError500:
+      description: 服务端内部错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    # ---------- 枚举 ----------
+    Role:
+      type: string
+      enum: [PATIENT, DOCTOR, PHARMACIST, PHARMACY_OPERATOR, ADMIN]
+    UserStatus:
+      type: string
+      enum: [ACTIVE, DISABLED, CANCELLED]
+    ConsultationStatus:
+      type: string
+      enum: [WAITING, IN_PROGRESS, ENDED, ARCHIVED]
+    MessageType:
+      type: string
+      enum: [TEXT, IMAGE]
+    PrescriptionStatus:
+      type: string
+      enum: [DRAFT, PENDING_REVIEW, APPROVED, REJECTED, CANCELLED, EXPIRED, DISPENSING, COMPLETED]
+    ReviewAction:
+      type: string
+      enum: [APPROVED, REJECTED]
+
+    # ---------- 认证相关 ----------
+    PatientRegisterRequest:
+      type: object
+      required: [username, password, realName, idCardNo, phone]
+      properties:
+        username:
+          type: string
+          minLength: 4
+          maxLength: 32
+          example: liziyu_patient
+        password:
+          type: string
+          minLength: 8
+          maxLength: 64
+          example: Patient@2026
+        realName:
+          type: string
+          example: 张三
+        idCardNo:
+          type: string
+          description: 身份证号（加密存储）
+          example: 110101199001011234
+        phone:
+          type: string
+          pattern: '^1[3-9]\d{9}$'
+          example: 13800138000
+
+    StaffRegisterRequest:
+      type: object
+      required: [username, password, realName, idCardNo, phone, role, licenseNo]
+      properties:
+        username:
+          type: string
+          example: dr_liziyu
+        password:
+          type: string
+          minLength: 8
+          example: Doctor@2026
+        realName:
+          type: string
+          example: 李医生
+        idCardNo:
+          type: string
+          example: 110101198505056789
+        phone:
+          type: string
+          example: 13900139000
+        role:
+          type: string
+          enum: [DOCTOR, PHARMACIST]
+        licenseNo:
+          type: string
+          description: 执业资质编号
+          example: 1101202600086
+        department:
+          type: string
+          example: 内分泌科
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: dr_liziyu
+        password:
+          type: string
+          example: Doctor@2026
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDAxIiwicm9sZSI6Ik9UT1IifQ.signed
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          description: 有效期（秒）
+          example: 7200
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1001
+        username:
+          type: string
+          example: dr_liziyu
+        realName:
+          type: string
+          example: 李医生
+        role:
+          $ref: '#/components/schemas/Role'
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        department:
+          type: string
+          example: 内分泌科
+
+    # ---------- 问诊相关 ----------
+    ConsultationCreateRequest:
+      type: object
+      required: [department, diseaseName, chiefComplaint]
+      properties:
+        department:
+          type: string
+          example: 内分泌科
+        diseaseName:
+          type: string
+          description: 复诊疾病名称
+          example: 2 型糖尿病
+        chiefComplaint:
+          type: string
+          description: 主诉
+          example: 血糖控制不佳，随访复诊
+
+    Consultation:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 2001
+        patientId:
+          type: integer
+          format: int64
+          example: 1002
+        doctorId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 1001
+        department:
+          type: string
+          example: 内分泌科
+        diseaseName:
+          type: string
+          example: 2 型糖尿病
+        chiefComplaint:
+          type: string
+          example: 血糖控制不佳，随访复诊
+        status:
+          $ref: '#/components/schemas/ConsultationStatus'
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-11-06T14:00:00+08:00
+        endedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    MessageSendRequest:
+      type: object
+      required: [contentType, content]
+      properties:
+        contentType:
+          $ref: '#/components/schemas/MessageType'
+        content:
+          type: string
+          description: 文本内容或图片 URL
+          example: 医生您好，最近空腹血糖 7.8 mmol/L
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 3001
+        consultationId:
+          type: integer
+          format: int64
+          example: 2001
+        senderId:
+          type: integer
+          format: int64
+          example: 1002
+        senderRole:
+          $ref: '#/components/schemas/Role'
+        contentType:
+          $ref: '#/components/schemas/MessageType'
+        content:
+          type: string
+          example: 医生您好，最近空腹血糖 7.8 mmol/L
+        read:
+          type: boolean
+          example: false
+        sentAt:
+          type: string
+          format: date-time
+          example: 2026-11-06T14:05:00+08:00
+
+    # ---------- 处方相关 ----------
+    PrescriptionCreateRequest:
+      type: object
+      required: [diagnosis, items]
+      properties:
+        diagnosis:
+          type: string
+          example: 2 型糖尿病
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/PrescriptionItemRequest'
+
+    PrescriptionItemRequest:
+      type: object
+      required: [drugCode, drugName, dosage, frequency, duration, quantity]
+      properties:
+        drugCode:
+          type: string
+          example: DRUG001
+        drugName:
+          type: string
+          example: 盐酸二甲双胍片
+        specification:
+          type: string
+          example: 0.5g*20 片
+        dosage:
+          type: string
+          description: 单次剂量
+          example: 0.5g
+        frequency:
+          type: string
+          description: 用药频次
+          example: 每日 2 次
+        duration:
+          type: string
+          description: 疗程
+          example: 30 天
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+        unitPrice:
+          type: number
+          format: double
+          example: 15.00
+
+    Prescription:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 4001
+        consultationId:
+          type: integer
+          format: int64
+          example: 2001
+        patientId:
+          type: integer
+          format: int64
+          example: 1002
+        doctorId:
+          type: integer
+          format: int64
+          example: 1001
+        diagnosis:
+          type: string
+          example: 2 型糖尿病
+        status:
+          $ref: '#/components/schemas/PrescriptionStatus'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrescriptionItem'
+        totalAmount:
+          type: number
+          format: double
+          example: 30.00
+        version:
+          type: integer
+          description: 乐观锁版本号
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PrescriptionItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 5001
+        drugCode:
+          type: string
+          example: DRUG001
+        drugName:
+          type: string
+          example: 盐酸二甲双胍片
+        specification:
+          type: string
+          example: 0.5g*20 片
+        dosage:
+          type: string
+          example: 0.5g
+        frequency:
+          type: string
+          example: 每日 2 次
+        duration:
+          type: string
+          example: 30 天
+        quantity:
+          type: integer
+          example: 2
+        unitPrice:
+          type: number
+          format: double
+          example: 15.00
+        subtotal:
+          type: number
+          format: double
+          example: 30.00
+
+    # ---------- 审核相关 ----------
+    ReviewRequest:
+      type: object
+      required: [comment]
+      properties:
+        comment:
+          type: string
+          minLength: 2
+          description: 审核意见；驳回时必填具体原因
+          example: 用法用量适宜，审核通过
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 6001
+        prescriptionId:
+          type: integer
+          format: int64
+          example: 4001
+        pharmacistId:
+          type: integer
+          format: int64
+          example: 1003
+        action:
+          $ref: '#/components/schemas/ReviewAction'
+        comment:
+          type: string
+          example: 用法用量适宜，审核通过
+        signature:
+          type: string
+          description: 电子签名值
+          example: SIG-ME9k2L...
+        signedAt:
+          type: string
+          format: date-time
+          example: 2026-11-06T15:00:00+08:00
+
+    # ---------- 通用模型 ----------
+    SimpleResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    PageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 20
+        totalElements:
+          type: integer
+          format: int64
+          example: 100
+        totalPages:
+          type: integer
+          example: 5
+        last:
+          type: boolean
+          example: false
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: CONSULTATION_NOT_FOUND
+        message:
+          type: string
+          example: 问诊会话不存在或已归档
+        details:
+          type: array
+          items:
+            type: string
+          example: ["consultationId=10086"]
+        timestamp:
+          type: string
+          format: date-time
+          example: 2026-11-06T14:30:00+08:00
+        path:
+          type: string
+          example: /api/v1/consultations/10086

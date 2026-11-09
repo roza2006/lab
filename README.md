@@ -67,27 +67,46 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R1-A：README、目录规范、文档索引
 - [ ] R1-B：需求范围与角色
 - [x] R1-C：用例清单（`docs/requirements/use-cases.md`，v1.0 待评审）
-- [x] R1-D：领域模型（`docs/design/domain-model.md`，v0.1 待评审）
+- [x] R1-郝佳鑫：领域模型（`docs/design/domain-model.md`，v0.1 待评审）
 - [x] R1-E：数据库表清单（`database/schema.sql`，v0.1 待评审）
 - [ ] R1-F：测试计划与协作模板
-- [ ] R2–R6：架构、编码、测试、发布
+- [x] R2-郝佳鑫：后端工程骨架（`backend/pom.xml`、`PlatformApplication`、`application.yml`）
+- [ ] R2：架构文档、接口契约、前端骨架、核心表与种子、CI
+- [ ] R3–R6：认证与问诊、处方与审核、流转与部署、测试与发布
 
 ## 8. 本地开发
 
-> 工程骨架将在第 2 轮加入；当前仓库以文档和目录为主。
-
-后续计划：
+> 第 2 轮起后端为可编译的 Spring Boot 3.2 工程（Java 17 + Maven）；运行需要 MySQL 8 与 Redis 7，前端骨架随第 2 轮前端任务加入。
 
 ```bash
-# 后端（第 2 轮加入 pom.xml 后）
+# 后端（Java 17 + Maven 3.9）
 cd backend
-mvn spring-boot:run
+mvn spring-boot:run            # 默认 8080；未启动 MySQL/Redis 时会在数据源阶段失败，属预期
 
-# 前端（第 2 轮加入 package.json 后）
+# 打包与测试
+mvn -DskipTests package
+mvn test
+
+# 存活探针（启用安全配置后需放行）
+curl http://127.0.0.1:8080/actuator/health
+```
+
+配置全部支持环境变量覆盖，仓库内不含真实密钥：
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| `SERVER_PORT` | `8080` | 服务端口 |
+| `DB_HOST` / `DB_PORT` / `DB_NAME` | `127.0.0.1` / `3306` / `medical_platform` | MySQL 连接 |
+| `DB_USER` / `DB_PASSWORD` | `root` / `root` | 本地开发账号 |
+| `REDIS_HOST` / `REDIS_PORT` | `127.0.0.1` / `6379` | Redis 连接 |
+| `FLYWAY_ENABLED` | `false` | 迁移脚本落地后再开启 |
+
+```bash
+# 前端（第 2 轮前端骨架加入后）
 cd frontend
 pnpm install
 pnpm dev
 
-# 数据库
+# 数据库（schema 见第 1 轮 database/schema.sql）
 mysql -u root -p < database/schema.sql
 ```

@@ -8,14 +8,14 @@
 |---|---|---|---|
 | `requirements/requirements.md` | 项目范围、角色、约束、非功能需求 | B | 待 R1 |
 | `requirements/use-cases.md` | 29 个用例、优先级、权限边界 | C | 已提交（R1-C，v1.0 待评审） |
-| `design/domain-model.md` | 聚合根、实体、值对象、关系 | D | 已提交（R1-D，v0.1 待评审） |
+| `design/domain-model.md` | 聚合根、实体、值对象、关系 | 郝佳鑫 | 已提交（R1，v0.1 待评审） |
 | `design/architecture.md` | DDD 分层、模块化单体、架构决策 | A | 待 R2 |
 | `design/api-contract.md` | 认证/问诊/处方 API 契约 | B | 待 R2 |
 | `design/er.md` | ER 图与表关系 | E | 待 R2 |
 | `design/adr/` | 架构决策记录 | A | 待 R2 |
 | `test/test-plan.md` | 测试策略、环境、进入/退出准则 | F | 待 R1 |
 | `test/test-report.md` | 回归执行、缺陷与结论 | A | 待 R6 |
-| `test/acceptance.md` | 最终验收用例 | D | 待 R6 |
+| `test/acceptance.md` | 最终验收用例 | 郝佳鑫 | 待 R6 |
 | `process/sprint-01.md` | 第 1 次迭代目标与完成情况 | F | 待 R3 |
 | `process/review-01.md` | 需求/设计评审记录 | F | 待 R3 |
 | `process/sprint-03.md` | 第 3 次迭代记录 | F | 待 R5 |

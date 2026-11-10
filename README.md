@@ -74,6 +74,7 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R2-郝佳鑫：后端工程骨架（`backend/pom.xml`、`PlatformApplication`、`application.yml`）
 - [x] R2-刘飞燕：架构设计与 ADR-001（`docs/design/architecture.md`、`docs/design/adr/ADR-001.md`）
 - [x] R2-代香晰：前端四端骨架（`frontend/`，Vue 3 + Vite，18 个页面）
+- [x] R3-代香晰：患者端登录、发起问诊与问诊会话（`frontend/src/views/patient`）
 - [x] R2-李梓语：API 契约与 OpenAPI（`docs/design/api-contract.md`、`backend/src/main/resources/openapi.yaml`）
 - [x] R2-班国勇：本地编排与 CI（`deploy/`、`.github/workflows/ci.yml`）
 - [x] R3-刘飞燕：登录、JWT、角色权限（`backend/src/main/java/com/medical/platform/identity`）

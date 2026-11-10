@@ -1,6 +1,10 @@
 /**
- * 统一请求封装：对应后端 `ApiResult{code,message,data,traceId}`。
- * R2 阶段仅提供基础设施，具体接口在 R3–R5 按 `docs/design/api-contract.md` 接入。
+ * 统一请求封装。
+ *
+ * 后端存在两种响应风格：
+ * - 统一信封 `ApiResult{code,message,data,traceId}`（约定使用）；
+ * - 裸对象（当前认证模块 `LoginResponse`/`UserView` 直接返回 record）。
+ * 这里同时兼容两者，等 B 的 `docs/design/api-contract.md` 冻结后再统一。
  */
 
 export interface ApiResult<T> {
@@ -44,15 +48,40 @@ function buildUrl(path: string, query?: Record<string, QueryValue>): string {
   return url.toString()
 }
 
-function parsePayload<T>(text: string): ApiResult<T> | null {
+function parsePayload(text: string): unknown {
   if (!text) {
     return null
   }
   try {
-    return JSON.parse(text) as ApiResult<T>
+    return JSON.parse(text) as unknown
   } catch {
-    return null
+    return text
   }
+}
+
+function isEnvelope(payload: unknown): payload is ApiResult<unknown> {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'code' in payload &&
+    'data' in payload
+  )
+}
+
+function messageOf(payload: unknown, fallback: string): string {
+  if (typeof payload === 'object' && payload !== null) {
+    const record = payload as Record<string, unknown>
+    if (typeof record.message === 'string' && record.message) {
+      return record.message
+    }
+    if (typeof record.error === 'string' && record.error) {
+      return record.error
+    }
+  }
+  if (typeof payload === 'string' && payload) {
+    return payload
+  }
+  return fallback
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -69,24 +98,30 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     body: body === undefined ? undefined : JSON.stringify(body),
   })
 
-  // 令牌失效：清除本地登录态，由布局层监听事件跳转登录页（R3 接入）。
+  const payload = parsePayload(await response.text())
+
+  // 令牌失效：清除本地登录态，由 main.ts 监听事件跳转登录页。
   if (response.status === 401) {
     window.dispatchEvent(new CustomEvent('mp:unauthorized'))
     throw new ApiError(401, 'TOKEN_INVALID', '登录已失效，请重新登录')
   }
 
-  const payload = parsePayload<T>(await response.text())
   if (!response.ok) {
     throw new ApiError(
       response.status,
-      payload?.code ?? 'HTTP_ERROR',
-      payload?.message ?? `请求失败（HTTP ${response.status}）`,
+      isEnvelope(payload) ? payload.code : 'HTTP_ERROR',
+      messageOf(payload, `请求失败（HTTP ${response.status}）`),
     )
   }
-  if (payload?.code && payload.code !== 'OK') {
-    throw new ApiError(response.status, payload.code, payload.message)
+
+  if (isEnvelope(payload)) {
+    if (payload.code !== 'OK') {
+      throw new ApiError(response.status, payload.code, payload.message)
+    }
+    return payload.data as T
   }
-  return (payload?.data ?? null) as T
+
+  return payload as T
 }
 
 export const http = {

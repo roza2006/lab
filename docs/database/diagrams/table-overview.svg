@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2600" height="1000" viewBox="0 0 2600 1000">
+  <title>数据库表总览（24 张）</title>
+  <desc>按业务域分组的 24 张表清单，含规模与约束统计。</desc>
+  <rect width="2600" height="1000" fill="#FFFFFF"/>
+  <text x="100" y="78" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="46" font-weight="bold" fill="#1F4E79" text-anchor="start">数据库表总览（24 张）</text>
+  <text x="100" y="118" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="normal" fill="#7A8B9A" text-anchor="start">按业务域分组：核心表 12 张、支撑表 12 张。字段、索引与约束见 database/schema.sql</text>
+  <polyline points="100,138 2500,138" fill="none" stroke="#DEEAF6" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="100" y="200" width="580" height="290" rx="14" ry="14" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="100" y="200" width="580" height="54" rx="14" ry="14" fill="#1F4E79"/>
+  <rect x="100" y="240" width="580" height="14" fill="#1F4E79"/>
+  <text x="120" y="236" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">身份与权限</text>
+  <text x="660" y="236" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#E3EEF8" text-anchor="end">5 张</text>
+  <rect x="116" y="268" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="116" y="268" width="6" height="62" rx="3" ry="3" fill="#1F4E79"/>
+  <text x="134" y="294" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">用户账号</text>
+  <text x="134" y="316" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">sys_user</text>
+  <rect x="398" y="268" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="398" y="268" width="6" height="62" rx="3" ry="3" fill="#1F4E79"/>
+  <text x="416" y="294" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">角色</text>
+  <text x="416" y="316" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">sys_role</text>
+  <rect x="116" y="344" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="116" y="344" width="6" height="62" rx="3" ry="3" fill="#1F4E79"/>
+  <text x="134" y="370" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">权限点</text>
+  <text x="134" y="392" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">sys_permission</text>
+  <rect x="398" y="344" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="398" y="344" width="6" height="62" rx="3" ry="3" fill="#1F4E79"/>
+  <text x="416" y="370" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">用户角色</text>
+  <text x="416" y="392" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">sys_user_role</text>
+  <rect x="116" y="420" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="116" y="420" width="6" height="62" rx="3" ry="3" fill="#1F4E79"/>
+  <text x="134" y="446" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">角色权限</text>
+  <text x="134" y="468" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">sys_role_permission</text>
+  <rect x="720" y="200" width="580" height="290" rx="14" ry="14" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="720" y="200" width="580" height="54" rx="14" ry="14" fill="#2F8F83"/>
+  <rect x="720" y="240" width="580" height="14" fill="#2F8F83"/>
+  <text x="740" y="236" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">档案与主数据</text>
+  <text x="1280" y="236" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#E3EEF8" text-anchor="end">5 张</text>
+  <rect x="736" y="268" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="736" y="268" width="6" height="62" rx="3" ry="3" fill="#2F8F83"/>
+  <text x="754" y="294" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">患者档案</text>
+  <text x="754" y="316" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">patient_profile</text>
+  <rect x="1018" y="268" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="1018" y="268" width="6" height="62" rx="3" ry="3" fill="#2F8F83"/>
+  <text x="1036" y="294" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">医生档案</text>
+  <text x="1036" y="316" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">doctor_profile</text>
+  <rect x="736" y="344" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="736" y="344" width="6" height="62" rx="3" ry="3" fill="#2F8F83"/>
+  <text x="754" y="370" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">药师档案</text>
+  <text x="754" y="392" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">pharmacist_profile</text>
+  <rect x="1018" y="344" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="1018" y="344" width="6" height="62" rx="3" ry="3" fill="#2F8F83"/>
+  <text x="1036" y="370" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">科室</text>
+  <text x="1036" y="392" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">department</text>
+  <rect x="736" y="420" width="266" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="736" y="420" width="6" height="62" rx="3" ry="3" fill="#2F8F83"/>
+  <text x="754" y="446" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">药品分类</text>
+  <text x="754" y="468" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">drug_category</text>
+  <rect x="1340" y="200" width="560" height="290" rx="14" ry="14" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1340" y="200" width="560" height="54" rx="14" ry="14" fill="#2E75B6"/>
+  <rect x="1340" y="240" width="560" height="14" fill="#2E75B6"/>
+  <text x="1360" y="236" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">问诊</text>
+  <text x="1880" y="236" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#E3EEF8" text-anchor="end">3 张</text>
+  <rect x="1356" y="268" width="256" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="1356" y="268" width="6" height="62" rx="3" ry="3" fill="#2E75B6"/>
+  <text x="1374" y="294" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">问诊会话</text>
+  <text x="1374" y="316" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">consultation_session</text>
+  <rect x="1628" y="268" width="256" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="1628" y="268" width="6" height="62" rx="3" ry="3" fill="#2E75B6"/>
+  <text x="1646" y="294" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">问诊消息</text>
+  <text x="1646" y="316" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">consultation_message</text>
+  <rect x="1356" y="344" width="256" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="1356" y="344" width="6" height="62" rx="3" ry="3" fill="#2E75B6"/>
+  <text x="1374" y="370" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">电子病历</text>
+  <text x="1374" y="392" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">medical_record</text>
+  <rect x="1940" y="200" width="560" height="290" rx="14" ry="14" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1940" y="200" width="560" height="54" rx="14" ry="14" fill="#BF9000"/>
+  <rect x="1940" y="240" width="560" height="14" fill="#BF9000"/>
+  <text x="1960" y="236" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">药品与药房</text>
+  <text x="2480" y="236" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#E3EEF8" text-anchor="end">2 张</text>
+  <rect x="1956" y="268" width="256" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="1956" y="268" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
+  <text x="1974" y="294" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">药品目录</text>
+  <text x="1974" y="316" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">drug</text>
+  <rect x="2228" y="268" width="256" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="2228" y="268" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
+  <text x="2246" y="294" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">合作药房</text>
+  <text x="2246" y="316" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">pharmacy</text>
+  <rect x="100" y="520" width="780" height="290" rx="14" ry="14" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="100" y="520" width="780" height="54" rx="14" ry="14" fill="#BF9000"/>
+  <rect x="100" y="560" width="780" height="14" fill="#BF9000"/>
+  <text x="120" y="556" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">处方与流转</text>
+  <text x="860" y="556" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#E3EEF8" text-anchor="end">4 张</text>
+  <rect x="116" y="588" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="116" y="588" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
+  <text x="134" y="614" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">电子处方</text>
+  <text x="134" y="636" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">prescription</text>
+  <rect x="498" y="588" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="498" y="588" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
+  <text x="516" y="614" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">处方明细</text>
+  <text x="516" y="636" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">prescription_item</text>
+  <rect x="116" y="664" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="116" y="664" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
+  <text x="134" y="690" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">处方流转单</text>
+  <text x="134" y="712" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">circulation_order</text>
+  <rect x="498" y="664" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="498" y="664" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
+  <text x="516" y="690" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">发药核销</text>
+  <text x="516" y="712" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">dispense_record</text>
+  <rect x="920" y="520" width="780" height="290" rx="14" ry="14" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="920" y="520" width="780" height="54" rx="14" ry="14" fill="#5B6B7A"/>
+  <rect x="920" y="560" width="780" height="14" fill="#5B6B7A"/>
+  <text x="940" y="556" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">支撑与治理</text>
+  <text x="1680" y="556" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#E3EEF8" text-anchor="end">5 张</text>
+  <rect x="936" y="588" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="936" y="588" width="6" height="62" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="954" y="614" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">审计日志</text>
+  <text x="954" y="636" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">audit_log</text>
+  <rect x="1318" y="588" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="1318" y="588" width="6" height="62" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="1336" y="614" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">知情同意</text>
+  <text x="1336" y="636" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">consent_record</text>
+  <rect x="936" y="664" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="936" y="664" width="6" height="62" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="954" y="690" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">通知</text>
+  <text x="954" y="712" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">notification</text>
+  <rect x="1318" y="664" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="1318" y="664" width="6" height="62" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="1336" y="690" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">事务发件箱</text>
+  <text x="1336" y="712" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">outbox_event</text>
+  <rect x="936" y="740" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="936" y="740" width="6" height="62" rx="3" ry="3" fill="#5B6B7A"/>
+  <text x="954" y="766" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">幂等记录</text>
+  <text x="954" y="788" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">idempotency_record</text>
+  <rect x="1740" y="520" width="760" height="290" rx="14" ry="14" fill="#F4F8FC" stroke="#C4D6E7" stroke-width="2"/>
+  <text x="1764" y="564" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F4E79" text-anchor="start">规模与约束统计</text>
+  <text x="1764" y="644" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">24</text>
+  <text x="1840" y="640" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">张表</text>
+  <text x="1840" y="666" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">核心 12 + 支撑 12</text>
+  <text x="2124" y="644" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">29</text>
+  <text x="2200" y="640" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">条外键</text>
+  <text x="2200" y="666" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">核心表建物理外键</text>
+  <text x="1764" y="764" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">27</text>
+  <text x="1840" y="760" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">个唯一键</text>
+  <text x="1840" y="786" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">业务唯一性由库保证</text>
+  <text x="2124" y="764" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">30</text>
+  <text x="2200" y="760" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">条 CHECK</text>
+  <text x="2200" y="786" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">状态列枚举约束</text>
+  <text x="100" y="900" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#7A8B9A" text-anchor="start">统一约定：主键 BIGINT 自增；时间 DATETIME(3)；状态 VARCHAR + CHECK 枚举；敏感字段 _enc 密文 + _hash 盲索引；审计/事件/幂等表不建外键。</text>
+  <text x="2500" y="900" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="end">R1 · v0.1</text>
+</svg>

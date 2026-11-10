@@ -49,16 +49,22 @@ process/sprint-*.md + test/test-report.md
 - 测试用例编号：`FT-xx` 功能、`ST-xx` 安全、`SM-xx` 状态机、`PT-xx` 性能；
 - 每份文档在文首写“版本 / 更新日期 / 负责人”，便于评审追溯。
 
-## 4. 数据库文档（R1-魏宇佳）
+## 4. 数据库与部署文档（魏宇佳）
 
-| 文件（仓库根目录相对） | 内容 | 负责人 | 状态 |
-|---|---|---|---|
-| `database/schema.sql` | 24 张表 DDL 草案：主外键、索引、CHECK 枚举、安全列 | 魏宇佳 | R1 草案 v0.1 待评审 |
-| `database/README.md` | 数据库目录说明、本地验证步骤、与报告的差异 | 魏宇佳 | R1 |
-| `docs/database/table-list.md` | 24 张表清单与核心表字段要点 | 魏宇佳 | R1 |
-| `docs/database/er.md` | 表关系说明与核心 ER 图（成品图 + Mermaid 源） | 魏宇佳 | R1（R2 定稿并入 `design/er.md`） |
-| `docs/database/diagrams/er-core.png` | ER 图位图，2600×1480，可直接插入报告 | 魏宇佳 | R1 |
-| `docs/database/diagrams/er-core.svg` | ER 图矢量源文件，可用 draw.io 修改 | 魏宇佳 | R1 |
-| `docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | 魏宇佳 | R1 |
-| `scripts/check_schema.py` | 无数据库环境下的静态结构自检 | 魏宇佳 | R1 |
-| `scripts/render_er_diagram.py` | ER 图生成脚本（改结构后重跑即可更新图） | 魏宇佳 | R1 |
+| 文件（仓库根目录相对） | 内容 | 状态 |
+|---|---|---|
+| `database/schema.sql` | 24 张表 DDL 草案：主外键、索引、CHECK 枚举、安全列 | R1 草案 v0.1 待评审 |
+| `database/README.md` | 数据库目录说明、本地验证、与报告的差异 | R1 |
+| `docs/database/table-list.md` | 24 张表清单与核心表字段要点 | R1 |
+| `docs/database/dictionary.xlsx` | 数据字典：表清单、235 个字段、索引、外键 | R1 |
+| `docs/database/er.md` | 表关系说明与核心 ER 图 | R1（R2 定稿并入 `design/er.md`） |
+| `docs/database/diagrams/er-core.png` | ER 图，2600×1480，可直接插入报告 | R1 |
+| `docs/database/diagrams/table-overview.png` | 24 张表按业务域分组的总览图 | R1 |
+| `docs/database/diagrams/deployment.png` | 系统部署图：四区分区、MySQL 主从、备份 | R1 |
+| `docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | R1 |
+| `deploy/README.md` | 部署结构、端口、环境变量、备份策略 | R1 |
+| `scripts/check_schema.py` | 无数据库环境下的静态结构自检 | R1 |
+| `scripts/render_er_diagram.py` | 生成 ER 图 | R1 |
+| `scripts/render_table_overview.py` | 生成表总览图 | R1 |
+| `scripts/render_deployment.py` | 生成部署图 | R1 |
+| `scripts/build_dictionary.py` | 解析 DDL 生成数据字典 | R1 |

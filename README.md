@@ -68,7 +68,8 @@ deploy/      docker-compose、Nginx、部署说明
 - [ ] R1-李梓语：需求范围与角色
 - [x] R1-代香晰：用例清单（`docs/requirements/use-cases.md`，v1.0 待评审）
 - [x] R1-郝佳鑫：领域模型（`docs/design/domain-model.md`，v0.1 待评审）
-- [x] R1-魏宇佳：数据库表清单（`database/schema.sql`，v0.1 待评审）
+- [x] R1-魏宇佳：数据库表清单与数据字典（`database/schema.sql`、`docs/database/dictionary.xlsx`）
+- [x] R1-魏宇佳：核心 ER 图、表总览图、系统部署图（`docs/database/diagrams/`、`deploy/`）
 - [ ] R1-班国勇：测试计划与协作模板
 - [x] R2-郝佳鑫：后端工程骨架（`backend/pom.xml`、`PlatformApplication`、`application.yml`）
 - [x] R2-刘飞燕：架构设计与 ADR-001（`docs/design/architecture.md`、`docs/design/adr/ADR-001.md`）

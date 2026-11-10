@@ -75,6 +75,7 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R2-刘飞燕：架构设计与 ADR-001（`docs/design/architecture.md`、`docs/design/adr/ADR-001.md`）
 - [x] R2-代香晰：前端四端骨架（`frontend/`，Vue 3 + Vite，18 个页面）
 - [x] R3-刘飞燕：登录、JWT、角色权限（`backend/src/main/java/com/medical/platform/identity`）
+- [x] R3-郝佳鑫：认证与问诊接口测试（`backend/src/test`，22 例：16 通过 / 6 待问诊实现启用）
 - [ ] R2：接口契约、核心表与种子、CI
 - [ ] R4–R6：处方与审核、流转与部署、测试与发布
 

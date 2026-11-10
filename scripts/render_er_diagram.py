@@ -209,7 +209,7 @@ def build() -> Canvas:
     cv.text(100, 78, "智慧医疗在线问诊与处方流转平台 · 核心 ER 图", 46, NAVY, bold=True)
     cv.text(
         100, 118,
-        "第 1 轮 E｜数据库设计基线 v0.1｜14 张核心表 + 9 张支撑表｜完整 24 表字段见 database/schema.sql",
+        "第 1 轮 · 数据库设计 v0.1｜14 张核心表 + 9 张支撑表｜字段见 database/schema.sql",
         18, MUTED,
     )
     cv.line([(100, 138), (2500, 138)], LIGHT, 2)
@@ -377,7 +377,7 @@ def build() -> Canvas:
         "为保持图面清晰，这两条关系以文字说明代替连线。",
         15, MUTED,
     )
-    cv.text(2500, 1426, "R1-E · v0.1", 15, MUTED, anchor="rs")
+    cv.text(2500, 1426, "R1 · v0.1", 15, MUTED, anchor="rs")
 
     return cv
 
@@ -396,7 +396,7 @@ def main() -> int:
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">\n'
         f"  <title>智慧医疗在线问诊与处方流转平台 · 核心 ER 图</title>\n"
-        f"  <desc>R1-E 数据库设计：14 张核心表与 9 张支撑表，含主外键与基数标注。</desc>\n"
+        f"  <desc>数据库设计：14 张核心表与 9 张支撑表，含主外键与基数标注。</desc>\n"
         f'  <rect width="{W}" height="{H}" fill="{BG}"/>\n'
         f"  {body}\n</svg>\n"
     )

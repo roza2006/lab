@@ -550,6 +550,6 @@
   <text x="977" y="1352" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
   <text x="1002" y="1358" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#1F2D3D" text-anchor="start">唯一键</text>
   <text x="100" y="1396" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">线端标注：竖线「│」＝ 1，分叉「&lt;」＝ 多，圆圈「○」＝ 可为空（0..1）；卡片内 PK/FK/UK 为键类型。</text>
-  <text x="100" y="1426" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 关联药师档案。为保持图面清晰，这两条关系以文字说明代替连线。</text>
+  <text x="100" y="1426" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 关联药师档案。这两条关系用文字说明，避免连线交叉。</text>
   <text x="2500" y="1426" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="end">R1 · v0.1</text>
 </svg>

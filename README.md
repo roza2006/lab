@@ -72,8 +72,9 @@ deploy/      docker-compose、Nginx、部署说明
 - [ ] R1-班国勇：测试计划与协作模板
 - [x] R2-郝佳鑫：后端工程骨架（`backend/pom.xml`、`PlatformApplication`、`application.yml`）
 - [x] R2-刘飞燕：架构设计与 ADR-001（`docs/design/architecture.md`、`docs/design/adr/ADR-001.md`）
+- [x] R2-代香晰：前端四端骨架（`frontend/`，Vue 3 + Vite，18 个页面）
 - [x] R3-刘飞燕：登录、JWT、角色权限（`backend/src/main/java/com/medical/platform/identity`）
-- [ ] R2：接口契约、前端骨架、核心表与种子、CI
+- [ ] R2：接口契约、核心表与种子、CI
 - [ ] R4–R6：处方与审核、流转与部署、测试与发布
 
 ## 8. 本地开发

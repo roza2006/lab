@@ -1,4 +1,4 @@
-# deploy —— 部署配置（魏宇佳）
+# deploy —— 部署配置与本地编排（魏宇佳、班国勇）
 
 第 1 轮只确定部署结构和网络分区，`docker-compose.yml`、Nginx 配置、初始化脚本在第 5 轮补上。
 本目录现在的产出是部署图与部署说明，供第 2 轮搭骨架时对照。
@@ -59,3 +59,74 @@
 - [ ] `init/01-schema.sql`：导入 `database/schema.sql`
 - [ ] `init/02-seed.sql`：演示种子数据（虚构）
 - [ ] 一键启动脚本与健康检查
+
+---
+
+## 7. 本地编排（R2-F）
+
+第 2 轮由 F 负责：把"起本地环境"这件事从口口相传变成可执行文件。
+
+### 包含什么
+
+| 文件 | 作用 |
+|---|---|
+| `docker-compose.yml` | MySQL 8 + Redis 7 + 后端三个服务，一条命令起停 |
+| `README.md` | 端口、环境变量、常用命令与排错 |
+
+后端镜像使用 `backend/Dockerfile` 构建（多阶段：Maven 编译 → JRE 运行），
+所以 `deploy/` 与 `backend/Dockerfile` 需要一起 review。
+
+### 快速开始
+
+```bash
+# 仓库根目录执行
+docker compose -f deploy/docker-compose.yml up -d --build
+
+# 看状态：三个容器应为 running，mysql/redis 为 healthy
+docker compose -f deploy/docker-compose.yml ps
+
+# 跟踪后端日志，出现 Started PlatformApplication 即启动完成
+docker compose -f deploy/docker-compose.yml logs -f backend
+
+# 停止；加 -v 连数据卷一起删
+docker compose -f deploy/docker-compose.yml down
+```
+
+启动后：
+
+| 地址 | 说明 |
+|---|---|
+| `http://127.0.0.1:8080` | 后端 HTTP 端口 |
+| `127.0.0.1:3306` | MySQL，账号 `root` / 密码见环境变量 |
+| `127.0.0.1:6379` | Redis，无密码（仅本地） |
+
+### 环境变量
+
+所有变量都有演示用默认值，不需要 `.env` 也能跑；需要覆盖时在 `deploy/`
+下新建 `.env`（已被 `.gitignore` 忽略，**不要提交**）。
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| `SERVER_PORT` | `8080` | 后端对外端口 |
+| `DB_ROOT_PASSWORD` | `root` | MySQL root 密码，仅本地演示 |
+| `DB_NAME` | `medical_platform` | 初始化库名（`MYSQL_DATABASE`） |
+| `DB_PORT` | `3306` | MySQL 对外端口 |
+| `REDIS_PORT` | `6379` | Redis 对外端口 |
+
+容器内后端通过服务名连接：`DB_HOST=mysql`、`REDIS_HOST=redis`，
+对应 `backend/src/main/resources/application.yml` 里的 `${DB_HOST}` / `${REDIS_HOST}`。
+
+### 与数据库的关系
+
+- `database/schema.sql` 是第 1 轮的表结构草案，**不会**被 compose 自动执行：
+  首次起来后按需手动导入（`docker compose exec -T mysql mysql -uroot -proot < database/schema.sql`）。
+- Flyway 目前 `FLYWAY_ENABLED=false`，等 E 把 `database/migrations/` 落地后再打开。
+
+### 排错
+
+| 现象 | 处理 |
+|---|---|
+| `port is already allocated` | 本机 3306/6379/8080 被占用，改 `.env` 里的 `DB_PORT`/`REDIS_PORT`/`SERVER_PORT` |
+| `backend` 一直 restarting | 先看 `logs backend`：多数是 MySQL 还没 healthy，等 30s 或 `up -d` 重试 |
+| `docker: command not found` | 本机没装 Docker Desktop，CI 里只用 `docker compose config` 做静态校验 |
+| 想彻底重来 | `docker compose -f deploy/docker-compose.yml down -v` 后重新 `up` |

@@ -14,6 +14,7 @@
 | 2026-11-10 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 编写认证与问诊接口测试：`AuthTest`（12 例）、`ConsultationTest`（10 例），并补充 H2 测试库配置与 `schema-test.sql` | 登录/账号状态/令牌篡改/过期/伪造 ADMIN 越权等断言，问诊发起、接诊、越权与结束后写保护的用例骨架 | 待郝佳鑫复核：越权覆盖是否足够、`ConsultationTest` 待问诊实现合入后逐个启用 | JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B test`：22 例运行、0 失败、6 跳过（待问诊实现）；本地沙箱禁止 JVM 动态挂载 agent，故本地临时改用 subclass mock maker 验证，仓库不保留该覆盖 |
 | 2026-11-10 | 代香晰 | DeepSeek Harness（deepseek 模型） | 实现患者端流程：登录对接、发起问诊、问诊列表与会话（消息轮询、发送去重、结束问诊），并补充零依赖 mock 服务 | 页面与 API 适配层、mock 服务、README 初稿 | 待代香晰复核：问诊接口字段、轮询间隔、mock 与真实后端的差异 | `pnpm build` 通过；mock + dev 实际走通登录→问诊→消息→结束，并经 Vite 代理核对接口返回 |
 | 2026-11-10 | 代香晰 | DeepSeek Harness（deepseek 模型） | 按 `docs/design/api-contract.md` v1.0 对齐患者端问诊接口：`department`/`diseaseName`/`contentType`、分页 `PageResponse`、`Idempotency-Key` | 接口类型、页面字段、mock 数据与 README 的修正稿 | 待代香晰复核：与李梓语后端实现的字段差异、医生名称的展示方式 | `pnpm build` 通过；mock 经 Vite 代理实测登录、列表、创建、消息、结束 |
+| 2026-11-10 | 李梓语 | DeepSeek Harness（deepseek 模型） | 实现 R3 问诊上下文：聚合与会话状态机、消息收发、接诊/结束的乐观锁条件更新、越权与数据范围校验、7 个 REST 端点，并补 `docs/design/consultation.md` | 领域/应用/接口/基础设施四层代码初稿、错误码映射、H2 测试表结构、启用 `ConsultationTest` 的改动 | 人工核对：状态迁移是否只经聚合方法、`patientId` 是否只取 JWT、并发接诊是否条件更新、消息表 `read_flag` 避开保留字、分页参数边界 | `mvn -B -ntp test`：22 例全绿（问诊 10 例含越权/结束后写保护）；逐条比对 `openapi.yaml` 字段与 `domain-model.md` §11 错误码 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

@@ -14,6 +14,7 @@
 | 2026-11-10 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 编写认证与问诊接口测试：`AuthTest`（12 例）、`ConsultationTest`（10 例），并补充 H2 测试库配置与 `schema-test.sql` | 登录/账号状态/令牌篡改/过期/伪造 ADMIN 越权等断言，问诊发起、接诊、越权与结束后写保护的用例骨架 | 待郝佳鑫复核：越权覆盖是否足够、`ConsultationTest` 待问诊实现合入后逐个启用 | JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B test`：22 例运行、0 失败、6 跳过（待问诊实现）；本地沙箱禁止 JVM 动态挂载 agent，故本地临时改用 subclass mock maker 验证，仓库不保留该覆盖 |
 | 2026-11-10 | 代香晰 | DeepSeek Harness（deepseek 模型） | 实现患者端流程：登录对接、发起问诊、问诊列表与会话（消息轮询、发送去重、结束问诊），并补充零依赖 mock 服务 | 页面与 API 适配层、mock 服务、README 初稿 | 待代香晰复核：问诊接口字段、轮询间隔、mock 与真实后端的差异 | `pnpm build` 通过；mock + dev 实际走通登录→问诊→消息→结束，并经 Vite 代理核对接口返回 |
 | 2026-11-10 | 代香晰 | DeepSeek Harness（deepseek 模型） | 按 `docs/design/api-contract.md` v1.0 对齐患者端问诊接口：`department`/`diseaseName`/`contentType`、分页 `PageResponse`、`Idempotency-Key` | 接口类型、页面字段、mock 数据与 README 的修正稿 | 待代香晰复核：与李梓语后端实现的字段差异、医生名称的展示方式 | `pnpm build` 通过；mock 经 Vite 代理实测登录、列表、创建、消息、结束 |
+| 2026-11-10 | 班国勇 | DeepSeek Harness（deepseek 模型） | 起草 `deploy/docker-compose.yml`、`deploy/README.md`、`backend/Dockerfile`、`.github/workflows/ci.yml`：本地三服务编排 + 两任务 CI | 三服务 compose、多阶段镜像、`mvn verify` 与 `docker compose config` 两个 job 初稿 | 人工核对 `pom.xml` 的 `<finalName>` 与镜像内 jar 名一致、按 `application.yml` 对齐 `DB_HOST`/`REDIS_HOST`、调端口默认值与排错表；与魏宇佳的 `deploy/README.md` 合并为「第 7 节 本地编排」 | PR #14 已合入 main：`backend (mvn verify)` 与 `deploy (compose config)` 两个 job 通过；文件复制前后 SHA256 一致 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

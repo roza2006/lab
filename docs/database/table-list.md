@@ -1,7 +1,8 @@
 # 数据库表清单（24 张）
 
-> 对应报告表 3-6；字段级 DDL 见 [`database/schema.sql`](../../database/schema.sql)。
-> 类别说明：**核心**＝承载主要业务不变量；**支撑**＝权限、字典、审计、通知等支撑能力。
+> 对应报告表 3-6；字段级 DDL 见 [`database/schema.sql`](../../database/schema.sql)，
+> 235 个字段的完整数据字典见 [`dictionary.xlsx`](./dictionary.xlsx)。
+> 类别说明：核心＝承载主要业务不变量；支撑＝权限、字典、审计、通知等支撑能力。
 > 命名规范见 [`conventions.md`](./conventions.md)。
 
 ## 1. 总览

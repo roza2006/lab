@@ -3,17 +3,20 @@
 > 对应报告 3.2 节与图 3-5。字段级定义见 [`database/schema.sql`](../../database/schema.sql)，
 > 表清单见 [`table-list.md`](./table-list.md)。
 
-## 0. 成品图
+## 0. 图与数据字典
 
 ![核心 ER 图](./diagrams/er-core.png)
 
-- 位图（可直接插入报告）：[`diagrams/er-core.png`](./diagrams/er-core.png)，2600 × 1480
-- 矢量（可在 draw.io / Visio / Inkscape 中修改）：[`diagrams/er-core.svg`](./diagrams/er-core.svg)
-- 生成脚本：[`scripts/render_er_diagram.py`](../../scripts/render_er_diagram.py)（改数据后重跑即可复现）
+| 产物 | 文件 | 用途 |
+|---|---|---|
+| ER 图（位图） | [`diagrams/er-core.png`](./diagrams/er-core.png) | 直接插入报告，2600 × 1480 |
+| ER 图（矢量） | [`diagrams/er-core.svg`](./diagrams/er-core.svg) | 用 draw.io 或 Visio 修改 |
+| 表总览图 | [`diagrams/table-overview.png`](./diagrams/table-overview.png) | 24 张表按业务域分组 |
+| 数据字典 | [`dictionary.xlsx`](./dictionary.xlsx) | 24 张表、235 个字段、索引与外键 |
+| 生成脚本 | [`render_er_diagram.py`](../../scripts/render_er_diagram.py)、[`render_table_overview.py`](../../scripts/render_table_overview.py)、[`build_dictionary.py`](../../scripts/build_dictionary.py) | 改完 DDL 重跑即可同步 |
 
-图中标注 14 张核心表的主键（PK）、外键（FK）、唯一键（UK）与 15 条关系基数；
-9 张支撑表在底部单独列出，只做逻辑关联，不建物理外键。
-本文第 3 节的 Mermaid 图是可编辑的关系源，二者内容一致。
+图中画了 14 张核心表，标注 PK/FK/UK 和 15 条关系基数；9 张支撑表在底部单独列出，
+只做逻辑关联、不建物理外键。第 3 节的 Mermaid 图是同一份关系的可编辑版本。
 
 ## 1. 关系总述
 

@@ -36,14 +36,25 @@
 | 管理员 | 用户、角色、权限、药品目录、审计与统计 |
 | 合作药房 | 接方、身份核验、发药、核销回传 |
 
-## 4. 技术栈
+## 4. 成员分工
+
+| 成员 | 负责内容 | 主要目录 |
+|---|---|---|
+| 刘飞燕 | 架构、认证、集成 | `backend/`（identity）、`docs/design/` |
+| 李梓语 | 问诊、处方域 | `backend/`（consultation、prescription） |
+| 代香晰 | 前端四端 | `frontend/src/` |
+| 郝佳鑫 | 测试、安全 | `backend/src/test/`、`docs/test/` |
+| 魏宇佳 | 数据库、部署 | `database/`、`deploy/` |
+| 班国勇 | 文档、流程、发布 | `docs/process/`、`.github/` |
+
+## 5. 技术栈
 
 - 后端：Java 17、Spring Boot 3、Spring Security 6、MyBatis-Plus、MySQL 8、Redis 7
 - 前端：Vue 3、TypeScript、Vite、Element Plus、Pinia
 - 文档：Markdown、OpenAPI 3.0、Mermaid / draw.io
 - 部署：Docker Compose、Nginx
 
-## 5. 目录结构
+## 6. 目录结构
 
 ```text
 docs/        需求、设计、测试、过程、安全、报告、演示
@@ -54,25 +65,26 @@ deploy/      docker-compose、Nginx、部署说明
 .github/     Issue/PR 模板与 CI
 ```
 
-## 6. 项目文档
+## 7. 项目文档
 
 - [提交计划](COMMIT_PLAN.md)：6 轮 × 6 人，每轮的任务、目录与 commit message
 - [文档索引](docs/README.md)：需求、设计、测试、过程、安全、报告
 - [AI 使用记录](docs/ai-usage.md)：工具、范围、人工修改与验证
 - [远程仓库重置说明](RESET_GUIDE.md)：已完成记录与回滚参考
 
-## 7. 当前进度
+## 8. 当前进度
 
 - [x] 仓库重置与目录骨架
-- [x] R1-A：README、目录规范、文档索引
-- [ ] R1-B：需求范围与角色
-- [x] R1-C：用例清单（`docs/requirements/use-cases.md`，v1.0 待评审）
-- [x] R1-D：领域模型（`docs/design/domain-model.md`，v0.1 待评审）
-- [x] R1-E：数据库表清单（`database/schema.sql`，v0.1 待评审）
-- [ ] R1-F：测试计划与协作模板
+- [x] 刘飞燕：项目说明、目录规范、文档索引（R1）
+- [ ] 李梓语：需求范围与角色（R1）
+- [x] 代香晰：用例清单（`docs/requirements/use-cases.md`，v1.0 待评审，R1）
+- [x] 郝佳鑫：领域模型（`docs/design/domain-model.md`，v0.1 待评审，R1）
+- [x] 魏宇佳：数据库表清单与数据字典（`database/schema.sql`、`docs/database/dictionary.xlsx`，R1）
+- [x] 魏宇佳：核心 ER 图、表总览图、系统部署图（`docs/database/diagrams/`、`deploy/`，R1）
+- [ ] 班国勇：测试计划与协作模板（R1）
 - [ ] R2–R6：架构、编码、测试、发布
 
-## 8. 本地开发
+## 9. 本地开发
 
 > 工程骨架将在第 2 轮加入；当前仓库以文档和目录为主。
 

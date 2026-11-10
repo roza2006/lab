@@ -2,106 +2,90 @@
 /**
  * 零依赖本地 mock 服务（R3 演示/联调前使用）。
  *
- *   node mock/server.mjs        # 默认 http://127.0.0.1:8080
+ *   node mock/server.mjs                 # 默认 http://127.0.0.1:8080
+ *   MOCK_PORT=18080 node mock/server.mjs # 端口被占用时改端口，并用 VITE_PROXY_TARGET 指向它
  *
- * 与 Vite 的 /api 代理对接；真实后端就绪后无需启动本服务。
+ * 字段与 `docs/design/api-contract.md` v1.0 / `openapi.yaml` 对齐：
+ *   POST /auth/login
+ *   GET  /auth/me
+ *   GET/POST /consultations
+ *   GET  /consultations/{id}
+ *   GET/POST /consultations/{id}/messages
+ *   POST /consultations/{id}/end
+ *
  * 演示账号：patient / doctor / pharmacist / admin，密码均为 123456。
- * 这里只实现 R3 患者端用到的接口，字段与前端 `src/api/*.ts` 保持一致。
  */
 import { createServer } from 'node:http'
 
 const PORT = Number(process.env.MOCK_PORT || 8080)
 
 const USERS = [
-  { id: 1, username: 'patient', password: '123456', roleCode: 'PATIENT' },
-  { id: 2, username: 'doctor', password: '123456', roleCode: 'DOCTOR' },
-  { id: 3, username: 'pharmacist', password: '123456', roleCode: 'PHARMACIST' },
-  { id: 4, username: 'admin', password: '123456', roleCode: 'ADMIN' },
+  { id: 1002, username: 'patient', password: '123456', role: 'PATIENT', realName: '张小明' },
+  { id: 1001, username: 'doctor', password: '123456', role: 'DOCTOR', realName: '李医生' },
+  { id: 1003, username: 'pharmacist', password: '123456', role: 'PHARMACIST', realName: '王药师' },
+  { id: 1004, username: 'admin', password: '123456', role: 'ADMIN', realName: '管理员' },
 ]
 
-const DOCTOR_NAMES = { 2: '李医生' }
-const DEPARTMENT_NAMES = { 1: '内科', 2: '外科', 3: '儿科', 4: '皮肤科' }
+const iso = (offsetMinutes = 0) => new Date(Date.now() + offsetMinutes * 60_000).toISOString()
 
-const iso = (offsetMinutes = 0) =>
-  new Date(Date.now() + offsetMinutes * 60_000).toISOString()
-
-let sequence = 100
+let sequence = 3000
 const nextId = () => (sequence += 1)
 
-const sessions = [
+const consultations = [
   {
-    id: 1,
-    sessionNo: 'S20261110001',
-    patientId: 1,
-    patientName: '张小明',
-    doctorId: 2,
-    doctorName: '李医生',
-    departmentId: 1,
-    departmentName: '内科',
+    id: 2001,
+    patientId: 1002,
+    doctorId: 1001,
+    department: '内分泌科',
+    diseaseName: '2 型糖尿病',
+    chiefComplaint: '血糖控制不佳，随访复诊；近一周空腹血糖 7.8 mmol/L 左右',
     status: 'IN_PROGRESS',
-    chiefComplaint: '反复咳嗽三天，伴低热，无呼吸困难',
-    description: '无药物过敏史，已服用两次止咳糖浆。',
     createdAt: iso(-120),
-    startedAt: iso(-110),
+    endedAt: null,
   },
   {
-    id: 2,
-    sessionNo: 'S20261110002',
-    patientId: 1,
-    patientName: '张小明',
-    departmentId: 4,
-    departmentName: '皮肤科',
+    id: 2002,
+    patientId: 1002,
+    doctorId: null,
+    department: '皮肤科',
+    diseaseName: '湿疹',
+    chiefComplaint: '手臂出现红色皮疹，偶有瘙痒，两天前开始',
     status: 'WAITING',
-    chiefComplaint: '手臂出现红色皮疹，偶有瘙痒',
-    description: '两天前开始，未使用新化妆品。',
     createdAt: iso(-30),
+    endedAt: null,
   },
   {
-    id: 3,
-    sessionNo: 'S20261109007',
-    patientId: 1,
-    patientName: '张小明',
-    doctorId: 2,
-    doctorName: '李医生',
-    departmentId: 1,
-    departmentName: '内科',
+    id: 2003,
+    patientId: 1002,
+    doctorId: 1001,
+    department: '内科',
+    diseaseName: '急性咽炎',
+    chiefComplaint: '咽痛两天，吞咽时加重，无发热',
     status: 'ENDED',
-    chiefComplaint: '咽痛两天，吞咽时加重',
     createdAt: iso(-1440),
-    startedAt: iso(-1435),
     endedAt: iso(-1400),
   },
 ]
 
 const messages = [
   {
-    id: 1,
-    sessionId: 1,
-    senderId: 0,
-    senderRole: 'SYSTEM',
-    senderName: '系统',
-    msgType: 'SYSTEM',
-    content: '问诊已创建，医生已接诊。',
-    sentAt: iso(-120),
-  },
-  {
-    id: 2,
-    sessionId: 1,
-    senderId: 2,
+    id: 3001,
+    consultationId: 2001,
+    senderId: 1001,
     senderRole: 'DOCTOR',
-    senderName: '李医生',
-    msgType: 'TEXT',
-    content: '您好，我是内科李医生。请问咳嗽是干咳还是有痰？体温最高多少？',
+    contentType: 'TEXT',
+    content: '您好，我是内分泌科李医生。请问最近一次糖化血红蛋白是多少？目前用药方案是什么？',
+    read: false,
     sentAt: iso(-108),
   },
   {
-    id: 3,
-    sessionId: 1,
-    senderId: 1,
+    id: 3002,
+    consultationId: 2001,
+    senderId: 1002,
     senderRole: 'PATIENT',
-    senderName: '张小明',
-    msgType: 'TEXT',
-    content: '干咳为主，偶尔有少量白痰；昨晚体温 37.8℃。',
+    contentType: 'TEXT',
+    content: '上个月糖化 8.1%，现在每天二甲双胍 0.5g，早晚各一次。',
+    read: true,
     sentAt: iso(-100),
   },
 ]
@@ -109,14 +93,13 @@ const messages = [
 const tokens = new Map()
 
 function sendJson(res, status, payload) {
-  const body = JSON.stringify(payload)
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Idempotency-Key',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   })
-  res.end(body)
+  res.end(JSON.stringify(payload))
 }
 
 function userOf(req) {
@@ -143,7 +126,7 @@ function readBody(req) {
       try {
         resolve(JSON.parse(raw))
       } catch {
-        reject(new Error('invalid json'))
+        reject(new Error('请求体不是合法 JSON'))
       }
     })
     req.on('error', reject)
@@ -153,26 +136,30 @@ function readBody(req) {
 const publicUser = (user) => ({
   id: user.id,
   username: user.username,
-  roleCode: user.roleCode,
+  realName: user.realName,
+  role: user.role,
+  status: 'ACTIVE',
 })
 
-function canAccess(user, session) {
-  if (user.roleCode === 'PATIENT') return session.patientId === user.id
-  if (user.roleCode === 'DOCTOR') return session.doctorId === user.id
-  return user.roleCode === 'ADMIN'
+function canAccess(user, consultation) {
+  if (user.role === 'PATIENT') return consultation.patientId === user.id
+  if (user.role === 'DOCTOR') return consultation.doctorId === user.id
+  return user.role === 'ADMIN'
 }
 
-function requireSession(res, user, id) {
-  const session = sessions.find((item) => item.id === Number(id))
-  if (!session) {
-    sendJson(res, 404, { message: '会话不存在' })
-    return null
+function pageOf(items, url) {
+  const page = Number(url.searchParams.get('page') ?? 0)
+  const size = Number(url.searchParams.get('size') ?? 20)
+  const start = page * size
+  const content = items.slice(start, start + size)
+  return {
+    content,
+    page,
+    size,
+    totalElements: items.length,
+    totalPages: Math.max(1, Math.ceil(items.length / size)),
+    last: start + size >= items.length,
   }
-  if (!canAccess(user, session)) {
-    sendJson(res, 403, { message: '无权访问该会话' })
-    return null
-  }
-  return session
 }
 
 const server = createServer(async (req, res) => {
@@ -189,7 +176,7 @@ const server = createServer(async (req, res) => {
       const { username, password } = await readBody(req)
       const user = USERS.find((item) => item.username === username && item.password === password)
       if (!user) {
-        sendJson(res, 401, { message: '用户名或密码错误' })
+        sendJson(res, 401, { code: 'UNAUTHORIZED', message: '用户名或密码错误' })
         return
       }
       const token = `mock-${user.username}-${Date.now()}`
@@ -197,7 +184,7 @@ const server = createServer(async (req, res) => {
       sendJson(res, 200, {
         accessToken: token,
         tokenType: 'Bearer',
-        expiresIn: 3600,
+        expiresIn: 7200,
         user: publicUser(user),
       })
       return
@@ -205,7 +192,7 @@ const server = createServer(async (req, res) => {
 
     const user = userOf(req)
     if (!user) {
-      sendJson(res, 401, { message: '未登录或登录已失效' })
+      sendJson(res, 401, { code: 'UNAUTHORIZED', message: '未登录或登录已失效' })
       return
     }
 
@@ -214,126 +201,144 @@ const server = createServer(async (req, res) => {
       return
     }
 
-    if (req.method === 'GET' && path === '/api/v1/consultations') {
-      const mine = sessions
-        .filter((item) => canAccess(user, item) && item.status !== 'CANCELLED')
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      sendJson(res, 200, mine)
-      return
-    }
-
-    if (req.method === 'POST' && path === '/api/v1/consultations') {
-      const body = await readBody(req)
-      if (!body.chiefComplaint || String(body.chiefComplaint).length < 5) {
-        sendJson(res, 400, { message: '主诉至少 5 个字' })
+    if (path === '/api/v1/consultations') {
+      if (req.method === 'GET') {
+        const status = url.searchParams.get('status')
+        const mine = consultations
+          .filter((item) => canAccess(user, item))
+          .filter((item) => (status ? item.status === status : true))
+          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        sendJson(res, 200, pageOf(mine, url))
         return
       }
-      const departmentId = Number(body.departmentId)
-      const session = {
-        id: nextId(),
-        sessionNo: `S${Date.now()}`,
-        patientId: user.id,
-        patientName: user.username,
-        departmentId,
-        departmentName: DEPARTMENT_NAMES[departmentId] || '全科',
-        status: 'WAITING',
-        chiefComplaint: String(body.chiefComplaint),
-        description: body.description ? String(body.description) : undefined,
-        createdAt: iso(),
+
+      if (req.method === 'POST') {
+        const body = await readBody(req)
+        const department = String(body.department || '').trim()
+        const diseaseName = String(body.diseaseName || '').trim()
+        const chiefComplaint = String(body.chiefComplaint || '').trim()
+        if (!department || !diseaseName || chiefComplaint.length < 5) {
+          sendJson(res, 422, {
+            code: 'VALIDATION_FAILED',
+            message: '科室、复诊疾病必填，主诉至少 5 个字',
+          })
+          return
+        }
+        const consultation = {
+          id: nextId(),
+          patientId: user.id,
+          doctorId: null,
+          department,
+          diseaseName,
+          chiefComplaint,
+          status: 'WAITING',
+          createdAt: iso(),
+          endedAt: null,
+        }
+        consultations.push(consultation)
+        sendJson(res, 201, consultation)
+        return
       }
-      sessions.push(session)
-      messages.push({
-        id: nextId(),
-        sessionId: session.id,
-        senderId: 0,
-        senderRole: 'SYSTEM',
-        senderName: '系统',
-        msgType: 'SYSTEM',
-        content: '问诊已提交，正在等待医生接诊。',
-        sentAt: iso(),
-      })
-      sendJson(res, 200, session)
-      return
     }
 
     const detailMatch = path.match(/^\/api\/v1\/consultations\/(\d+)$/)
     if (req.method === 'GET' && detailMatch) {
-      const session = requireSession(res, user, detailMatch[1])
-      if (session) sendJson(res, 200, session)
+      const consultation = consultations.find((item) => item.id === Number(detailMatch[1]))
+      if (!consultation) {
+        sendJson(res, 404, { code: 'CONSULTATION_NOT_FOUND', message: '会话不存在' })
+        return
+      }
+      if (!canAccess(user, consultation)) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '无权访问该会话' })
+        return
+      }
+      sendJson(res, 200, consultation)
       return
     }
 
     const messageMatch = path.match(/^\/api\/v1\/consultations\/(\d+)\/messages$/)
     if (messageMatch) {
-      const session = requireSession(res, user, messageMatch[1])
-      if (!session) return
+      const consultation = consultations.find((item) => item.id === Number(messageMatch[1]))
+      if (!consultation) {
+        sendJson(res, 404, { code: 'CONSULTATION_NOT_FOUND', message: '会话不存在' })
+        return
+      }
+      if (!canAccess(user, consultation)) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '无权访问该会话' })
+        return
+      }
 
       if (req.method === 'GET') {
         const list = messages
-          .filter((item) => item.sessionId === session.id)
+          .filter((item) => item.consultationId === consultation.id)
           .sort((a, b) => a.id - b.id)
-        sendJson(res, 200, list)
+        sendJson(res, 200, pageOf(list, url))
         return
       }
 
       if (req.method === 'POST') {
-        if (session.status === 'ENDED' || session.status === 'CANCELLED') {
-          sendJson(res, 409, { message: '会话已结束，不能继续发送消息' })
+        if (consultation.status !== 'IN_PROGRESS') {
+          sendJson(res, 409, { code: 'ILLEGAL_STATE', message: '会话不在进行中状态，不能发送消息' })
           return
         }
         const body = await readBody(req)
+        const contentType = body.contentType === 'IMAGE' ? 'IMAGE' : 'TEXT'
         const content = String(body.content || '').trim()
         if (!content) {
-          sendJson(res, 400, { message: '消息内容不能为空' })
+          sendJson(res, 422, { code: 'VALIDATION_FAILED', message: '消息内容不能为空' })
           return
         }
         const message = {
           id: nextId(),
-          sessionId: session.id,
+          consultationId: consultation.id,
           senderId: user.id,
-          senderRole: user.roleCode,
-          senderName: user.username === 'patient' ? '张小明' : user.username,
-          msgType: body.msgType || 'TEXT',
+          senderRole: user.role,
+          contentType,
           content,
+          read: false,
           sentAt: iso(),
         }
         messages.push(message)
-        sendJson(res, 200, message)
+        sendJson(res, 201, message)
         return
       }
     }
 
     const endMatch = path.match(/^\/api\/v1\/consultations\/(\d+)\/end$/)
     if (req.method === 'POST' && endMatch) {
-      const session = requireSession(res, user, endMatch[1])
-      if (!session) return
-      if (session.status === 'ENDED') {
-        sendJson(res, 200, session)
+      const consultation = consultations.find((item) => item.id === Number(endMatch[1]))
+      if (!consultation) {
+        sendJson(res, 404, { code: 'CONSULTATION_NOT_FOUND', message: '会话不存在' })
         return
       }
-      session.status = 'ENDED'
-      session.endedAt = iso()
-      messages.push({
-        id: nextId(),
-        sessionId: session.id,
-        senderId: 0,
-        senderRole: 'SYSTEM',
-        senderName: '系统',
-        msgType: 'SYSTEM',
-        content: '问诊已结束，感谢您的使用。',
-        sentAt: iso(),
-      })
-      sendJson(res, 200, session)
+      if (!canAccess(user, consultation)) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '无权访问该会话' })
+        return
+      }
+      if (consultation.status === 'ENDED' || consultation.status === 'ARCHIVED') {
+        sendJson(res, 409, { code: 'ILLEGAL_STATE', message: '会话已结束' })
+        return
+      }
+      if (consultation.status !== 'IN_PROGRESS') {
+        sendJson(res, 409, { code: 'ILLEGAL_STATE', message: '医生接诊后才能结束会话' })
+        return
+      }
+      consultation.status = 'ENDED'
+      consultation.endedAt = iso()
+      sendJson(res, 200, consultation)
       return
     }
 
-    sendJson(res, 404, { message: `未实现的接口：${req.method} ${path}` })
+    sendJson(res, 404, { code: 'NOT_FOUND', message: `未实现的接口：${req.method} ${path}` })
   } catch (error) {
-    sendJson(res, 500, { message: error instanceof Error ? error.message : 'mock 服务异常' })
+    sendJson(res, 500, {
+      code: 'INTERNAL_ERROR',
+      message: error instanceof Error ? error.message : 'mock 服务异常',
+    })
   }
 })
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`[mock] listening on http://127.0.0.1:${PORT}`)
-  console.log('[mock] demo accounts: patient / doctor / pharmacist / admin，密码 123456')
+  console.log('[mock] accounts: patient / doctor / pharmacist / admin，密码 123456')
 })

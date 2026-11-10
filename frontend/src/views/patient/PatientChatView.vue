@@ -24,7 +24,7 @@ const draft = ref('')
 const messageListRef = ref<HTMLElement | null>(null)
 
 const closed = computed(
-  () => session.value?.status === 'ENDED' || session.value?.status === 'CANCELLED',
+  () => session.value?.status === 'ENDED' || session.value?.status === 'ARCHIVED',
 )
 const canSend = computed(() => session.value?.status === 'IN_PROGRESS')
 const statusLabel = computed(() =>
@@ -32,6 +32,9 @@ const statusLabel = computed(() =>
 )
 const statusTag = computed(() =>
   session.value ? SESSION_STATUS_TAG[session.value.status] : 'info',
+)
+const doctorLabel = computed(() =>
+  session.value?.doctorId ? `医生 #${session.value.doctorId}` : '待分配医生',
 )
 
 let pollTimer: number | undefined
@@ -79,7 +82,7 @@ function stopPolling() {
   }
 }
 
-function clientMessageId() {
+function idempotencyKey() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
   }
@@ -93,11 +96,11 @@ async function send() {
   }
   sending.value = true
   try {
-    await consultationApi.send(sessionId.value, {
-      content,
-      clientMsgId: clientMessageId(),
-      msgType: 'TEXT',
-    })
+    await consultationApi.send(
+      sessionId.value,
+      { contentType: 'TEXT', content },
+      idempotencyKey(),
+    )
     draft.value = ''
     await loadMessages()
   } catch (error) {
@@ -157,15 +160,22 @@ onUnmounted(stopPolling)
       <template #header>
         <div class="chat__title">
           <div>
-            <strong>{{ session.doctorName || '待分配医生' }}</strong>
+            <strong>{{ doctorLabel }}</strong>
             <span class="chat__meta">
-              {{ session.departmentName }} · 会话 {{ session.sessionNo || session.id }} ·
+              {{ session.department }} · {{ session.diseaseName }} ·
               {{ formatDateTime(session.createdAt) }}
             </span>
           </div>
           <div class="chat__actions">
             <el-tag :type="statusTag" effect="light">{{ statusLabel }}</el-tag>
-            <el-button v-if="!closed" link type="danger" @click="endConsultation">结束问诊</el-button>
+            <el-button
+              v-if="session.status === 'IN_PROGRESS'"
+              link
+              type="danger"
+              @click="endConsultation"
+            >
+              结束问诊
+            </el-button>
           </div>
         </div>
       </template>
@@ -173,7 +183,6 @@ onUnmounted(stopPolling)
       <div class="chat__complaint">
         <span class="chat__complaint-label">主诉</span>
         <p class="chat__complaint-text">{{ session.chiefComplaint }}</p>
-        <p v-if="session.description" class="chat__complaint-extra">{{ session.description }}</p>
       </div>
 
       <div ref="messageListRef" class="chat__messages">
@@ -185,17 +194,14 @@ onUnmounted(stopPolling)
         <div
           v-for="message in messages"
           :key="message.id"
-          :class="[
-            'msg',
-            message.senderRole === 'PATIENT' ? 'msg--self' : 'msg--other',
-            message.senderRole === 'SYSTEM' ? 'msg--system' : '',
-          ]"
+          :class="['msg', message.senderRole === 'PATIENT' ? 'msg--self' : 'msg--other']"
         >
-          <div v-if="message.senderRole !== 'SYSTEM'" class="msg__meta">
-            {{ message.senderName || (message.senderRole === 'PATIENT' ? '我' : '医生') }} ·
+          <div class="msg__meta">
+            {{ message.senderRole === 'PATIENT' ? '我' : '医生' }} ·
             {{ formatDateTime(message.sentAt) }}
           </div>
-          <div class="msg__bubble">{{ message.content }}</div>
+          <div v-if="message.contentType === 'IMAGE'" class="msg__bubble">[图片] {{ message.content }}</div>
+          <div v-else class="msg__bubble">{{ message.content }}</div>
         </div>
       </div>
 
@@ -299,12 +305,6 @@ onUnmounted(stopPolling)
   line-height: 1.7;
 }
 
-.chat__complaint-extra {
-  margin: 6px 0 0;
-  color: var(--mp-text-secondary);
-  font-size: 13px;
-}
-
 .chat__messages {
   display: flex;
   flex-direction: column;
@@ -333,11 +333,6 @@ onUnmounted(stopPolling)
   align-items: flex-start;
 }
 
-.msg--system {
-  align-self: center;
-  max-width: 100%;
-}
-
 .msg__meta {
   font-size: 12px;
   color: var(--mp-text-secondary);
@@ -359,12 +354,6 @@ onUnmounted(stopPolling)
 .msg--other .msg__bubble {
   background: #fff;
   border: 1px solid var(--mp-color-border);
-}
-
-.msg--system .msg__bubble {
-  background: transparent;
-  color: var(--mp-text-secondary);
-  font-size: 12px;
 }
 
 .chat__waiting {

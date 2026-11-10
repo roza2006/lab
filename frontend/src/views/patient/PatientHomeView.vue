@@ -33,6 +33,10 @@ async function load() {
   }
 }
 
+function doctorLabel(session: ConsultationSession) {
+  return session.doctorId ? `医生 #${session.doctorId}` : '待分配'
+}
+
 function openSession(id: number) {
   router.push(`/patient/consultations/${id}`)
 }
@@ -83,12 +87,18 @@ onMounted(load)
           发起问诊
         </el-button>
       </el-empty>
-      <el-table v-else :data="recent" row-key="id" @row-click="(row: ConsultationSession) => openSession(row.id)">
-        <el-table-column prop="doctorName" label="医生" min-width="110">
-          <template #default="{ row }">{{ row.doctorName || '待分配' }}</template>
+      <el-table
+        v-else
+        :data="recent"
+        row-key="id"
+        @row-click="(row: ConsultationSession) => openSession(row.id)"
+      >
+        <el-table-column label="医生" width="100">
+          <template #default="{ row }">{{ doctorLabel(row) }}</template>
         </el-table-column>
-        <el-table-column prop="departmentName" label="科室" min-width="90" />
-        <el-table-column prop="chiefComplaint" label="主诉" min-width="220" show-overflow-tooltip />
+        <el-table-column prop="department" label="科室" width="90" />
+        <el-table-column prop="diseaseName" label="复诊疾病" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="chiefComplaint" label="主诉" min-width="200" show-overflow-tooltip />
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="SESSION_STATUS_TAG[row.status as keyof typeof SESSION_STATUS_TAG]" effect="light">

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 import { authApi } from '@/api/auth'
 
-/** 与后端 `sys_role.role_code` 保持一致 */
+/** 与后端 `sys_role.role_code` / 契约 Role 枚举保持一致 */
 export type Role = 'PATIENT' | 'DOCTOR' | 'PHARMACIST' | 'ADMIN'
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -15,18 +15,20 @@ export const ROLE_LABELS: Record<Role, string> = {
 export interface UserInfo {
   id: number
   username: string
+  realName?: string
   role: Role
 }
 
 const TOKEN_KEY = 'mp.token'
 const USER_KEY = 'mp.user'
 
-/** 后端还存在 PHARMACY（合作药房）角色，v1 复用药师工作台 */
+/** 合作药房操作员（PHARMACY_OPERATOR）复用药师工作台 */
 const ROLE_ALIASES: Record<string, Role> = {
   PATIENT: 'PATIENT',
   DOCTOR: 'DOCTOR',
   PHARMACIST: 'PHARMACIST',
   PHARMACY: 'PHARMACIST',
+  PHARMACY_OPERATOR: 'PHARMACIST',
   ADMIN: 'ADMIN',
 }
 
@@ -58,20 +60,22 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
     role: (state): Role | null => state.user?.role ?? null,
-    displayName: (state) => state.user?.username ?? '未登录',
+    displayName: (state) => state.user?.realName || state.user?.username || '未登录',
   },
   actions: {
     /**
-     * 真实登录：POST /api/v1/auth/login（R3-A 已实现）。
-     * 后端只返回 accessToken 与 user{id,username,roleCode}，角色由 roleCode 映射。
+     * POST /api/v1/auth/login（契约 v1.0）。
+     * 后端当前返回 user.roleCode，契约定义 user.role，这里两者都兼容。
      */
     async login(username: string, password: string) {
       const result = await authApi.login(username.trim(), password)
+      const backendUser = result.user
       this.token = result.accessToken
       this.user = {
-        id: result.user.id,
-        username: result.user.username,
-        role: mapRole(result.user.roleCode),
+        id: backendUser.id,
+        username: backendUser.username,
+        realName: backendUser.realName,
+        role: mapRole(backendUser.role ?? backendUser.roleCode ?? ''),
       }
       localStorage.setItem(TOKEN_KEY, this.token)
       localStorage.setItem(USER_KEY, JSON.stringify(this.user))

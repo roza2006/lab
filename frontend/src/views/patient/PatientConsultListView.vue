@@ -24,6 +24,10 @@ const filtered = computed(() =>
     : sessions.value,
 )
 
+function doctorLabel(session: ConsultationSession) {
+  return session.doctorId ? `医生 #${session.doctorId}` : '待分配'
+}
+
 async function load() {
   loading.value = true
   try {
@@ -54,7 +58,7 @@ onMounted(load)
           <el-option label="待接诊" value="WAITING" />
           <el-option label="进行中" value="IN_PROGRESS" />
           <el-option label="已结束" value="ENDED" />
-          <el-option label="已取消" value="CANCELLED" />
+          <el-option label="已归档" value="ARCHIVED" />
         </el-select>
         <el-button :loading="loading" @click="load">刷新</el-button>
         <el-button type="primary" @click="router.push('/patient/consultations/new')">发起问诊</el-button>
@@ -64,14 +68,17 @@ onMounted(load)
     <el-card shadow="never">
       <el-skeleton v-if="loading" :rows="4" animated />
       <el-empty v-else-if="!filtered.length" description="没有符合条件的问诊记录" />
-      <el-table v-else :data="filtered" row-key="id" @row-click="(row: ConsultationSession) => openSession(row.id)">
-        <el-table-column prop="sessionNo" label="会话号" width="150">
-          <template #default="{ row }">{{ row.sessionNo || row.id }}</template>
+      <el-table
+        v-else
+        :data="filtered"
+        row-key="id"
+        @row-click="(row: ConsultationSession) => openSession(row.id)"
+      >
+        <el-table-column label="医生" width="100">
+          <template #default="{ row }">{{ doctorLabel(row) }}</template>
         </el-table-column>
-        <el-table-column prop="doctorName" label="医生" width="110">
-          <template #default="{ row }">{{ row.doctorName || '待分配' }}</template>
-        </el-table-column>
-        <el-table-column prop="departmentName" label="科室" width="90" />
+        <el-table-column prop="department" label="科室" width="90" />
+        <el-table-column prop="diseaseName" label="复诊疾病" min-width="130" show-overflow-tooltip />
         <el-table-column prop="chiefComplaint" label="主诉" min-width="220" show-overflow-tooltip />
         <el-table-column label="状态" width="100">
           <template #default="{ row }">

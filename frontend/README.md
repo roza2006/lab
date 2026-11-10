@@ -75,22 +75,22 @@ mock 账号：`patient` / `doctor` / `pharmacist` / `admin`，密码均为 `1234
 | 页面 | 路由 | 用例 | 说明 |
 |---|---|---|---|
 | 患者首页 | `/patient/home` | UC-P03 | 进行中/待接诊统计 + 最近问诊，快捷发起 |
-| 发起问诊 | `/patient/consultations/new` | UC-P03 | 科室 + 主诉（5–1000 字）+ 病情补充，提交后进入会话 |
+| 发起问诊 | `/patient/consultations/new` | UC-P03 | 科室 + 复诊疾病 + 主诉（≥ 5 字），提交后进入会话 |
 | 我的问诊 | `/patient/consultations` | UC-P05 | 状态筛选、会话列表、进入会话 |
-| 问诊会话 | `/patient/consultations/:id` | UC-P04 | 消息轮询（3 秒）、发送（客户端消息 ID 去重）、结束问诊 |
+| 问诊会话 | `/patient/consultations/:id` | UC-P04 | 消息轮询（3 秒）、发送（`Idempotency-Key`）、结束问诊 |
 
-接口收敛在 `src/api/consultation.ts`，路径沿用 `docs/requirements/use-cases.md` §3/§7：
+接口已对齐 `docs/design/api-contract.md` v1.0（李梓语）与 `openapi.yaml`，收敛在 `src/api/consultation.ts`：
 
 ```text
-POST /api/v1/consultations               创建会话
-GET  /api/v1/consultations               我的会话列表
+POST /api/v1/consultations               创建会话（201，返回 Consultation）
+GET  /api/v1/consultations               我的会话列表（分页 PageResponse）
 GET  /api/v1/consultations/{id}          会话详情
-GET  /api/v1/consultations/{id}/messages 消息列表
-POST /api/v1/consultations/{id}/messages 发送消息（clientMsgId 去重）
-POST /api/v1/consultations/{id}/end      结束问诊
+GET  /api/v1/consultations/{id}/messages 消息列表（分页）
+POST /api/v1/consultations/{id}/messages 发送消息（201，可选 Idempotency-Key）
+POST /api/v1/consultations/{id}/end      结束会话
 ```
 
-> B 的 `docs/design/api-contract.md` 合并后若字段不同，只需改 `src/api/consultation.ts` 的适配层；页面与路由不受影响。
+字段以契约为准：`department`（字符串）、`diseaseName`、`chiefComplaint`、`status`（`WAITING/IN_PROGRESS/ENDED/ARCHIVED`）、消息 `contentType`（`TEXT/IMAGE`）。
 
 ## 6. 页面骨架约定
 

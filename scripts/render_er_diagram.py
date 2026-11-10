@@ -374,7 +374,7 @@ def build() -> Canvas:
     cv.text(
         100, 1426,
         "说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 关联药师档案。"
-        "为保持图面清晰，这两条关系以文字说明代替连线。",
+        "这两条关系用文字说明，避免连线交叉。",
         15, MUTED,
     )
     cv.text(2500, 1426, "R1 · v0.1", 15, MUTED, anchor="rs")

@@ -9,6 +9,7 @@
 | 2026-11-03 | 代香晰 | DeepSeek Harness（deepseek 模型） | 起草 `docs/requirements/use-cases.md`：按报告表 2-4～2-7、表 2-8 权限矩阵与《代码实现方案》§6.2 梳理 29 个用例 | 用例总览、分角色场景表、5 个关键用例规格、权限矩阵与越权场景初稿 | 待 C 复核：优先级、合作药房用例边界、8 个待确认问题的结论 | 与实验报告 §3.2/§3.3 逐表对照；与郝佳鑫的 `domain-model.md` §12.1 追踪列核对 |
 | 2026-11-03 | 班国勇 | DeepSeek | 起草测试策略文档、Issue 模板、PR 模板 | 初稿 | 人工审核、补充修改与格式调整 | PR review 并合并至 main 分支 |
 | 2026-11-09 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 搭建后端工程骨架：`backend/pom.xml`、`PlatformApplication`、`application.yml`，并核对依赖坐标与配置项 | Spring Boot 3.2.5 + MyBatis-Plus 依赖清单、启动类、数据源/Redis/日志基础配置初稿 | 待郝佳鑫复核：依赖取舍（Flyway/Redis/Actuator 是否在第 2 轮引入）、包结构、配置命名 | 父 POM 与 16 个依赖坐标在 Maven Central 校验存在；JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B -DskipTests package` BUILD SUCCESS（产物 `backend/target/medical-platform-backend.jar`）；`application.yml` 通过 YAML 解析校验 |
+| 2026-11-10 | 代香晰 | DeepSeek Harness（deepseek 模型） | 搭建前端四端骨架：Vite 6 + Vue 3 + TypeScript + Element Plus + Pinia，含 18 个页面、角色路由守卫与统一请求封装 | 工程配置、路由与菜单、布局与页面骨架、frontend/README 初稿 | 待代香晰复核：页面划分与菜单、模拟登录策略、构建白名单 | `pnpm install` 与 `pnpm build` 通过（vue-tsc 类型检查 + Vite 构建）；无头浏览器走查患者/医生/管理员页面 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

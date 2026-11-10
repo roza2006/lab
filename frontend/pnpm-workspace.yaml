@@ -1,0 +1,4 @@
+# pnpm 10+ 的依赖构建白名单：esbuild 的 postinstall 用于准备 Vite 所需的平台二进制。
+# 由 `pnpm approve-builds esbuild` 生成，保留在仓库中可避免 CI/新成员重复确认。
+allowBuilds:
+  esbuild: true

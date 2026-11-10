@@ -71,7 +71,8 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R1-魏宇佳：数据库表清单（`database/schema.sql`，v0.1 待评审）
 - [ ] R1-班国勇：测试计划与协作模板
 - [x] R2-郝佳鑫：后端工程骨架（`backend/pom.xml`、`PlatformApplication`、`application.yml`）
-- [ ] R2：架构文档、接口契约、前端骨架、核心表与种子、CI
+- [x] R2-刘飞燕：架构设计与 ADR-001（`docs/design/architecture.md`、`docs/design/adr/ADR-001.md`）
+- [ ] R2：接口契约、前端骨架、核心表与种子、CI
 - [ ] R3–R6：认证与问诊、处方与审核、流转与部署、测试与发布
 
 ## 8. 本地开发

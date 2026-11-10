@@ -9,14 +9,19 @@ const router = useRouter()
 
 const submitting = ref(false)
 const form = reactive({
-  departmentId: undefined as number | undefined,
+  department: '',
+  diseaseName: '',
   chiefComplaint: '',
-  description: '',
 })
 
 async function handleSubmit() {
-  if (!form.departmentId) {
+  if (!form.department) {
     ElMessage.warning('请选择就诊科室')
+    return
+  }
+  const diseaseName = form.diseaseName.trim()
+  if (!diseaseName) {
+    ElMessage.warning('请填写复诊疾病名称')
     return
   }
   const chiefComplaint = form.chiefComplaint.trim()
@@ -24,17 +29,13 @@ async function handleSubmit() {
     ElMessage.warning('请填写至少 5 个字的主诉')
     return
   }
-  if (chiefComplaint.length > 1000) {
-    ElMessage.warning('主诉不能超过 1000 字')
-    return
-  }
 
   submitting.value = true
   try {
     const session = await consultationApi.create({
-      departmentId: form.departmentId,
+      department: form.department,
+      diseaseName,
       chiefComplaint,
-      description: form.description.trim() || undefined,
     })
     ElMessage.success('问诊已提交，进入会话等待医生接诊')
     await router.replace(`/patient/consultations/${session.id}`)
@@ -53,48 +54,41 @@ async function handleSubmit() {
       <el-tag type="info" effect="plain">UC-P03</el-tag>
     </header>
     <p class="create__summary">
-      选择就诊科室并描述病情，提交后生成问诊会话与候诊号，医生接诊后即可图文沟通。
+      填写复诊疾病与主诉，提交后生成问诊会话并进入候诊队列，医生接诊后即可图文沟通。
     </p>
 
     <el-alert
       type="info"
       show-icon
       :closable="false"
-      title="R3 暂未接入附件上传服务，图片/PDF 资料将在 R4 支持；当前可用文字补充说明。"
+      title="R3 暂未接入附件上传服务，图片资料将在 R4 支持；当前可用文字补充说明。"
     />
 
     <el-card shadow="never">
       <el-form label-width="96px" label-position="left">
         <el-form-item label="就诊科室" required>
-          <el-select v-model="form.departmentId" placeholder="请选择科室" class="create__control">
-            <el-option
-              v-for="item in DEPARTMENT_OPTIONS"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+          <el-select v-model="form.department" placeholder="请选择科室" class="create__control">
+            <el-option v-for="item in DEPARTMENT_OPTIONS" :key="item" :label="item" :value="item" />
           </el-select>
+        </el-form-item>
+
+        <el-form-item label="复诊疾病" required>
+          <el-input
+            v-model="form.diseaseName"
+            maxlength="64"
+            placeholder="例如：2 型糖尿病、高血压"
+            class="create__control"
+          />
         </el-form-item>
 
         <el-form-item label="主诉" required>
           <el-input
             v-model="form.chiefComplaint"
             type="textarea"
-            :rows="4"
+            :rows="5"
             maxlength="1000"
             show-word-limit
-            placeholder="例如：反复咳嗽三天，伴低热，无呼吸困难"
-          />
-        </el-form-item>
-
-        <el-form-item label="病情补充">
-          <el-input
-            v-model="form.description"
-            type="textarea"
-            :rows="4"
-            maxlength="1000"
-            show-word-limit
-            placeholder="既往史、过敏史、已服用的药物等（选填）"
+            placeholder="例如：血糖控制不佳，随访复诊；近一周空腹血糖 7.8 mmol/L 左右"
           />
         </el-form-item>
 
@@ -133,6 +127,6 @@ async function handleSubmit() {
 }
 
 .create__control {
-  width: 260px;
+  width: 280px;
 }
 </style>

@@ -1,91 +1,103 @@
-import { http } from './http'
+import { http, request } from './http'
 
 /**
- * 问诊接口约定（R3 前端先行版）。
- *
- * 路径沿用 `docs/requirements/use-cases.md` §3/§7：
- *   POST /consultations               创建会话
- *   GET  /consultations               我的会话列表
+ * 问诊接口：对齐 `docs/design/api-contract.md` v1.0 与 `backend/src/main/resources/openapi.yaml`
+ *   POST /consultations               创建会话（201）
+ *   GET  /consultations               我的会话列表（分页 PageResponse）
  *   GET  /consultations/{id}          会话详情
- *   GET  /consultations/{id}/messages 消息列表
- *   POST /consultations/{id}/messages 发送消息
- *   POST /consultations/{id}/end      结束问诊
- *
- * B 的 `docs/design/api-contract.md` 合并后，如字段命名不同，只改本文件的适配层。
+ *   GET  /consultations/{id}/messages 消息列表（分页）
+ *   POST /consultations/{id}/messages 发送消息（201，可带 Idempotency-Key）
+ *   POST /consultations/{id}/end      结束会话
  */
 
-export type SessionStatus = 'WAITING' | 'IN_PROGRESS' | 'ENDED' | 'CANCELLED'
+export type SessionStatus = 'WAITING' | 'IN_PROGRESS' | 'ENDED' | 'ARCHIVED'
 
-export type MessageType = 'TEXT' | 'IMAGE' | 'FILE' | 'SYSTEM'
+export type MessageType = 'TEXT' | 'IMAGE'
+
+/** 与 openapi.yaml 的 Role 枚举一致 */
+export type RoleCode = 'PATIENT' | 'DOCTOR' | 'PHARMACIST' | 'PHARMACY_OPERATOR' | 'ADMIN'
+
+export interface PageResponse<T> {
+  content: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+  last: boolean
+}
 
 export interface ConsultationSession {
   id: number
-  sessionNo?: string
   patientId: number
-  patientName?: string
-  doctorId?: number
-  doctorName?: string
-  departmentId?: number
-  departmentName?: string
-  status: SessionStatus
+  doctorId?: number | null
+  department: string
+  diseaseName: string
   chiefComplaint: string
-  description?: string
+  status: SessionStatus
   createdAt: string
-  startedAt?: string
-  endedAt?: string
+  endedAt?: string | null
 }
 
 export interface ConsultationMessage {
   id: number
-  sessionId: number
+  consultationId: number
   senderId: number
-  senderRole: 'PATIENT' | 'DOCTOR' | 'SYSTEM'
-  senderName?: string
-  msgType: MessageType
+  senderRole: RoleCode
+  contentType: MessageType
   content: string
+  read?: boolean
   sentAt: string
 }
 
 export interface CreateConsultationPayload {
-  departmentId: number
-  doctorId?: number
+  department: string
+  diseaseName: string
   chiefComplaint: string
-  description?: string
 }
 
 export interface SendMessagePayload {
+  contentType: MessageType
   content: string
-  clientMsgId: string
-  msgType?: MessageType
 }
 
 export const SESSION_STATUS_LABELS: Record<SessionStatus, string> = {
   WAITING: '待接诊',
   IN_PROGRESS: '进行中',
   ENDED: '已结束',
-  CANCELLED: '已取消',
+  ARCHIVED: '已归档',
 }
 
 export const SESSION_STATUS_TAG: Record<SessionStatus, 'warning' | 'primary' | 'info' | 'danger'> = {
   WAITING: 'warning',
   IN_PROGRESS: 'primary',
   ENDED: 'info',
-  CANCELLED: 'danger',
+  ARCHIVED: 'info',
 }
 
+/** 契约中 department 为字符串；v1 先用固定科室，R4 接目录服务 */
 export const DEPARTMENT_OPTIONS = [
-  { value: 1, label: '内科' },
-  { value: 2, label: '外科' },
-  { value: 3, label: '儿科' },
-  { value: 4, label: '皮肤科' },
+  '内科',
+  '外科',
+  '儿科',
+  '皮肤科',
+  '内分泌科',
+  '全科',
 ] as const
 
-type ListResponse = ConsultationSession[] | { items: ConsultationSession[] }
+type ListResult<T> = PageResponse<T> | T[]
+
+function unwrapPage<T>(data: ListResult<T>): T[] {
+  return Array.isArray(data) ? data : data.content
+}
 
 export const consultationApi = {
-  async list(): Promise<ConsultationSession[]> {
-    const data = await http.get<ListResponse>('/consultations')
-    return Array.isArray(data) ? data : data.items
+  async list(params: { status?: SessionStatus; page?: number; size?: number } = {}) {
+    const data = await http.get<ListResult<ConsultationSession>>('/consultations', {
+      page: params.page ?? 0,
+      size: params.size ?? 50,
+      status: params.status,
+    })
+    return unwrapPage(data)
   },
 
   detail: (id: number | string) => http.get<ConsultationSession>(`/consultations/${id}`),
@@ -93,11 +105,20 @@ export const consultationApi = {
   create: (payload: CreateConsultationPayload) =>
     http.post<ConsultationSession>('/consultations', payload),
 
-  messages: (id: number | string) =>
-    http.get<ConsultationMessage[]>(`/consultations/${id}/messages`),
+  async messages(id: number | string, params: { page?: number; size?: number } = {}) {
+    const data = await http.get<ListResult<ConsultationMessage>>(`/consultations/${id}/messages`, {
+      page: params.page ?? 0,
+      size: params.size ?? 100,
+    })
+    return unwrapPage(data)
+  },
 
-  send: (id: number | string, payload: SendMessagePayload) =>
-    http.post<ConsultationMessage>(`/consultations/${id}/messages`, payload),
+  send: (id: number | string, payload: SendMessagePayload, idempotencyKey?: string) =>
+    request<ConsultationMessage>(`/consultations/${id}/messages`, {
+      method: 'POST',
+      body: payload,
+      headers: idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : undefined,
+    }),
 
-  end: (id: number | string) => http.post<ConsultationSession>(`/consultations/${id}/end`, {}),
+  end: (id: number | string) => http.post<ConsultationSession>(`/consultations/${id}/end`),
 }

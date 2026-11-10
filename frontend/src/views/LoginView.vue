@@ -1,27 +1,31 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 import { HOME_BY_ROLE } from '@/router/menus'
-import { ROLE_LABELS, useAuthStore, type Role } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
-const roleOptions = (Object.keys(ROLE_LABELS) as Role[]).map((role) => ({
-  value: role,
-  label: ROLE_LABELS[role],
-}))
+const loading = ref(false)
+const form = reactive({ username: '', password: '' })
 
-const form = reactive({
-  role: 'PATIENT' as Role,
-  username: '',
-  password: '',
-})
+const demoAccounts = [
+  { username: 'patient', label: '患者' },
+  { username: 'doctor', label: '医生' },
+  { username: 'pharmacist', label: '药师' },
+  { username: 'admin', label: '管理员' },
+]
 
-function handleSubmit() {
+function fill(username: string) {
+  form.username = username
+  form.password = '123456'
+}
+
+async function handleSubmit() {
   if (!form.username.trim()) {
     ElMessage.warning('请输入用户名')
     return
@@ -31,15 +35,25 @@ function handleSubmit() {
     return
   }
 
-  // R2：本地模拟登录（不校验密码），R3 接入 POST /api/v1/auth/login。
-  auth.loginAs(form.role, form.username)
-  ElMessage.success(`已以${ROLE_LABELS[form.role]}身份进入演示环境`)
+  loading.value = true
+  try {
+    await auth.login(form.username, form.password)
+    const role = auth.role
+    if (!role) {
+      throw new Error('登录状态异常，请重试')
+    }
+    ElMessage.success(`欢迎回来，${auth.displayName}`)
 
-  const redirect =
-    typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
-      ? route.query.redirect
-      : HOME_BY_ROLE[form.role]
-  router.replace(redirect)
+    const redirect =
+      typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
+        ? route.query.redirect
+        : HOME_BY_ROLE[role]
+    await router.replace(redirect)
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -57,32 +71,44 @@ function handleSubmit() {
       <h2 class="login__title">登录</h2>
 
       <el-alert
-        type="warning"
+        type="info"
         show-icon
         :closable="false"
-        title="R2 阶段为本地模拟登录：任选角色，密码不校验；R3 接入统一认证。"
+        title="已接入后端 POST /api/v1/auth/login；未启动后端时可运行 pnpm mock 使用本地演示数据。"
         class="login__tip"
       />
 
       <el-form label-position="top" @submit.prevent="handleSubmit">
-        <el-form-item label="登录角色">
-          <el-select v-model="form.role" class="login__control">
-            <el-option
-              v-for="option in roleOptions"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
-            />
-          </el-select>
-        </el-form-item>
         <el-form-item label="用户名">
-          <el-input v-model="form.username" placeholder="演示账号：patient / doctor / pharmacist / admin" />
+          <el-input v-model="form.username" placeholder="请输入账号" autocomplete="username" />
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="form.password" type="password" show-password placeholder="演示密码：123456" />
+          <el-input
+            v-model="form.password"
+            type="password"
+            show-password
+            placeholder="请输入密码"
+            autocomplete="current-password"
+            @keyup.enter="handleSubmit"
+          />
         </el-form-item>
-        <el-button type="primary" class="login__submit" @click="handleSubmit">进入工作台</el-button>
+        <el-button type="primary" class="login__submit" :loading="loading" @click="handleSubmit">
+          登录
+        </el-button>
       </el-form>
+
+      <div class="login__demo">
+        <span class="login__demo-label">演示账号（密码 123456）：</span>
+        <el-button
+          v-for="account in demoAccounts"
+          :key="account.username"
+          link
+          type="primary"
+          @click="fill(account.username)"
+        >
+          {{ account.label }}
+        </el-button>
+      </div>
 
       <p class="login__foot">演示数据均为虚构，请勿录入真实患者信息。</p>
     </el-card>
@@ -133,7 +159,7 @@ function handleSubmit() {
 }
 
 .login__card {
-  width: min(420px, 100%);
+  width: min(440px, 100%);
 }
 
 .login__title {
@@ -146,12 +172,21 @@ function handleSubmit() {
   margin-bottom: 16px;
 }
 
-.login__control {
+.login__submit {
   width: 100%;
 }
 
-.login__submit {
-  width: 100%;
+.login__demo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.login__demo-label {
+  font-size: 13px;
+  color: var(--mp-text-secondary);
 }
 
 .login__foot {

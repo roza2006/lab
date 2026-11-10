@@ -12,6 +12,7 @@
 | 2026-11-09 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 搭建后端工程骨架：`backend/pom.xml`、`PlatformApplication`、`application.yml`，并核对依赖坐标与配置项 | Spring Boot 3.2.5 + MyBatis-Plus 依赖清单、启动类、数据源/Redis/日志基础配置初稿 | 待郝佳鑫复核：依赖取舍（Flyway/Redis/Actuator 是否在第 2 轮引入）、包结构、配置命名 | 父 POM 与 16 个依赖坐标在 Maven Central 校验存在；JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B -DskipTests package` BUILD SUCCESS（产物 `backend/target/medical-platform-backend.jar`）；`application.yml` 通过 YAML 解析校验 |
 | 2026-11-10 | 代香晰 | DeepSeek Harness（deepseek 模型） | 搭建前端四端骨架：Vite 6 + Vue 3 + TypeScript + Element Plus + Pinia，含 18 个页面、角色路由守卫与统一请求封装 | 工程配置、路由与菜单、布局与页面骨架、frontend/README 初稿 | 待代香晰复核：页面划分与菜单、模拟登录策略、构建白名单 | `pnpm install` 与 `pnpm build` 通过（vue-tsc 类型检查 + Vite 构建）；无头浏览器走查患者/医生/管理员页面 |
 | 2026-11-10 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 编写认证与问诊接口测试：`AuthTest`（12 例）、`ConsultationTest`（10 例），并补充 H2 测试库配置与 `schema-test.sql` | 登录/账号状态/令牌篡改/过期/伪造 ADMIN 越权等断言，问诊发起、接诊、越权与结束后写保护的用例骨架 | 待郝佳鑫复核：越权覆盖是否足够、`ConsultationTest` 待问诊实现合入后逐个启用 | JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B test`：22 例运行、0 失败、6 跳过（待问诊实现）；本地沙箱禁止 JVM 动态挂载 agent，故本地临时改用 subclass mock maker 验证，仓库不保留该覆盖 |
+| 2026-11-10 | 代香晰 | DeepSeek Harness（deepseek 模型） | 实现患者端流程：登录对接、发起问诊、问诊列表与会话（消息轮询、发送去重、结束问诊），并补充零依赖 mock 服务 | 页面与 API 适配层、mock 服务、README 初稿 | 待代香晰复核：问诊接口字段、轮询间隔、mock 与真实后端的差异 | `pnpm build` 通过；mock + dev 实际走通登录→问诊→消息→结束，并经 Vite 代理核对接口返回 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

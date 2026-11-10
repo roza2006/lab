@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 
-/** 与后端 `sys_role` 的 `role_code` 保持一致 */
+import { authApi } from '@/api/auth'
+
+/** 与后端 `sys_role.role_code` 保持一致 */
 export type Role = 'PATIENT' | 'DOCTOR' | 'PHARMACIST' | 'ADMIN'
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -11,13 +13,22 @@ export const ROLE_LABELS: Record<Role, string> = {
 }
 
 export interface UserInfo {
-  id: string
-  name: string
+  id: number
+  username: string
   role: Role
 }
 
 const TOKEN_KEY = 'mp.token'
 const USER_KEY = 'mp.user'
+
+/** 后端还存在 PHARMACY（合作药房）角色，v1 复用药师工作台 */
+const ROLE_ALIASES: Record<string, Role> = {
+  PATIENT: 'PATIENT',
+  DOCTOR: 'DOCTOR',
+  PHARMACIST: 'PHARMACIST',
+  PHARMACY: 'PHARMACIST',
+  ADMIN: 'ADMIN',
+}
 
 function readUser(): UserInfo | null {
   const raw = localStorage.getItem(USER_KEY)
@@ -31,6 +42,14 @@ function readUser(): UserInfo | null {
   }
 }
 
+function mapRole(roleCode: string): Role {
+  const role = ROLE_ALIASES[roleCode?.toUpperCase?.() ?? '']
+  if (!role) {
+    throw new Error(`账号角色“${roleCode}”无前端入口，请联系管理员`)
+  }
+  return role
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: localStorage.getItem(TOKEN_KEY) ?? '',
@@ -39,24 +58,25 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
     role: (state): Role | null => state.user?.role ?? null,
-    displayName: (state) => state.user?.name ?? '未登录',
+    displayName: (state) => state.user?.username ?? '未登录',
   },
   actions: {
     /**
-     * R2 骨架阶段的本地模拟登录：后端 `/api/v1/auth/login` 由 R3-A 实现。
-     * 接入真实接口时，把这里替换为 http 请求 + 保存后端返回的 token 即可，
-     * 路由守卫、菜单与页面无需改动。
+     * 真实登录：POST /api/v1/auth/login（R3-A 已实现）。
+     * 后端只返回 accessToken 与 user{id,username,roleCode}，角色由 roleCode 映射。
      */
-    loginAs(role: Role, username: string) {
-      this.token = `dev-mock-${role.toLowerCase()}-${Date.now()}`
+    async login(username: string, password: string) {
+      const result = await authApi.login(username.trim(), password)
+      this.token = result.accessToken
       this.user = {
-        id: `dev-${role.toLowerCase()}`,
-        name: username.trim() || ROLE_LABELS[role],
-        role,
+        id: result.user.id,
+        username: result.user.username,
+        role: mapRole(result.user.roleCode),
       }
       localStorage.setItem(TOKEN_KEY, this.token)
       localStorage.setItem(USER_KEY, JSON.stringify(this.user))
     },
+
     logout() {
       this.token = ''
       this.user = null

@@ -1,5 +1,6 @@
 package com.medical.platform;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,7 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 由 {@link MapperScan} 扫描注册。
  */
 @SpringBootApplication
-@MapperScan("com.medical.platform.**.infrastructure.mapper")
+@MapperScan(basePackages = "com.medical.platform", annotationClass = Mapper.class)
 public class PlatformApplication {
 
     public static void main(String[] args) {

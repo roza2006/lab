@@ -6,7 +6,7 @@
 
 | 文档版本 | 更新日期 | 负责人 | 状态 | 关联文档 |
 |---|---|---|---|---|
-| v0.1 | 2026-11-03 | 郝佳鑫 | 待评审 | `docs/requirements/use-cases.md`（C，R1）、`docs/design/architecture.md`（A，R2）、`docs/design/er.md`（E，R2） |
+| v0.1 | 2026-11-03 | 郝佳鑫 | 待评审 | `docs/requirements/use-cases.md`（代香晰，R1）、`docs/design/architecture.md`（刘飞燕，R2）、`docs/design/er.md`（魏宇佳，R2） |
 
 ---
 

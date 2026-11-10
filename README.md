@@ -64,12 +64,12 @@ deploy/      docker-compose、Nginx、部署说明
 ## 7. 当前进度
 
 - [x] 仓库重置与目录骨架
-- [x] R1-A：README、目录规范、文档索引
-- [ ] R1-B：需求范围与角色
-- [x] R1-C：用例清单（`docs/requirements/use-cases.md`，v1.0 待评审）
+- [x] R1-刘飞燕：README、目录规范、文档索引
+- [ ] R1-李梓语：需求范围与角色
+- [x] R1-代香晰：用例清单（`docs/requirements/use-cases.md`，v1.0 待评审）
 - [x] R1-郝佳鑫：领域模型（`docs/design/domain-model.md`，v0.1 待评审）
-- [x] R1-E：数据库表清单（`database/schema.sql`，v0.1 待评审）
-- [ ] R1-F：测试计划与协作模板
+- [x] R1-魏宇佳：数据库表清单（`database/schema.sql`，v0.1 待评审）
+- [ ] R1-班国勇：测试计划与协作模板
 - [x] R2-郝佳鑫：后端工程骨架（`backend/pom.xml`、`PlatformApplication`、`application.yml`）
 - [ ] R2：架构文档、接口契约、前端骨架、核心表与种子、CI
 - [ ] R3–R6：认证与问诊、处方与审核、流转与部署、测试与发布

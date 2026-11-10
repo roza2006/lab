@@ -65,18 +65,20 @@ deploy/      docker-compose、Nginx、部署说明
 
 - [x] 仓库重置与目录骨架
 - [x] R1-刘飞燕：README、目录规范、文档索引
-- [ ] R1-李梓语：需求范围与角色
+- [x] R1-李梓语：需求范围与角色
 - [x] R1-代香晰：用例清单（`docs/requirements/use-cases.md`，v1.0 待评审）
 - [x] R1-郝佳鑫：领域模型（`docs/design/domain-model.md`，v0.1 待评审）
 - [x] R1-魏宇佳：数据库表清单与数据字典（`database/schema.sql`、`docs/database/dictionary.xlsx`）
 - [x] R1-魏宇佳：核心 ER 图、表总览图、系统部署图（`docs/database/diagrams/`、`deploy/`）
-- [ ] R1-班国勇：测试计划与协作模板
+- [x] R1-班国勇：测试计划与协作模板
 - [x] R2-郝佳鑫：后端工程骨架（`backend/pom.xml`、`PlatformApplication`、`application.yml`）
 - [x] R2-刘飞燕：架构设计与 ADR-001（`docs/design/architecture.md`、`docs/design/adr/ADR-001.md`）
 - [x] R2-代香晰：前端四端骨架（`frontend/`，Vue 3 + Vite，18 个页面）
+- [x] R2-李梓语：API 契约与 OpenAPI（`docs/design/api-contract.md`、`backend/src/main/resources/openapi.yaml`）
+- [x] R2-班国勇：本地编排与 CI（`deploy/`、`.github/workflows/ci.yml`）
 - [x] R3-刘飞燕：登录、JWT、角色权限（`backend/src/main/java/com/medical/platform/identity`）
 - [x] R3-郝佳鑫：认证与问诊接口测试（`backend/src/test`，22 例：16 通过 / 6 待问诊实现启用）
-- [ ] R2：接口契约、核心表与种子、CI
+- [ ] R2：演示种子数据
 - [ ] R4–R6：处方与审核、流转与部署、测试与发布
 
 ## 8. 本地开发

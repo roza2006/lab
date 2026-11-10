@@ -6,14 +6,14 @@
 
 | 目录/文件 | 内容 | 计划负责人 | 状态 |
 |---|---|---|---|
-| `requirements/requirements.md` | 项目范围、角色、约束、非功能需求 | 李梓语 | 待 R1 |
+| `requirements/requirements.md` | 项目范围、角色、约束、非功能需求 | 李梓语 | 已提交（R1，待评审） |
 | `requirements/use-cases.md` | 29 个用例、优先级、权限边界 | 代香晰 | 已提交（R1-代香晰，v1.0 待评审） |
 | `design/domain-model.md` | 聚合根、实体、值对象、关系 | 郝佳鑫 | 已提交（R1，v0.1 待评审） |
 | `design/architecture.md` | DDD 分层、模块化单体、架构决策 | 刘飞燕 | 已提交（R2，v1.0 待评审） |
-| `design/api-contract.md` | 认证/问诊/处方 API 契约 | 李梓语 | 待 R2 |
+| `design/api-contract.md` | 认证/问诊/处方 API 契约 | 李梓语 | 已提交（R2，v1.0 待评审） |
 | `design/er.md` | ER 图与表关系 | 魏宇佳 | 待 R2 |
 | `design/adr/` | 架构决策记录 | 刘飞燕 | 已提交 ADR-001（R2） |
-| `test/test-plan.md` | 测试策略、环境、进入/退出准则 | 班国勇 | 待 R1 |
+| `test/test-plan.md` | 测试策略、环境、进入/退出准则 | 班国勇 | 已提交（R1，待评审） |
 | `test/test-report.md` | 回归执行、缺陷与结论 | 刘飞燕 | 待 R6 |
 | `test/acceptance.md` | 最终验收用例 | 郝佳鑫 | 待 R6 |
 | `process/sprint-01.md` | 第 1 次迭代目标与完成情况 | 班国勇 | 待 R3 |

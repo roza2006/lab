@@ -6,6 +6,7 @@
 |---|---|---|---|---|---|---|
 | 2026-11-03 | 魏宇佳 | DeepSeek Harness（deepseek 模型） | 起草 `database/schema.sql`：依据报告表 3-6 ~ 3-13、表 2-10、图 3-5 生成 24 张表 DDL，并整理 `docs/database/` 下的表清单、ER、规范 | 24 表 DDL 初稿、表关系说明、命名与安全规范、静态自检脚本 | 核对补充字段是否采纳（审核人、过期时间、盲索引）、审计类表是否建外键、敏感列加密方式 | MySQL 临时实例导入 24 张表；CHECK、唯一键、外键按预期拦截；`check_schema.py` 通过；对照报告表 3-7 ~ 3-13 |
 | 2026-11-10 | 魏宇佳 | DeepSeek Harness（deepseek 模型） | 生成 ER 图、表总览图、系统部署图与数据字典：Pillow 画图，openpyxl 从 DDL 解析出 Excel | 绘图公共模块、三张图的布局、Excel 解析脚本 | 调整分栏与连线走线、补图例说明、核对 24 张表与 235 个字段、重写部署分区描述 | 图上表名与 `schema.sql` 一致；SVG 通过 XML 解析；Excel 字段数与 DDL 一致 |
+| 2026-11-11 | 魏宇佳 | DeepSeek Harness（deepseek 模型） | 写 `V002__core.sql`、`V003__auth_consult.sql`：把 24 张表落成 Flyway 脚本，再按问诊代码的 Mapper SQL 调整会话/消息表并补索引 | 两份迁移脚本、索引清单、`schema.sql` 同步改动 | 对照 `Consultation*Mapper` 核对查询条件与排序，去掉与旧索引重复的项；把科室外键换成字符串字段；补 Flyway 路径配置 | 临时 MySQL 实例按 V002→V003 顺序执行成功；与 `schema.sql` 单独导入的结果逐列逐索引比对一致（237 列 / 133 索引行 / 28 外键）；插入会话与消息验证默认值与外键约束 |
 | 2026-11-03 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 起草 `docs/design/domain-model.md`：按报告表 2-9/2-10、表 3-3/3-6 提炼聚合、实体、值对象与不变量 | 文档结构、聚合清单、Mermaid 类图与状态图、错误码映射表初稿 | 待郝佳鑫复核：核准聚合边界（病历是否独立）、错误码命名、开放问题结论 | 与实验报告 §3.4、§2.3、表 2-10 逐条对照；PR 内逐节 review |
 | 2026-11-03 | 代香晰 | DeepSeek Harness（deepseek 模型） | 起草 `docs/requirements/use-cases.md`：按报告表 2-4～2-7、表 2-8 权限矩阵与《代码实现方案》§6.2 梳理 29 个用例 | 用例总览、分角色场景表、5 个关键用例规格、权限矩阵与越权场景初稿 | 待 C 复核：优先级、合作药房用例边界、8 个待确认问题的结论 | 与实验报告 §3.2/§3.3 逐表对照；与郝佳鑫的 `domain-model.md` §12.1 追踪列核对 |
 | 2026-11-03 | 班国勇 | DeepSeek | 起草测试策略文档、Issue 模板、PR 模板 | 初稿 | 人工审核、补充修改与格式调整 | PR review 并合并至 main 分支 |

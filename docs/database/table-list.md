@@ -17,8 +17,8 @@
 | 6 | `patient_profile` | 患者档案表 | 核心 | `id` | `user_id`、`id_card_hash` | → `consultation_session` |
 | 7 | `doctor_profile` | 医生档案表 | 核心 | `id` | `user_id`、`license_no` | → `consultation_session`、`prescription` |
 | 8 | `pharmacist_profile` | 药师档案表 | 核心 | `id` | `user_id`、`license_no` | → `prescription.reviewer_id` |
-| 9 | `department` | 科室表 | 支撑 | `id` | `dept_code` | ← `doctor_profile`、`consultation_session` |
-| 10 | `consultation_session` | 问诊会话表 | 核心 | `id` | `session_no` | ← `consultation_message`、`medical_record`、`prescription` |
+| 9 | `department` | 科室表 | 支撑 | `id` | `dept_code` | ← `doctor_profile` |
+| 10 | `consultation_session` | 问诊会话表 | 核心 | `id` | `session_no` | → `sys_user`（v1）；← `consultation_message`、`medical_record`、`prescription` |
 | 11 | `consultation_message` | 问诊消息表 | 核心 | `id` | `(session_id, client_msg_id)` | → `consultation_session` |
 | 12 | `medical_record` | 病历表 | 核心 | `id` | `session_id`（一会话一病历） | → `consultation_session` |
 | 13 | `prescription` | 处方主表 | 核心 | `id` | `rx_no` | → `consultation_session`、`patient_profile`、`doctor_profile` |
@@ -76,7 +76,9 @@
 ### 3.3 `consultation_session` 问诊会话表
 
 `status` ∈ `WAITING / IN_PROGRESS / ENDED / CANCELLED`；`version` 用于并发接诊控制；
-`doctor_id` 可空（接诊后写入）；`chief_complaint` 必填。
+`doctor_id` 可空（接诊后写入）；`chief_complaint`、`department`、`disease_name` 必填。
+第 3 轮按代码调整过：`department` 存科室名称，不再用 `department_id` 外键；
+`patient_id` / `doctor_id` 在 v1 直接指向 `sys_user.id`。
 
 ### 3.4 `circulation_order` 处方流转单表
 

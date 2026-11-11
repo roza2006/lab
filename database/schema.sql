@@ -1,17 +1,19 @@
 -- =============================================================================
--- 智慧医疗在线问诊与处方流转平台 —— 数据库 Schema 草案（v0.1）
+-- 智慧医疗在线问诊与处方流转平台 —— 数据库 Schema（v0.2）
 -- -----------------------------------------------------------------------------
 -- 文件      : database/schema.sql
--- 轮次      : 第 1 轮
+-- 轮次      : 第 1 轮起草，第 3 轮按问诊代码调整
 -- 负责人    : 魏宇佳
 -- 对应报告  : 表 3-6（表清单）、表 3-7 ~ 表 3-13（核心表字段）、图 3-5（ER 图）
 -- 目标库    : MySQL 8.0.16+（CHECK 约束从 8.0.16 起生效）
 -- 字符集    : utf8mb4 / utf8mb4_0900_ai_ci，引擎 InnoDB
 -- -----------------------------------------------------------------------------
 -- 说明：
---   第 1 轮只交付表清单和核心字段草案，供评审表结构、主外键、索引和安全列，
---   不是上线脚本。第 2 轮起改用 Flyway 迁移（V002__core.sql 等），本文件只作
---   基线参考。报告表 3-7 ~ 3-13 未覆盖的补充字段列在第 12 节，待评审确认。
+--   本文件是当前完整结构，方便直接看。真正执行用 Flyway 脚本：
+--     database/migrations/V002__core.sql  建 24 张表（第 2 轮）
+--     database/migrations/V003__auth_consult.sql  问诊字段与索引调整（第 3 轮）
+--   V003 把会话表的科室改成名称、加疾病分类，消息表加已读标记，
+--   患者/医生改挂 sys_user；本文件已同步这些变化。
 -- -----------------------------------------------------------------------------
 -- 约定（详见 docs/database/conventions.md）：
 --   * 主键统一 BIGINT AUTO_INCREMENT，业务编号单独建唯一键；
@@ -83,6 +85,7 @@ CREATE TABLE sys_user (
     UNIQUE KEY uk_username (username),
     UNIQUE KEY uk_phone_hash (phone_hash),
     KEY idx_role_status (role_code, status),
+    KEY idx_user_status_login (status, last_login_at),
     CONSTRAINT ck_user_status CHECK (status IN (0, 1))
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
   COMMENT = '用户账号表：登录凭证与账号状态';
@@ -263,15 +266,16 @@ CREATE TABLE pharmacist_profile (
 -- 5. 问诊（核心域 · 3 张表）
 -- =============================================================================
 
--- 5.1 问诊会话表（报告表 3-9）
+-- 5.1 问诊会话表（报告表 3-9；第 3 轮按代码调整：科室存名称，患者/医生挂账号）
 CREATE TABLE consultation_session (
     id              BIGINT        NOT NULL AUTO_INCREMENT COMMENT '会话 ID',
     session_no      VARCHAR(32)   NULL                    COMMENT '会话编号（业务编号，UK）',
-    patient_id      BIGINT        NOT NULL                COMMENT '发起人（患者）',
-    doctor_id       BIGINT        NULL                    COMMENT '接诊医生，接诊后写入',
-    department_id   BIGINT        NULL                    COMMENT '就诊科室（候诊队列分组）',
-    status          VARCHAR(24)   NOT NULL                COMMENT '状态：WAITING 待接诊 / IN_PROGRESS 进行中 / ENDED 已结束 / CANCELLED 已取消',
+    patient_id      BIGINT        NOT NULL                COMMENT '发起人（v1 存登录账号 ID）',
+    doctor_id       BIGINT        NULL                    COMMENT '接诊医生（v1 存登录账号 ID），接诊后写入',
+    department      VARCHAR(64)   NOT NULL                COMMENT '科室名称，与接口字段一致',
+    disease_name    VARCHAR(128)  NOT NULL                COMMENT '就诊疾病或问题分类',
     chief_complaint VARCHAR(1000) NOT NULL                COMMENT '主诉，患者填写',
+    status          VARCHAR(24)   NOT NULL                COMMENT '状态：WAITING 待接诊 / IN_PROGRESS 进行中 / ENDED 已结束 / CANCELLED 已取消',
     started_at      DATETIME(3)   NULL                    COMMENT '接诊时间',
     ended_at        DATETIME(3)   NULL                    COMMENT '结束时间',
     version         INT           NOT NULL DEFAULT 1      COMMENT '版本号：并发接诊乐观锁',
@@ -279,12 +283,11 @@ CREATE TABLE consultation_session (
     updated_at      DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
     PRIMARY KEY (id),
     UNIQUE KEY uk_session_no (session_no),
-    KEY idx_patient_created (patient_id, created_at),
-    KEY idx_doctor_status (doctor_id, status, created_at),
-    KEY idx_queue (department_id, status, created_at),
-    CONSTRAINT fk_session_patient FOREIGN KEY (patient_id) REFERENCES patient_profile (id),
-    CONSTRAINT fk_session_doctor FOREIGN KEY (doctor_id) REFERENCES doctor_profile (id),
-    CONSTRAINT fk_session_dept FOREIGN KEY (department_id) REFERENCES department (id),
+    KEY idx_session_patient (patient_id, id),
+    KEY idx_session_status (status, id),
+    KEY idx_session_doctor (doctor_id, id),
+    CONSTRAINT fk_session_patient FOREIGN KEY (patient_id) REFERENCES sys_user (id),
+    CONSTRAINT fk_session_doctor FOREIGN KEY (doctor_id) REFERENCES sys_user (id),
     CONSTRAINT ck_session_status CHECK (status IN ('WAITING', 'IN_PROGRESS', 'ENDED', 'CANCELLED'))
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
   COMMENT = '问诊会话表：接诊用 version 乐观锁，禁止重复接诊';
@@ -297,12 +300,14 @@ CREATE TABLE consultation_message (
     sender_role   VARCHAR(32)  NOT NULL                COMMENT '发送者角色：PATIENT/DOCTOR/SYSTEM',
     msg_type      VARCHAR(16)  NOT NULL DEFAULT 'TEXT' COMMENT '消息类型：TEXT/IMAGE/FILE/SYSTEM',
     content       VARCHAR(4000) NOT NULL               COMMENT '消息正文（图片/文件存对象存储键，正文不落二进制）',
+    read_flag     TINYINT(1)   NOT NULL DEFAULT 0      COMMENT '是否已读：1 是 0 否',
     client_msg_id VARCHAR(64)  NULL                    COMMENT '客户端消息 ID，用于重发去重',
     sent_at       DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '发送时间',
     created_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
     PRIMARY KEY (id),
     UNIQUE KEY uk_msg_client (session_id, client_msg_id),
-    KEY idx_session_sent (session_id, sent_at),
+    KEY idx_msg_session (session_id, id),
+    KEY idx_msg_unread (session_id, read_flag),
     CONSTRAINT fk_msg_session FOREIGN KEY (session_id) REFERENCES consultation_session (id),
     CONSTRAINT ck_msg_type CHECK (msg_type IN ('TEXT', 'IMAGE', 'FILE', 'SYSTEM')),
     CONSTRAINT ck_msg_role CHECK (sender_role IN ('PATIENT', 'DOCTOR', 'SYSTEM'))

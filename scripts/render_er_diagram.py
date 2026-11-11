@@ -227,8 +227,8 @@ def build() -> Canvas:
         ]),
         Card("问诊会话", "consultation_session", 2, 0, TEAL, [
             ("id", "BIGINT", "PK"), ("patient_id", "BIGINT", "FK"),
-            ("doctor_id", "BIGINT", "FK"), ("status", "VARCHAR(24)", ""),
-            ("version", "INT", ""),
+            ("doctor_id", "BIGINT", "FK"), ("department", "VARCHAR(64)", ""),
+            ("status", "VARCHAR(24)", ""),
         ]),
         Card("电子处方", "prescription", 3, 0, GOLD, [
             ("id", "BIGINT", "PK"), ("rx_no", "VARCHAR(32)", "UK"),
@@ -373,11 +373,11 @@ def build() -> Canvas:
     )
     cv.text(
         100, 1426,
-        "说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 关联药师档案。"
-        "这两条关系用文字说明，避免连线交叉。",
+        "说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 关联药师档案；"
+        "问诊会话在 v1 直接挂 sys_user，这几条关系用文字说明。",
         15, MUTED,
     )
-    cv.text(2500, 1426, "R1 · v0.1", 15, MUTED, anchor="rs")
+    cv.text(2500, 1426, "v0.2 · 第 3 轮", 15, MUTED, anchor="rs")
 
     return cv
 

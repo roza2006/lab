@@ -78,6 +78,8 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R2-李梓语：API 契约与 OpenAPI（`docs/design/api-contract.md`、`backend/src/main/resources/openapi.yaml`）
 - [x] R2-班国勇：本地编排与 CI（`deploy/`、`.github/workflows/ci.yml`）
 - [x] R3-刘飞燕：登录、JWT、角色权限（`backend/src/main/java/com/medical/platform/identity`）
+- [x] R3-李梓语：问诊会话与消息（`backend/src/main/java/com/medical/platform/consultation`）
+- [x] R3-魏宇佳：Flyway 迁移 V002/V003，会话表对齐代码并补查询索引（`database/migrations/`）
 - [x] R3-郝佳鑫：认证与问诊接口测试（`backend/src/test`，22 例：16 通过 / 6 待问诊实现启用）
 - [ ] R2：演示种子数据
 - [ ] R4–R6：处方与审核、流转与部署、测试与发布

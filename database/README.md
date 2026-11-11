@@ -1,15 +1,17 @@
 # 数据库设计（魏宇佳）
 
-本目录放数据库设计与变更脚本。第 1 轮交付 24 张表的清单和核心字段草案，供评审表结构、
-主外键、索引与安全列；草案不是最终脚本，第 2 轮起改用 Flyway 迁移管理。
+本目录放数据库结构和变更脚本。第 1 轮先出 24 张表的清单与字段草案，第 2 轮把结构写成
+Flyway 脚本，第 3 轮按问诊代码调整会话/消息两张表并补查询索引。
 
 ## 1. 文件说明
 
 | 文件 | 作用 | 状态 |
 |---|---|---|
-| `schema.sql` | 24 张表 DDL（表注释、字段注释、索引、CHECK 约束） | R1 草案 v0.1，待评审 |
+| `schema.sql` | 当前完整结构（表注释、字段注释、索引、CHECK 约束） | v0.2，第 3 轮已同步 |
+| `migrations/V002__core.sql` | 建 24 张表：主键、唯一键、外键、CHECK、命名索引 | 第 2 轮 |
+| `migrations/V003__auth_consult.sql` | 问诊字段调整 + 认证/问诊索引 | 第 3 轮 |
 | `../docs/database/table-list.md` | 表清单：中文名、分类、主键、关键字段、关联 | R1 |
-| `../docs/database/dictionary.xlsx` | 数据字典：表清单、235 个字段、索引、外键 | R1，由 DDL 解析生成 |
+| `../docs/database/dictionary.xlsx` | 数据字典：表清单、237 个字段、索引、外键 | 由 DDL 解析生成 |
 | `../docs/database/er.md` | 表关系说明与 ER 图 | R1 |
 | `../docs/database/diagrams/` | ER 图、表总览图、部署图（png + svg） | R1 |
 | `../docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | R1 |
@@ -18,8 +20,8 @@
 | `../scripts/render_er_diagram.py` | 生成 ER 图 | R1 |
 | `../scripts/render_table_overview.py` | 生成表总览图 | R1 |
 
-第 2 轮会增加 `seed.sql` 和 `migrations/V002__core.sql`，那时 `schema.sql` 只作基线参考，
-不再直接对生产库执行。
+迁移脚本的执行顺序是 V002 → V003，Flyway 会在 `flyway_schema_history` 里记录到哪一版。
+`schema.sql` 是两份脚本执行完的结果，方便直接看，不参与 Flyway 执行。
 
 ## 2. 表的分组
 
@@ -47,8 +49,12 @@ mysql --version
 mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS medical_platform \
   DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
 
-# 2. 导入
+# 2. 方式一：直接导入完整结构
 mysql -uroot -p medical_platform < database/schema.sql
+
+# 2. 方式二：按迁移顺序执行，和 Flyway 的行为一致
+mysql -uroot -p medical_platform < database/migrations/V002__core.sql
+mysql -uroot -p medical_platform < database/migrations/V003__auth_consult.sql
 
 # 3. 核对表数量，应输出 24
 mysql -uroot -p -N -e "SELECT COUNT(*) FROM information_schema.tables \
@@ -63,6 +69,16 @@ PowerShell 下第 2 步：
 ```powershell
 Get-Content -Raw database/schema.sql | mysql -uroot -p medical_platform
 ```
+
+用 Flyway 跑（默认关闭，需要显式打开）：
+
+```bash
+cd backend
+FLYWAY_ENABLED=true mvn spring-boot:run
+```
+
+脚本路径由 `application.yml` 的 `spring.flyway.locations` 指向 `../database/migrations`，
+所以要在 `backend` 目录下启动；换目录时用 `FLYWAY_LOCATIONS` 覆盖。
 
 ## 4. 关键约束
 
@@ -96,18 +112,18 @@ Get-Content -Raw database/schema.sql | mysql -uroot -p medical_platform
 
 ## 6. 六轮计划
 
-| 轮次 | 交付物 | 主要工作 |
-|---|---|---|
-| R1（本轮） | `schema.sql`、数据字典、ER 图、部署图 | 表清单、核心字段、索引与安全列草案 |
-| R2 | `schema.sql`、`seed.sql`、`V002__core.sql` | 核心表定稿、演示种子、接入 Flyway |
-| R3 | `V003__auth_consult.sql`、`er.md` | 认证/问诊索引、ER 更新 |
-| R4 | `V004__prescription.sql`、`audit.md` | 处方/审计表、版本字段、哈希链 |
-| R5 | `deploy/`、`seed.sql` | 演示部署、种子数据、一键启动 |
-| R6 | `README.md`、报告部署章节 | 部署说明、最终文档 |
+| 轮次 | 交付物 | 主要工作 | 状态 |
+|---|---|---|---|
+| R1 | `schema.sql`、数据字典、ER 图、部署图 | 表清单、核心字段、索引与安全列草案 | 已提交 |
+| R2 | `V002__core.sql` | 24 张表落成可执行脚本，接入 Flyway | 已提交 |
+| R3 | `V003__auth_consult.sql`、`er.md` | 会话/消息字段对齐代码、补查询索引 | 已提交 |
+| R4 | `V004__prescription.sql`、`audit.md` | 处方/审计表、版本字段、哈希链 | 待做 |
+| R5 | `deploy/`、`seed.sql` | 演示部署、种子数据、一键启动 | 待做 |
+| R6 | `README.md`、报告部署章节 | 部署说明、最终文档 | 待做 |
 
 ## 7. 数据与合规
 
-- 仓库不包含真实患者数据；`seed.sql`（R2 起）里的姓名、手机号、身份证号、药品批号全部虚构。
+- 仓库不包含真实患者数据；`seed.sql`（R5 起）里的姓名、手机号、身份证号、药品批号全部虚构。
 - 不提交 `.env`、数据库密码、证书私钥，连接信息通过环境变量注入。
 - DDL 初稿由 AI 辅助生成，字段含义、约束与索引已对照报告表 3-7 ~ 3-13 逐条核对，
   补充字段和差异在第 5 节写明，供人工评审。

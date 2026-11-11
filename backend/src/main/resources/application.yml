@@ -31,10 +31,11 @@ spring:
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
       timeout: 2s
-  # 数据库版本化：迁移脚本落地后由数据库负责人打开（当前仓库尚无 Flyway 目录）
+  # 数据库版本化：脚本在仓库的 database/migrations 目录，默认按“从 backend 目录启动”取相对路径；
+  # 换启动目录时用 FLYWAY_LOCATIONS 覆盖，例如 filesystem:/opt/medical/database/migrations
   flyway:
     enabled: ${FLYWAY_ENABLED:false}
-    locations: classpath:db/migration
+    locations: ${FLYWAY_LOCATIONS:filesystem:../database/migrations}
     baseline-on-migrate: true
     encoding: UTF-8
   servlet:

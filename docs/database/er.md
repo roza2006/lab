@@ -48,11 +48,11 @@
 | `sys_user` — `pharmacist_profile` | 1 : 0..1 | `pharmacist_profile.user_id` 唯一 | 药师归属唯一药房 |
 | `sys_user` — `sys_role` | N : M | `sys_user_role` 关联表 | 支持一人多角色（如医生兼管理员） |
 | `sys_role` — `sys_permission` | N : M | `sys_role_permission` 关联表 | 权限点粒度到 `rx:approve` |
-| `department` — `doctor_profile` | 1 : N | `doctor_profile.department_id` | 科室决定候诊队列与处方权范围 |
+| `department` — `doctor_profile` | 1 : N | `doctor_profile.department_id` | 科室决定医生的执业范围 |
 | `pharmacy` — `pharmacist_profile` | 1 : N | `pharmacist_profile.pharmacy_id` | 药师审核数据范围 = 所属药房 |
-| `patient_profile` — `consultation_session` | 1 : N | `consultation_session.patient_id` | 患者可多次问诊 |
-| `doctor_profile` — `consultation_session` | 1 : N | `consultation_session.doctor_id` | 接诊后写入，未接诊为空 |
-| `consultation_session` — `consultation_message` | 1 : N | `consultation_message.session_id` | 消息按 `sent_at` 排序 |
+| `sys_user` — `consultation_session` | 1 : N | `consultation_session.patient_id` | v1 直接用账号 ID 起会话 |
+| `sys_user` — `consultation_session` | 1 : N | `consultation_session.doctor_id` | 接诊后写入，未接诊为空 |
+| `consultation_session` — `consultation_message` | 1 : N | `consultation_message.session_id` | 按自增 `id` 分页，`read_flag` 记已读 |
 | `consultation_session` — `medical_record` | 1 : 0..1 | `medical_record.session_id` 唯一 | 结束问诊时生成，签名后锁定 |
 | `consultation_session` — `prescription` | 1 : N | `prescription.session_id` | 一次会话可开多张处方（如补充处方） |
 | `prescription` — `prescription_item` | 1 : N | `prescription_item.prescription_id` | 明细 ≥1 条才能提交审核 |
@@ -81,8 +81,8 @@ erDiagram
     DEPARTMENT ||--o{ DOCTOR_PROFILE : "1:N 所属科室"
     PHARMACY ||--o{ PHARMACIST_PROFILE : "1:N 所属药房"
 
-    PATIENT_PROFILE ||--o{ CONSULTATION_SESSION : "1:N 发起"
-    DOCTOR_PROFILE ||--o{ CONSULTATION_SESSION : "1:N 接诊"
+    SYS_USER ||--o{ CONSULTATION_SESSION : "1:N 发起（v1 账号 ID）"
+    SYS_USER ||--o{ CONSULTATION_SESSION : "1:N 接诊"
     CONSULTATION_SESSION ||--o{ CONSULTATION_MESSAGE : "1:N 消息"
     CONSULTATION_SESSION ||--o| MEDICAL_RECORD : "1:0..1 病历"
     CONSULTATION_SESSION ||--o{ PRESCRIPTION : "1:N 开方"
@@ -218,3 +218,16 @@ erDiagram
 | 多重性标注（1、0..*、1..0..1） | 第 2 节“基数”列与图中 `1:N` / `1:0..1` 标注 |
 
 若后续调整表结构，先改 `schema.sql`，再同步本文件与报告图 3-5，避免文档与库不一致。
+
+## 6. 第 3 轮的改动
+
+问诊模块写完之后，代码里的字段和 R1 草案有几处对不上，第 3 轮用
+`database/migrations/V003__auth_consult.sql` 调平：
+
+1. `consultation_session` 增加 `department`（科室名称，字符串）和 `disease_name`（疾病分类），
+   去掉原来的 `department_id` 外键和 `idx_queue` 索引。
+2. `consultation_session.patient_id`、`doctor_id` 改为关联 `sys_user(id)`，v1 直接用登录账号 ID。
+3. `consultation_message` 增加 `read_flag`，消息按自增 `id` 分页。
+4. 按 Mapper 里的 SQL 补索引：`idx_session_patient`、`idx_session_status`、`idx_session_doctor`、
+   `idx_msg_session`、`idx_msg_unread`、`idx_user_status_login`；
+   同时删掉被覆盖的 `idx_patient_created`、`idx_doctor_status`、`idx_session_sent`。

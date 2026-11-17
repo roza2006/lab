@@ -65,6 +65,17 @@ const consultations = [
     createdAt: iso(-1440),
     endedAt: iso(-1400),
   },
+  {
+    id: 2004,
+    patientId: 1002,
+    doctorId: 1001,
+    department: '心血管内科',
+    diseaseName: '原发性高血压',
+    chiefComplaint: '血压控制不佳，晨起 150/95 mmHg，复诊调整用药',
+    status: 'IN_PROGRESS',
+    createdAt: iso(-60),
+    endedAt: null,
+  },
 ]
 
 const messages = [
@@ -89,6 +100,110 @@ const messages = [
     sentAt: iso(-100),
   },
 ]
+
+const prescriptions = [
+  {
+    id: 4001,
+    rxNo: 'RX202611160001',
+    consultationId: 2001,
+    patientId: 1002,
+    doctorId: 1001,
+    diagnosis: '2 型糖尿病（血糖控制不佳）',
+    status: 'PENDING_REVIEW',
+    items: [
+      {
+        id: 5001,
+        drugCode: 'DRUG001',
+        drugName: '盐酸二甲双胍片',
+        specification: '0.5g*20 片',
+        dosage: '0.5g',
+        frequency: '每日 2 次',
+        duration: '30 天',
+        quantity: 2,
+        unitPrice: 15,
+        subtotal: 30,
+      },
+    ],
+    totalAmount: 30,
+    version: 1,
+    createdAt: iso(-90),
+    updatedAt: iso(-80),
+  },
+  {
+    id: 4002,
+    rxNo: 'RX202611160002',
+    consultationId: 2004,
+    patientId: 1002,
+    doctorId: 1001,
+    diagnosis: '原发性高血压 2 级',
+    status: 'DRAFT',
+    items: [
+      {
+        id: 5002,
+        drugCode: 'DRUG003',
+        drugName: '苯磺酸氨氯地平片',
+        specification: '5mg*28 片',
+        dosage: '5mg',
+        frequency: '每日 1 次',
+        duration: '28 天',
+        quantity: 1,
+        unitPrice: 22,
+        subtotal: 22,
+      },
+    ],
+    totalAmount: 22,
+    version: 1,
+    createdAt: iso(-50),
+    updatedAt: iso(-40),
+  },
+]
+
+const reviews = []
+
+function canAccessPrescription(user, prescription) {
+  if (user.role === 'PATIENT') return prescription.patientId === user.id
+  if (user.role === 'DOCTOR') return prescription.doctorId === user.id
+  return true
+}
+
+function normalizePrescriptionBody(body) {
+  const diagnosis = String(body.diagnosis || '').trim()
+  if (!diagnosis) {
+    return { error: '诊断不能为空' }
+  }
+  const rawItems = Array.isArray(body.items) ? body.items : []
+  if (!rawItems.length || rawItems.length > 5) {
+    return { error: '处方至少 1 条、最多 5 条药品明细' }
+  }
+  const items = []
+  for (const item of rawItems) {
+    const drugCode = String(item.drugCode || '').trim()
+    const drugName = String(item.drugName || '').trim()
+    const dosage = String(item.dosage || '').trim()
+    const frequency = String(item.frequency || '').trim()
+    const duration = String(item.duration || '').trim()
+    const quantity = Number(item.quantity)
+    const unitPrice = Number(item.unitPrice || 0)
+    if (!drugCode || !drugName || !dosage || !frequency || !duration || quantity < 1) {
+      return { error: '药品明细字段不完整，数量必须大于 0' }
+    }
+    const id = nextId()
+    items.push({
+      id,
+      drugCode,
+      drugName,
+      specification: String(item.specification || ''),
+      dosage,
+      frequency,
+      duration,
+      quantity,
+      unitPrice,
+      subtotal: Number((quantity * unitPrice).toFixed(2)),
+    })
+  }
+  const totalAmount = Number(items.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2))
+  return { diagnosis, items, totalAmount }
+}
 
 const tokens = new Map()
 
@@ -327,6 +442,203 @@ const server = createServer(async (req, res) => {
       consultation.endedAt = iso()
       sendJson(res, 200, consultation)
       return
+    }
+
+    // ---------- 处方 ----------
+    if (path === '/api/v1/prescriptions' && req.method === 'GET') {
+      const status = url.searchParams.get('status')
+      const mine = prescriptions
+        .filter((item) => canAccessPrescription(user, item))
+        .filter((item) => (status ? item.status === status : true))
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      sendJson(res, 200, pageOf(mine, url))
+      return
+    }
+
+    if (path === '/api/v1/prescriptions/review-queue' && req.method === 'GET') {
+      if (!['PHARMACIST', 'ADMIN'].includes(user.role)) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '仅药师可查看待审队列' })
+        return
+      }
+      const pending = prescriptions
+        .filter((item) => item.status === 'PENDING_REVIEW')
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      sendJson(res, 200, pageOf(pending, url))
+      return
+    }
+
+    const rxCreateMatch = path.match(/^\/api\/v1\/consultations\/(\d+)\/prescriptions$/)
+    if (req.method === 'POST' && rxCreateMatch) {
+      if (user.role !== 'DOCTOR') {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '仅医生可开具处方' })
+        return
+      }
+      const consultation = consultations.find((item) => item.id === Number(rxCreateMatch[1]))
+      if (!consultation) {
+        sendJson(res, 404, { code: 'CONSULTATION_NOT_FOUND', message: '会话不存在' })
+        return
+      }
+      if (consultation.doctorId !== user.id) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '只能为本人接诊的会话开方' })
+        return
+      }
+      if (consultation.status !== 'IN_PROGRESS') {
+        sendJson(res, 409, { code: 'ILLEGAL_STATE', message: '会话不在进行中状态，不能开方' })
+        return
+      }
+      const normalized = normalizePrescriptionBody(await readBody(req))
+      if (normalized.error) {
+        sendJson(res, 422, { code: 'VALIDATION_FAILED', message: normalized.error })
+        return
+      }
+      const id = nextId()
+      const prescription = {
+        id,
+        rxNo: `RX${new Date().toISOString().slice(0, 10).replaceAll('-', '')}${id}`,
+        consultationId: consultation.id,
+        patientId: consultation.patientId,
+        doctorId: user.id,
+        diagnosis: normalized.diagnosis,
+        status: 'DRAFT',
+        items: normalized.items,
+        totalAmount: normalized.totalAmount,
+        version: 1,
+        createdAt: iso(),
+        updatedAt: iso(),
+      }
+      prescriptions.push(prescription)
+      sendJson(res, 201, prescription)
+      return
+    }
+
+    const rxActionMatch = path.match(/^\/api\/v1\/prescriptions\/(\d+)\/(submit|cancel)$/)
+    if (req.method === 'POST' && rxActionMatch) {
+      const prescription = prescriptions.find((item) => item.id === Number(rxActionMatch[1]))
+      if (!prescription) {
+        sendJson(res, 404, { code: 'PRESCRIPTION_NOT_FOUND', message: '处方不存在' })
+        return
+      }
+      if (prescription.doctorId !== user.id) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '只能操作本人开具的处方' })
+        return
+      }
+      if (rxActionMatch[2] === 'submit') {
+        if (prescription.status !== 'DRAFT') {
+          sendJson(res, 409, { code: 'ILLEGAL_STATE', message: '仅草稿可提交审核' })
+          return
+        }
+        prescription.status = 'PENDING_REVIEW'
+      } else {
+        if (!['DRAFT', 'PENDING_REVIEW'].includes(prescription.status)) {
+          sendJson(res, 409, { code: 'ILLEGAL_STATE', message: '当前状态不可撤销' })
+          return
+        }
+        prescription.status = 'CANCELLED'
+      }
+      prescription.version += 1
+      prescription.updatedAt = iso()
+      sendJson(res, 200, prescription)
+      return
+    }
+
+    const rxReviewsMatch = path.match(/^\/api\/v1\/prescriptions\/(\d+)\/reviews$/)
+    if (req.method === 'GET' && rxReviewsMatch) {
+      const prescription = prescriptions.find((item) => item.id === Number(rxReviewsMatch[1]))
+      if (!prescription) {
+        sendJson(res, 404, { code: 'PRESCRIPTION_NOT_FOUND', message: '处方不存在' })
+        return
+      }
+      if (!canAccessPrescription(user, prescription)) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '无权查看该处方' })
+        return
+      }
+      sendJson(
+        res,
+        200,
+        reviews.filter((item) => item.prescriptionId === prescription.id),
+      )
+      return
+    }
+
+    const rxReviewActionMatch = path.match(/^\/api\/v1\/prescriptions\/(\d+)\/reviews\/(approve|reject)$/)
+    if (req.method === 'POST' && rxReviewActionMatch) {
+      if (!['PHARMACIST', 'ADMIN'].includes(user.role)) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '仅药师可审核处方' })
+        return
+      }
+      const prescription = prescriptions.find((item) => item.id === Number(rxReviewActionMatch[1]))
+      if (!prescription) {
+        sendJson(res, 404, { code: 'PRESCRIPTION_NOT_FOUND', message: '处方不存在' })
+        return
+      }
+      if (prescription.status !== 'PENDING_REVIEW') {
+        sendJson(res, 409, { code: 'ILLEGAL_STATE', message: '处方不在待审核状态' })
+        return
+      }
+      const body = await readBody(req)
+      const comment = String(body.comment || '').trim()
+      if (comment.length < 2) {
+        sendJson(res, 422, { code: 'VALIDATION_FAILED', message: '审核意见至少 2 个字' })
+        return
+      }
+      const action = rxReviewActionMatch[2] === 'approve' ? 'APPROVED' : 'REJECTED'
+      prescription.status = action
+      prescription.version += 1
+      prescription.updatedAt = iso()
+      const review = {
+        id: nextId(),
+        prescriptionId: prescription.id,
+        pharmacistId: user.id,
+        action,
+        comment,
+        signature: `SIG-MOCK-${prescription.id}-${Date.now()}`,
+        signedAt: iso(),
+      }
+      reviews.push(review)
+      sendJson(res, 200, review)
+      return
+    }
+
+    const rxDetailMatch = path.match(/^\/api\/v1\/prescriptions\/(\d+)$/)
+    if (rxDetailMatch) {
+      const prescription = prescriptions.find((item) => item.id === Number(rxDetailMatch[1]))
+      if (!prescription) {
+        sendJson(res, 404, { code: 'PRESCRIPTION_NOT_FOUND', message: '处方不存在' })
+        return
+      }
+      if (!canAccessPrescription(user, prescription)) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '无权访问该处方' })
+        return
+      }
+
+      if (req.method === 'GET') {
+        sendJson(res, 200, prescription)
+        return
+      }
+
+      if (req.method === 'PUT') {
+        if (prescription.doctorId !== user.id) {
+          sendJson(res, 403, { code: 'FORBIDDEN', message: '只能修改本人开具的处方' })
+          return
+        }
+        if (!['DRAFT', 'REJECTED'].includes(prescription.status)) {
+          sendJson(res, 409, { code: 'ILLEGAL_STATE', message: '仅草稿或驳回态可修改' })
+          return
+        }
+        const normalized = normalizePrescriptionBody(await readBody(req))
+        if (normalized.error) {
+          sendJson(res, 422, { code: 'VALIDATION_FAILED', message: normalized.error })
+          return
+        }
+        prescription.diagnosis = normalized.diagnosis
+        prescription.items = normalized.items
+        prescription.totalAmount = normalized.totalAmount
+        prescription.status = 'DRAFT'
+        prescription.version += 1
+        prescription.updatedAt = iso()
+        sendJson(res, 200, prescription)
+        return
+      }
     }
 
     sendJson(res, 404, { code: 'NOT_FOUND', message: `未实现的接口：${req.method} ${path}` })

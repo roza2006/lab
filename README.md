@@ -84,6 +84,8 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R3-郝佳鑫：认证与问诊接口测试（`backend/src/test`，22 例全部通过）
 - [x] R4-郝佳鑫：处方状态机用例（8 状态 / 10 条正向迁移 + 非法迁移，`docs/test/prescription-state-cases.md`、`backend/src/test/java/com/medical/platform/prescription/PrescriptionStateTest.java`）
 - [x] R4-刘飞燕：处方聚合、明细与 8 状态机（`backend/src/main/java/com/medical/platform/prescription`）
+- [x] R4-李梓语：药师审核，通过/驳回与审核记录（`prescription_review`）
+- [x] R4-魏宇佳：V004 处方/明细/审核记录迁移，索引与字段对齐（`database/migrations/`）
 - [ ] R4-B/E/F：药师审核、处方迁移、安全文档
 - [ ] R2：演示种子数据
 - [ ] R5–R6：流转与部署、测试与发布

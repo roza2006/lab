@@ -26,7 +26,7 @@ TEAL = "2F8F83"
 CORE_TABLES = {
     "patient_profile", "doctor_profile", "pharmacist_profile",
     "consultation_session", "consultation_message", "medical_record",
-    "prescription", "prescription_item", "drug", "pharmacy",
+    "prescription", "prescription_item", "prescription_review", "drug", "pharmacy",
     "circulation_order", "dispense_record",
 }
 

@@ -58,12 +58,13 @@ process/sprint-*.md + test/test-report.md
 | `database/schema.sql` | 当前完整结构：主外键、索引、CHECK 枚举、安全列 | v0.2（第 3 轮同步） |
 | `database/migrations/V002__core.sql` | 建 24 张表，Flyway 基线 | 第 2 轮 |
 | `database/migrations/V003__auth_consult.sql` | 问诊字段调整与认证/问诊索引 | 第 3 轮 |
+| `database/migrations/V004__prescription.sql` | 处方、明细与审核记录表 | 第 4 轮 |
 | `database/README.md` | 数据库目录说明、本地验证、与报告的差异 | 持续更新 |
-| `docs/database/table-list.md` | 24 张表清单与核心表字段要点 | R1 |
-| `docs/database/dictionary.xlsx` | 数据字典：表清单、237 个字段、索引、外键 | 由 DDL 生成 |
+| `docs/database/table-list.md` | 25 张表清单与核心表字段要点 | 持续更新 |
+| `docs/database/dictionary.xlsx` | 数据字典：表清单、248 个字段、索引、外键 | 由 DDL 生成 |
 | `docs/database/er.md` | 表关系说明与核心 ER 图 | R1 |
 | `docs/database/diagrams/er-core.png` | ER 图，2600×1480，可直接插入报告 | R1 |
-| `docs/database/diagrams/table-overview.png` | 24 张表按业务域分组的总览图 | R1 |
+| `docs/database/diagrams/table-overview.png` | 25 张表按业务域分组的总览图 | 第 4 轮更新 |
 | `docs/database/diagrams/deployment.png` | 系统部署图：四区分区、MySQL 主从、备份 | R1 |
 | `docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | R1 |
 | `deploy/README.md` | 部署结构、端口、环境变量、备份策略 | R1 |

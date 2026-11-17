@@ -11,8 +11,8 @@
 |---|---|---|
 | ER 图（位图） | [`diagrams/er-core.png`](./diagrams/er-core.png) | 直接插入报告，2600 × 1480 |
 | ER 图（矢量） | [`diagrams/er-core.svg`](./diagrams/er-core.svg) | 用 draw.io 或 Visio 修改 |
-| 表总览图 | [`diagrams/table-overview.png`](./diagrams/table-overview.png) | 24 张表按业务域分组 |
-| 数据字典 | [`dictionary.xlsx`](./dictionary.xlsx) | 24 张表、235 个字段、索引与外键 |
+| 表总览图 | [`diagrams/table-overview.png`](./diagrams/table-overview.png) | 25 张表按业务域分组 |
+| 数据字典 | [`dictionary.xlsx`](./dictionary.xlsx) | 25 张表、248 个字段、索引与外键 |
 | 生成脚本 | [`render_er_diagram.py`](../../scripts/render_er_diagram.py)、[`render_table_overview.py`](../../scripts/render_table_overview.py)、[`build_dictionary.py`](../../scripts/build_dictionary.py) | 改完 DDL 重跑即可同步 |
 
 图中画了 14 张核心表，标注 PK/FK/UK 和 15 条关系基数；9 张支撑表在底部单独列出，
@@ -56,7 +56,8 @@
 | `consultation_session` — `medical_record` | 1 : 0..1 | `medical_record.session_id` 唯一 | 结束问诊时生成，签名后锁定 |
 | `consultation_session` — `prescription` | 1 : N | `prescription.session_id` | 一次会话可开多张处方（如补充处方） |
 | `prescription` — `prescription_item` | 1 : N | `prescription_item.prescription_id` | 明细 ≥1 条才能提交审核 |
-| `drug` — `prescription_item` | 1 : N | `prescription_item.drug_id` | 停用药品不得新开 |
+| `prescription` — `prescription_review` | 1 : N | `prescription_review.prescription_id` | 每次审核追加一条，只增不改 |
+| `drug` — `prescription_item` | 1 : N | 明细里存 `drug_code` / `drug_name`，不再建外键 | 改药品目录不影响已开处方 |
 | `drug_category` — `drug` | 1 : N | `drug.category_id` | 目录两级分类 |
 | `prescription` — `circulation_order` | 1 : 0..1 | `circulation_order.rx_id` 唯一 | 一处方一流转单 |
 | `pharmacy` — `circulation_order` | 1 : N | `circulation_order.pharmacy_id` | 药房接方前校验资质有效期 |
@@ -64,7 +65,7 @@
 
 ## 3. 核心 ER 图
 
-下图覆盖 24 张表中的 16 张主干表；`sys_permission`、`consent_record`、`notification`、
+下图覆盖 25 张表中的 16 张主干表；`sys_permission`、`consent_record`、`notification`、
 `outbox_event`、`idempotency_record`、`audit_log` 等支撑表为单向逻辑关联，为避免连线过密未绘出，
 其字段与索引见 `schema.sql`。
 
@@ -88,8 +89,8 @@ erDiagram
     CONSULTATION_SESSION ||--o{ PRESCRIPTION : "1:N 开方"
 
     PRESCRIPTION ||--|{ PRESCRIPTION_ITEM : "1:N 明细"
+    PRESCRIPTION ||--o{ PRESCRIPTION_REVIEW : "1:N 审核记录"
     DRUG_CATEGORY ||--o{ DRUG : "1:N 分类"
-    DRUG ||--o{ PRESCRIPTION_ITEM : "1:N 引用"
 
     PRESCRIPTION ||--o| CIRCULATION_ORDER : "1:0..1 流转"
     PHARMACY ||--o{ CIRCULATION_ORDER : "1:N 接方"
@@ -231,3 +232,17 @@ erDiagram
 4. 按 Mapper 里的 SQL 补索引：`idx_session_patient`、`idx_session_status`、`idx_session_doctor`、
    `idx_msg_session`、`idx_msg_unread`、`idx_user_status_login`；
    同时删掉被覆盖的 `idx_patient_created`、`idx_doctor_status`、`idx_session_sent`。
+
+## 7. 第 4 轮的改动
+
+处方聚合和药师审核写完之后，第 4 轮用 `database/migrations/V004__prescription.sql` 对齐：
+
+1. `prescription` 增加 `diagnosis`（开方必填），`expires_at` 改名 `valid_until`（提交后 72 小时）。
+2. `patient_id`、`doctor_id`、`reviewer_id` 统一挂 `sys_user(id)`。
+3. `prescription_item` 改为直接存 `drug_code`、`drug_name`、`specification`、`duration`、
+   `unit_price`、`subtotal`，`dosage` 改成带单位的字符串，去掉 `drug_id` 外键与
+   `dosage_unit`、`days`、`usage_note` 三列；原来的 `ck_item_dosage` 数值校验一并去掉。
+4. 新增 `prescription_review` 表，每次审核追加一条记录；`prescription` 上的
+   `reviewer_id`、`reject_reason` 只保留最近一次结论。
+5. 补索引：`idx_rx_patient`、`idx_rx_doctor`、`idx_rx_status`、`idx_rx_session`、
+   `idx_review_rx`、`idx_review_pharmacist`，删掉 `idx_patient_created`、`idx_doctor_status`。

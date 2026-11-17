@@ -10,8 +10,9 @@ Flyway 脚本，第 3 轮按问诊代码调整会话/消息两张表并补查询
 | `schema.sql` | 当前完整结构（表注释、字段注释、索引、CHECK 约束） | v0.2，第 3 轮已同步 |
 | `migrations/V002__core.sql` | 建 24 张表：主键、唯一键、外键、CHECK、命名索引 | 第 2 轮 |
 | `migrations/V003__auth_consult.sql` | 问诊字段调整 + 认证/问诊索引 | 第 3 轮 |
+| `migrations/V004__prescription.sql` | 处方、明细、审核记录表 | 第 4 轮 |
 | `../docs/database/table-list.md` | 表清单：中文名、分类、主键、关键字段、关联 | R1 |
-| `../docs/database/dictionary.xlsx` | 数据字典：表清单、237 个字段、索引、外键 | 由 DDL 解析生成 |
+| `../docs/database/dictionary.xlsx` | 数据字典：表清单、248 个字段、索引、外键 | 由 DDL 解析生成 |
 | `../docs/database/er.md` | 表关系说明与 ER 图 | R1 |
 | `../docs/database/diagrams/` | ER 图、表总览图、部署图（png + svg） | R1 |
 | `../docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | R1 |
@@ -33,11 +34,11 @@ Flyway 脚本，第 3 轮按问诊代码调整会话/消息两张表并补查询
 | 医生 / 药师 / 药房 | 3 | `doctor_profile`、`pharmacist_profile`、`pharmacy` |
 | 问诊 | 3 | `consultation_session`、`consultation_message`、`medical_record` |
 | 药品目录 | 1 | `drug` |
-| 电子处方 | 2 | `prescription`、`prescription_item` |
+| 电子处方 | 3 | `prescription`、`prescription_item`、`prescription_review` |
 | 流转与核销 | 2 | `circulation_order`、`dispense_record` |
 | 审计与合规 | 2 | `audit_log`、`consent_record` |
 | 通知 / 事件 / 幂等 | 3 | `notification`、`outbox_event`、`idempotency_record` |
-| 合计 | 24 | 核心 12 张 + 支撑 12 张 |
+| 合计 | 25 | 核心 13 张 + 支撑 12 张 |
 
 ## 3. 本地验证
 

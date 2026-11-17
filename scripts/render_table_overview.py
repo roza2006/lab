@@ -35,7 +35,8 @@ Domains: List[Tuple[str, str, List[Tuple[str, str]]]] = [
     ]),
     ("处方与流转", GOLD, [
         ("电子处方", "prescription"), ("处方明细", "prescription_item"),
-        ("处方流转单", "circulation_order"), ("发药核销", "dispense_record"),
+        ("处方审核", "prescription_review"), ("处方流转单", "circulation_order"),
+        ("发药核销", "dispense_record"),
     ]),
     ("支撑与治理", GRAY, [
         ("审计日志", "audit_log"), ("知情同意", "consent_record"), ("通知", "notification"),
@@ -71,8 +72,8 @@ def build() -> Canvas:
     cv = Canvas(W, H)
     title_block(
         cv,
-        "数据库表总览（24 张）",
-        "按业务域分组：核心表 12 张、支撑表 12 张。字段、索引与约束见 database/schema.sql",
+        "数据库表总览（25 张）",
+        "按业务域分组：核心表 13 张、支撑表 12 张。字段、索引与约束见 database/schema.sql",
     )
 
     # 第一行
@@ -92,10 +93,10 @@ def build() -> Canvas:
     cv.rect(x, y, w, h, fill="#F4F8FC", outline=BORDER, width=2, radius=14)
     cv.text(x + 24, y + 44, "规模与约束统计", 21, NAVY, bold=True)
     stats = [
-        ("24", "张表", "核心 12 + 支撑 12"),
+        ("25", "张表", "核心 13 + 支撑 12"),
         ("29", "条外键", "核心表建物理外键"),
-        ("27", "个唯一键", "业务唯一性由库保证"),
-        ("30", "条 CHECK", "状态列枚举约束"),
+        ("26", "个唯一键", "业务唯一性由库保证"),
+        ("29", "条 CHECK", "状态列枚举约束"),
     ]
     for i, (num, unit, note) in enumerate(stats):
         r, c = divmod(i, 2)
@@ -111,7 +112,7 @@ def build() -> Canvas:
         "敏感字段 _enc 密文 + _hash 盲索引；审计/事件/幂等表不建外键。",
         16, MUTED,
     )
-    cv.text(2500, 900, "R1 · v0.1", 15, MUTED, anchor="rs")
+    cv.text(2500, 900, "v0.3 · 第 4 轮", 15, MUTED, anchor="rs")
 
     return cv
 
@@ -123,8 +124,8 @@ def main() -> int:
     cv.save_png(os.path.join(out_dir, "table-overview.png"))
     cv.save_svg(
         os.path.join(out_dir, "table-overview.svg"),
-        "数据库表总览（24 张）",
-        "按业务域分组的 24 张表清单，含规模与约束统计。",
+        "数据库表总览（25 张）",
+        "按业务域分组的 25 张表清单，含规模与约束统计。",
     )
     print("png :", os.path.getsize(os.path.join(out_dir, "table-overview.png")), "bytes")
     print("svg :", os.path.getsize(os.path.join(out_dir, "table-overview.svg")), "bytes")

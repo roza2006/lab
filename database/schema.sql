@@ -1,8 +1,8 @@
 -- =============================================================================
--- 智慧医疗在线问诊与处方流转平台 —— 数据库 Schema（v0.2）
+-- 智慧医疗在线问诊与处方流转平台 —— 数据库 Schema（v0.3）
 -- -----------------------------------------------------------------------------
 -- 文件      : database/schema.sql
--- 轮次      : 第 1 轮起草，第 3 轮按问诊代码调整
+-- 轮次      : 第 1 轮起草，第 3、4 轮按代码调整
 -- 负责人    : 魏宇佳
 -- 对应报告  : 表 3-6（表清单）、表 3-7 ~ 表 3-13（核心表字段）、图 3-5（ER 图）
 -- 目标库    : MySQL 8.0.16+（CHECK 约束从 8.0.16 起生效）
@@ -10,10 +10,10 @@
 -- -----------------------------------------------------------------------------
 -- 说明：
 --   本文件是当前完整结构，方便直接看。真正执行用 Flyway 脚本：
---     database/migrations/V002__core.sql  建 24 张表（第 2 轮）
---     database/migrations/V003__auth_consult.sql  问诊字段与索引调整（第 3 轮）
---   V003 把会话表的科室改成名称、加疾病分类，消息表加已读标记，
---   患者/医生改挂 sys_user；本文件已同步这些变化。
+--     V002__core.sql           建 24 张表（第 2 轮）
+--     V003__auth_consult.sql   问诊字段与索引调整（第 3 轮）
+--     V004__prescription.sql   处方、明细、审核记录（第 4 轮）
+--   本文件已同步这些变化，目前共 25 张表。
 -- -----------------------------------------------------------------------------
 -- 约定（详见 docs/database/conventions.md）：
 --   * 主键统一 BIGINT AUTO_INCREMENT，业务编号单独建唯一键；
@@ -374,31 +374,34 @@ CREATE TABLE drug (
 -- 7. 电子处方（核心域 · 3 张表）
 -- =============================================================================
 
--- 7.1 处方主表（报告表 3-7）
+-- 7.1 处方主表（报告表 3-7；第 4 轮按代码加了诊断、有效期改名）
 CREATE TABLE prescription (
     id            BIGINT       NOT NULL AUTO_INCREMENT COMMENT '处方 ID',
     rx_no         VARCHAR(32)  NOT NULL                COMMENT '处方编号：RX+日期+序列（UK）',
     session_id    BIGINT       NOT NULL                COMMENT '绑定问诊会话',
-    patient_id    BIGINT       NOT NULL                COMMENT '患者（冗余，便于列表查询）',
-    doctor_id     BIGINT       NOT NULL                COMMENT '开方医生',
+    patient_id    BIGINT       NOT NULL                COMMENT '患者账号 ID（v1）',
+    doctor_id     BIGINT       NOT NULL                COMMENT '开方医生账号 ID（v1）',
+    diagnosis     VARCHAR(500) NOT NULL                COMMENT '门诊诊断，开方时填写',
     status        VARCHAR(32)  NOT NULL                COMMENT '状态：DRAFT/PENDING_REVIEW/REJECTED/APPROVED/CIRCULATED/REDEEMED/CANCELLED/EXPIRED',
     version       INT          NOT NULL DEFAULT 1      COMMENT '版本号（乐观锁，If-Match 比对）',
     signed_hash   CHAR(64)     NULL                    COMMENT '审核通过后的签名摘要，APPROVED 后写入',
-    reviewer_id   BIGINT       NULL                    COMMENT '审核药师（补充字段，见第 12 节）',
-    reviewed_at   DATETIME(3)  NULL                    COMMENT '审核时间（补充字段）',
-    reject_reason VARCHAR(500) NULL                    COMMENT '驳回理由，长度 ≥ 10（补充字段）',
-    expires_at    DATETIME(3)  NULL                    COMMENT '处方失效时间，默认签发后 72 小时（补充字段）',
+    reviewer_id   BIGINT       NULL                    COMMENT '审核药师账号 ID',
+    reviewed_at   DATETIME(3)  NULL                    COMMENT '审核时间',
+    reject_reason VARCHAR(500) NULL                    COMMENT '驳回理由，长度 ≥ 10',
+    valid_until   DATETIME(3)  NULL                    COMMENT '处方有效期，提交后 72 小时',
     created_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
     updated_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
     PRIMARY KEY (id),
     UNIQUE KEY uk_rx_no (rx_no),
-    KEY idx_doctor_status (doctor_id, status, created_at),
-    KEY idx_patient_created (patient_id, created_at),
-    KEY idx_rx_expire (status, expires_at),
+    KEY idx_rx_patient (patient_id, id),
+    KEY idx_rx_doctor (doctor_id, id),
+    KEY idx_rx_status (status, id),
+    KEY idx_rx_session (session_id, status),
+    KEY idx_rx_expire (status, valid_until),
     CONSTRAINT fk_rx_session FOREIGN KEY (session_id) REFERENCES consultation_session (id),
-    CONSTRAINT fk_rx_patient FOREIGN KEY (patient_id) REFERENCES patient_profile (id),
-    CONSTRAINT fk_rx_doctor FOREIGN KEY (doctor_id) REFERENCES doctor_profile (id),
-    CONSTRAINT fk_rx_reviewer FOREIGN KEY (reviewer_id) REFERENCES pharmacist_profile (id),
+    CONSTRAINT fk_rx_patient FOREIGN KEY (patient_id) REFERENCES sys_user (id),
+    CONSTRAINT fk_rx_doctor FOREIGN KEY (doctor_id) REFERENCES sys_user (id),
+    CONSTRAINT fk_rx_reviewer FOREIGN KEY (reviewer_id) REFERENCES sys_user (id),
     CONSTRAINT ck_rx_status CHECK (status IN ('DRAFT', 'PENDING_REVIEW', 'REJECTED', 'APPROVED',
                                               'CIRCULATED', 'REDEEMED', 'CANCELLED', 'EXPIRED')),
     CONSTRAINT ck_rx_version CHECK (version >= 1),
@@ -406,48 +409,48 @@ CREATE TABLE prescription (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
   COMMENT = '处方主表：状态只能经聚合方法迁移，禁止 UPDATE 直接改 status';
 
--- 7.2 处方明细表（报告表 3-8）
+-- 7.2 处方明细表（报告表 3-8；第 4 轮改为直接存药品编码与名称）
 CREATE TABLE prescription_item (
     id              BIGINT        NOT NULL AUTO_INCREMENT COMMENT '明细 ID',
     prescription_id BIGINT        NOT NULL                COMMENT '所属处方',
-    drug_id         BIGINT        NOT NULL                COMMENT '目录药品',
-    dosage          DECIMAL(10,3) NOT NULL                COMMENT '单次剂量，如 0.5',
-    dosage_unit     VARCHAR(16)   NOT NULL                COMMENT '剂量单位：mg/g/ml/片',
+    drug_code       VARCHAR(64)   NOT NULL                COMMENT '药品编码',
+    drug_name       VARCHAR(128)  NOT NULL                COMMENT '药品名称',
+    specification   VARCHAR(128)  NULL                    COMMENT '规格，如 0.25g*24 片',
+    dosage          VARCHAR(64)   NOT NULL                COMMENT '单次剂量，含单位，如 0.5g',
     frequency       VARCHAR(32)   NOT NULL                COMMENT '频次，如 qd/bid/tid',
-    days            INT           NOT NULL                COMMENT '疗程天数：1—30',
-    quantity        INT           NOT NULL                COMMENT '数量，需与剂量联动校验',
-    usage_note      VARCHAR(255)  NULL                    COMMENT '用法备注，如“饭后服用”',
+    duration        VARCHAR(32)   NULL                    COMMENT '疗程，如 7 天',
+    quantity        INT           NOT NULL                COMMENT '数量',
+    unit_price      DECIMAL(10,2) NULL                    COMMENT '单价',
+    subtotal        DECIMAL(10,2) NULL                    COMMENT '小计',
     sort_no         INT           NOT NULL DEFAULT 0      COMMENT '明细序号，保持开方顺序',
     created_at      DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
     PRIMARY KEY (id),
     KEY idx_item_rx (prescription_id, sort_no),
-    UNIQUE KEY uk_item_rx_drug (prescription_id, drug_id),
     CONSTRAINT fk_item_rx FOREIGN KEY (prescription_id) REFERENCES prescription (id),
-    CONSTRAINT fk_item_drug FOREIGN KEY (drug_id) REFERENCES drug (id),
-    CONSTRAINT ck_item_days CHECK (days BETWEEN 1 AND 30),
-    CONSTRAINT ck_item_dosage CHECK (dosage > 0),
     CONSTRAINT ck_item_qty CHECK (quantity > 0)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
-  COMMENT = '处方明细表：剂量/疗程/数量三项由药品规则校验';
+  COMMENT = '处方明细表：药品信息随处方固化，改目录不影响已开处方';
 
--- 7.3 处方审核记录表（R4-B 新增）
--- 一张处方可能经历“驳回 → 医生修改 → 再提交 → 通过”，只改 prescription 头部的
--- reviewer_id / reject_reason 会丢失中间历史，因此审核结论单独追加成记录，只增不改。
+-- 7.3 处方审核记录表（第 4 轮新增）
+-- 一张处方可能经历“驳回 → 医生修改 → 再提交 → 通过”，只改头部的 reviewer_id /
+-- reject_reason 会丢中间历史，所以审核结论单独追加，只增不改。
 CREATE TABLE prescription_review (
     id              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '审核记录 ID',
     prescription_id BIGINT       NOT NULL                COMMENT '所属处方',
-    pharmacist_id   BIGINT       NOT NULL                COMMENT '审核药师用户 ID',
-    action          VARCHAR(16)  NOT NULL                COMMENT '审核动作：APPROVED/REJECTED',
-    review_comment  VARCHAR(500) NOT NULL                COMMENT '审核意见；驳回时 ≥10 字',
-    signature       VARCHAR(128) NULL                    COMMENT '通过时的电子签名摘要（SIG- 前缀 + SHA-256 Base64URL）',
+    pharmacist_id   BIGINT       NOT NULL                COMMENT '审核药师账号 ID',
+    action          VARCHAR(16)  NOT NULL                COMMENT '审核动作：APPROVED / REJECTED',
+    review_comment  VARCHAR(500) NOT NULL DEFAULT ''     COMMENT '审核意见，驳回时不少于 10 字',
+    signature       VARCHAR(128) NULL                    COMMENT '通过时的签名摘要，SIG- 开头',
     signed_at       DATETIME(3)  NOT NULL                COMMENT '审核时间',
-    created_at      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '记录入库时间',
+    created_at      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '入库时间',
     PRIMARY KEY (id),
     KEY idx_review_rx (prescription_id, id),
+    KEY idx_review_pharmacist (pharmacist_id, signed_at),
     CONSTRAINT fk_review_rx FOREIGN KEY (prescription_id) REFERENCES prescription (id),
+    CONSTRAINT fk_review_pharmacist FOREIGN KEY (pharmacist_id) REFERENCES sys_user (id),
     CONSTRAINT ck_review_action CHECK (action IN ('APPROVED', 'REJECTED'))
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
-  COMMENT = '处方审核记录表：审核结论追加存储，支撑 /prescriptions/{id}/reviews 追溯';
+  COMMENT = '处方审核记录表：审核结论追加存储，可按处方追溯历史';
 
 
 -- =============================================================================

@@ -92,12 +92,37 @@ POST /api/v1/consultations/{id}/end      结束会话
 
 字段以契约为准：`department`（字符串）、`diseaseName`、`chiefComplaint`、`status`（`WAITING/IN_PROGRESS/ENDED/ARCHIVED`）、消息 `contentType`（`TEXT/IMAGE`）。
 
-## 6. 页面骨架约定
+## 6. R4 处方与审核
 
-尚未进入实现轮次的页面（医生端、药师端、管理端等）仍通过 `src/components/PageStub.vue` 渲染“标题 + 用例编号 + 目标说明 + 计划区域”，评审时可直接对照用例。实现时替换对应 `views/<角色>/*.vue` 即可，路由与菜单无需改动。
+| 页面 | 路由 | 用例 | 说明 |
+|---|---|---|---|
+| 开方工作台 | `/doctor/consultations/:id/prescription` | UC-D04 / UC-D05 | 诊断 + 药品明细（≤5 条）+ 保存草稿 / 提交审核 / 撤销 |
+| 待审处方 | `/pharmacist/reviews` | UC-H01 | 药师待审队列，按提交时间倒序 |
+| 处方审核 | `/pharmacist/reviews/:id` | UC-H02 / UC-H03 / UC-H04 | 核对明细与金额，通过签名或驳回（≥10 字），查看审核记录 |
 
-## 7. 边界
+接口收敛在 `src/api/prescription.ts`：
 
-- 本目录只放前端代码；接口契约由 B 在 `docs/design/api-contract.md` 维护，R3 的问诊接口为前端先行约定；
+```text
+POST /api/v1/consultations/{id}/prescriptions   医生开方（DRAFT，201）
+PUT  /api/v1/prescriptions/{id}                 修改草稿/驳回态
+POST /api/v1/prescriptions/{id}/submit          提交审核
+POST /api/v1/prescriptions/{id}/cancel          撤销
+GET  /api/v1/prescriptions                      列表（分页，按角色过滤）
+GET  /api/v1/prescriptions/{id}                 详情
+GET  /api/v1/prescriptions/review-queue         药师待审队列
+GET  /api/v1/prescriptions/{id}/reviews         审核记录
+POST /api/v1/prescriptions/{id}/reviews/approve 审核通过
+POST /api/v1/prescriptions/{id}/reviews/reject  驳回
+```
+
+> 药品目录（`DRUG_CATALOG`）暂为前端演示数据，待 R4 目录服务/接口就绪后替换；审核接口由 R4-B 实现，mock 已先行支持。
+
+## 7. 页面骨架约定
+
+尚未进入实现轮次的页面（药师发药、管理端等）仍通过 `src/components/PageStub.vue` 渲染“标题 + 用例编号 + 目标说明 + 计划区域”，评审时可直接对照用例。实现时替换对应 `views/<角色>/*.vue` 即可，路由与菜单无需改动。
+
+## 8. 边界
+
+- 本目录只放前端代码；接口契约由 B 在 `docs/design/api-contract.md` 维护；
 - 不提交 `node_modules/`、`dist/`、`.env*`（已在根 `.gitignore` 中忽略）；
 - 演示数据均为虚构，不得录入真实患者信息。

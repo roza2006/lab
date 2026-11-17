@@ -12,6 +12,7 @@
 | `design/architecture.md` | DDD 分层、模块化单体、架构决策 | 刘飞燕 | 已提交（R2，v1.0 待评审） |
 | `design/api-contract.md` | 认证/问诊/处方 API 契约 | 李梓语 | 已提交（R2，v1.0 待评审） |
 | `design/consultation.md` | 问诊模块实现说明：状态机、数据范围、错误码、验证记录 | 李梓语 | 已提交（R3，v1.0） |
+| `design/prescription-review.md` | 处方审核模块实现说明：队列、电子签名、驳回、记录追溯 | 李梓语 | 已提交（R4，v1.0） |
 | `design/er.md` | ER 图与表关系 | 魏宇佳 | 待 R2 |
 | `design/adr/` | 架构决策记录 | 刘飞燕 | 已提交 ADR-001（R2） |
 | `test/test-plan.md` | 测试策略、环境、进入/退出准则 | 班国勇 | 已提交（R1，待评审） |

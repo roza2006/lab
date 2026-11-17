@@ -19,6 +19,7 @@
 | 2026-11-17 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 设计并编写处方状态机用例：`docs/test/prescription-state-cases.md`（8 状态 × 8 事件矩阵、SM-01~SM-22、ST-07~ST-11）、`PrescriptionStateTest`，含迁移表自检与文档一致性检查 | 迁移矩阵、正向/非法用例清单、与接口契约的差异分析、可执行测试骨架 | 待郝佳鑫复核：Q1 驳回后能否直接重提、Q2 错误码 `ILLEGAL_STATE` 与 `RX_STATE_INVALID` 的统一、Q3 过期无对外接口的覆盖方式 | JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B test`：37 例运行、0 失败、9 跳过；已生效的 6 例含“迁移表与 domain-model §8.1 逐条一致”“10 个处方端点未认证一律 401”；迁移用例待 R4-A/R4-B 合入后启用 |
 | 2026-11-17 | 代香晰 | DeepSeek Harness（deepseek 模型） | 实现 R4 医生开方与药师审核：处方 API 适配、开方工作台（诊断/明细/草稿/提交/撤销）、待审队列与审核详情 | 页面与 API 层、mock 处方接口与种子数据、README 初稿 | 待代香晰复核：药品目录接入方式、驳回意见长度、与 R4-B 审核接口联调 | `pnpm build` 通过；mock 经 Vite 代理实测开方→提交→审核通过、审核记录查询 |
 | 2026-11-17 | 李梓语 | DeepSeek Harness（deepseek 模型） | 实现 R4 审核上下文：待审队列、审核通过（SHA-256 电子签名摘要）、驳回（≥10 字）、审核记录追溯、`prescription_review` 建表与 5 个用例，并写 `docs/design/prescription-review.md` | 领域/应用/接口/基础设施四层代码初稿、签名摘要算法、H2 测试表结构、文档初稿 | 人工核对：审核是否只经聚合方法迁移、并发是否用 version 条件更新、签名是否覆盖版本与药师、驳回理由边界、队列路径与 `/prescriptions/{id}` 是否冲突 | `mvn -B -ntp test`：53 例运行、0 失败、9 跳过（状态迁移用例待郝佳鑫启用）；逐条比对 `openapi.yaml` 的 `Review` 字段与错误码 |
+| 2026-11-17 | 班国勇 | DeepSeek Harness（deepseek 模型） | 编写 `docs/security/threat-model.md`、`docs/security/checklist.md`：按真实代码（`SecurityConfig`、`JwtTokenProvider`、错误码、`schema.sql`）梳理 STRIDE 威胁与隐私检查项 | 17 条威胁清单、信任边界与数据流、5 条重点分析、整改计划 S-01~S-07、8 组 53 项检查表 | 人工核对每条威胁对应的接口/表/错误码；把「设计有、代码无」的项标为部分落实或未落实（幂等、审计、限流、CSP）；状态符号统一改为文字表述 | 与 `application.yml`、`JwtAuthenticationFilter`、`schema.sql` 逐条对照；检查表计数 26/8/12/7=53 与汇总表一致 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

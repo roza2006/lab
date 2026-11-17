@@ -82,8 +82,9 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R3-魏宇佳：Flyway 迁移 V002/V003，会话表对齐代码并补查询索引（`database/migrations/`）
 - [x] R3-郝佳鑫：认证与问诊接口测试（`backend/src/test`，22 例全部通过）
 - [x] R4-郝佳鑫：处方状态机用例（8 状态 / 10 条正向迁移 + 非法迁移，`docs/test/prescription-state-cases.md`、`backend/src/test/java/com/medical/platform/prescription/PrescriptionStateTest.java`）
+- [x] R4-刘飞燕：处方聚合、明细与 8 状态机（`backend/src/main/java/com/medical/platform/prescription`）
+- [ ] R4-B/C/E/F：药师审核、处方页面、处方迁移、安全文档
 - [ ] R2：演示种子数据
-- [ ] R4：处方聚合与药师审核的业务实现
 - [ ] R5–R6：流转与部署、测试与发布
 
 ## 8. 本地开发

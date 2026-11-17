@@ -16,6 +16,7 @@
 | 2026-11-10 | 代香晰 | DeepSeek Harness（deepseek 模型） | 实现患者端流程：登录对接、发起问诊、问诊列表与会话（消息轮询、发送去重、结束问诊），并补充零依赖 mock 服务 | 页面与 API 适配层、mock 服务、README 初稿 | 待代香晰复核：问诊接口字段、轮询间隔、mock 与真实后端的差异 | `pnpm build` 通过；mock + dev 实际走通登录→问诊→消息→结束，并经 Vite 代理核对接口返回 |
 | 2026-11-10 | 代香晰 | DeepSeek Harness（deepseek 模型） | 按 `docs/design/api-contract.md` v1.0 对齐患者端问诊接口：`department`/`diseaseName`/`contentType`、分页 `PageResponse`、`Idempotency-Key` | 接口类型、页面字段、mock 数据与 README 的修正稿 | 待代香晰复核：与李梓语后端实现的字段差异、医生名称的展示方式 | `pnpm build` 通过；mock 经 Vite 代理实测登录、列表、创建、消息、结束 |
 | 2026-11-10 | 李梓语 | DeepSeek Harness（deepseek 模型） | 实现 R3 问诊上下文：聚合与会话状态机、消息收发、接诊/结束的乐观锁条件更新、越权与数据范围校验、7 个 REST 端点，并补 `docs/design/consultation.md` | 领域/应用/接口/基础设施四层代码初稿、错误码映射、H2 测试表结构、启用 `ConsultationTest` 的改动 | 人工核对：状态迁移是否只经聚合方法、`patientId` 是否只取 JWT、并发接诊是否条件更新、消息表 `read_flag` 避开保留字、分页参数边界 | `mvn -B -ntp test`：22 例全绿（问诊 10 例含越权/结束后写保护）；逐条比对 `openapi.yaml` 字段与 `domain-model.md` §11 错误码 |
+| 2026-11-17 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 设计并编写处方状态机用例：`docs/test/prescription-state-cases.md`（8 状态 × 8 事件矩阵、SM-01~SM-22、ST-07~ST-11）、`PrescriptionStateTest`，含迁移表自检与文档一致性检查 | 迁移矩阵、正向/非法用例清单、与接口契约的差异分析、可执行测试骨架 | 待郝佳鑫复核：Q1 驳回后能否直接重提、Q2 错误码 `ILLEGAL_STATE` 与 `RX_STATE_INVALID` 的统一、Q3 过期无对外接口的覆盖方式 | JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B test`：37 例运行、0 失败、9 跳过；已生效的 6 例含“迁移表与 domain-model §8.1 逐条一致”“10 个处方端点未认证一律 401”；迁移用例待 R4-A/R4-B 合入后启用 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

@@ -371,7 +371,7 @@ CREATE TABLE drug (
 
 
 -- =============================================================================
--- 7. 电子处方（核心域 · 2 张表）
+-- 7. 电子处方（核心域 · 3 张表）
 -- =============================================================================
 
 -- 7.1 处方主表（报告表 3-7）
@@ -429,6 +429,25 @@ CREATE TABLE prescription_item (
     CONSTRAINT ck_item_qty CHECK (quantity > 0)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
   COMMENT = '处方明细表：剂量/疗程/数量三项由药品规则校验';
+
+-- 7.3 处方审核记录表（R4-B 新增）
+-- 一张处方可能经历“驳回 → 医生修改 → 再提交 → 通过”，只改 prescription 头部的
+-- reviewer_id / reject_reason 会丢失中间历史，因此审核结论单独追加成记录，只增不改。
+CREATE TABLE prescription_review (
+    id              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '审核记录 ID',
+    prescription_id BIGINT       NOT NULL                COMMENT '所属处方',
+    pharmacist_id   BIGINT       NOT NULL                COMMENT '审核药师用户 ID',
+    action          VARCHAR(16)  NOT NULL                COMMENT '审核动作：APPROVED/REJECTED',
+    review_comment  VARCHAR(500) NOT NULL                COMMENT '审核意见；驳回时 ≥10 字',
+    signature       VARCHAR(128) NULL                    COMMENT '通过时的电子签名摘要（SIG- 前缀 + SHA-256 Base64URL）',
+    signed_at       DATETIME(3)  NOT NULL                COMMENT '审核时间',
+    created_at      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '记录入库时间',
+    PRIMARY KEY (id),
+    KEY idx_review_rx (prescription_id, id),
+    CONSTRAINT fk_review_rx FOREIGN KEY (prescription_id) REFERENCES prescription (id),
+    CONSTRAINT ck_review_action CHECK (action IN ('APPROVED', 'REJECTED'))
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci
+  COMMENT = '处方审核记录表：审核结论追加存储，支撑 /prescriptions/{id}/reviews 追溯';
 
 
 -- =============================================================================
@@ -589,7 +608,7 @@ CREATE TABLE idempotency_record (
 
 
 -- =============================================================================
--- 11. 表清单核对（24 张）
+-- 11. 表清单核对（25 张）
 -- -----------------------------------------------------------------------------
 -- 身份权限  : sys_user, sys_role, sys_permission, sys_user_role, sys_role_permission   (5)
 -- 主数据    : department, drug_category                                                (2)
@@ -597,11 +616,11 @@ CREATE TABLE idempotency_record (
 -- 医生药师  : doctor_profile, pharmacist_profile, pharmacy                             (3)
 -- 问诊      : consultation_session, consultation_message, medical_record              (3)
 -- 药品      : drug                                                                     (1)
--- 处方      : prescription, prescription_item                                          (2)
+-- 处方      : prescription, prescription_item, prescription_review                    (3)
 -- 流转      : circulation_order, dispense_record                                       (2)
 -- 审计合规  : audit_log, consent_record                                                (2)
 -- 通知事件  : notification, outbox_event, idempotency_record                          (3)
--- 合计      : 5+2+1+3+3+1+2+2+2+3 = 24
+-- 合计      : 5+2+1+3+3+1+3+2+2+3 = 25
 -- =============================================================================
 
 -- =============================================================================
@@ -619,5 +638,8 @@ CREATE TABLE idempotency_record (
 --                         理由：报告要求“HMAC 盲索引检索”，仅 phone_enc 无法等值查询。
 -- consultation_session  : session_no（业务编号）
 -- prescription_item     : usage_note, sort_no
+-- prescription_review   : 新增表（R4-B）
+--                         理由：审核可能反复（驳回 → 修改 → 再提交 → 通过），头部字段只保留最近结论，
+--                         中间历史需单独追加存储，满足“审核记录可追溯”与合规审计。
 -- consultation_message  : 无字段变更。
 -- =============================================================================

@@ -4,9 +4,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.medical.platform.prescription.domain.Prescription;
 import com.medical.platform.prescription.domain.PrescriptionItem;
 import com.medical.platform.prescription.domain.PrescriptionRepository;
+import com.medical.platform.prescription.domain.PrescriptionReview;
 import com.medical.platform.prescription.domain.PrescriptionStatus;
+import com.medical.platform.prescription.domain.ReviewAction;
 import com.medical.platform.prescription.infrastructure.mapper.PrescriptionItemMapper;
 import com.medical.platform.prescription.infrastructure.mapper.PrescriptionMapper;
+import com.medical.platform.prescription.infrastructure.mapper.PrescriptionReviewMapper;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -20,11 +23,14 @@ public class MyBatisPrescriptionRepository implements PrescriptionRepository {
 
     private final PrescriptionMapper prescriptionMapper;
     private final PrescriptionItemMapper itemMapper;
+    private final PrescriptionReviewMapper reviewMapper;
 
     public MyBatisPrescriptionRepository(PrescriptionMapper prescriptionMapper,
-                                         PrescriptionItemMapper itemMapper) {
+                                         PrescriptionItemMapper itemMapper,
+                                         PrescriptionReviewMapper reviewMapper) {
         this.prescriptionMapper = prescriptionMapper;
         this.itemMapper = itemMapper;
+        this.reviewMapper = reviewMapper;
     }
 
     @Override
@@ -116,6 +122,41 @@ public class MyBatisPrescriptionRepository implements PrescriptionRepository {
     @Override
     public long countAll(PrescriptionStatus status) {
         return prescriptionMapper.countAll(statusName(status));
+    }
+
+    @Override
+    public PrescriptionReview insertReview(PrescriptionReview review) {
+        PrescriptionReviewPO po = new PrescriptionReviewPO();
+        po.setPrescriptionId(review.prescriptionId());
+        po.setPharmacistId(review.pharmacistId());
+        po.setAction(review.action().name());
+        po.setReviewComment(review.comment());
+        po.setSignature(review.signature());
+        po.setSignedAt(review.signedAt());
+        po.setCreatedAt(LocalDateTime.now());
+        reviewMapper.insert(po);
+        return review.withId(po.getId());
+    }
+
+    @Override
+    public List<PrescriptionReview> findReviews(Long prescriptionId) {
+        return reviewMapper.selectList(Wrappers.<PrescriptionReviewPO>lambdaQuery()
+                        .eq(PrescriptionReviewPO::getPrescriptionId, prescriptionId)
+                        .orderByAsc(PrescriptionReviewPO::getId))
+                .stream()
+                .map(this::toReview)
+                .toList();
+    }
+
+    private PrescriptionReview toReview(PrescriptionReviewPO po) {
+        return new PrescriptionReview(
+                po.getId(),
+                po.getPrescriptionId(),
+                po.getPharmacistId(),
+                ReviewAction.valueOf(po.getAction()),
+                po.getReviewComment(),
+                po.getSignature(),
+                po.getSignedAt());
     }
 
     private List<Prescription> mapRows(List<PrescriptionPO> rows) {

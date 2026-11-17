@@ -34,4 +34,14 @@ public interface PrescriptionRepository {
     List<Prescription> findAll(PrescriptionStatus status, int offset, int size);
 
     long countAll(PrescriptionStatus status);
+
+    /**
+     * 追加一条审核记录（只增不改），返回带主键的记录。
+     */
+    PrescriptionReview insertReview(PrescriptionReview review);
+
+    /**
+     * 按时间顺序读取某张处方的全部审核记录，供医生与药师追溯“驳回 → 修改 → 通过”的完整链路。
+     */
+    List<PrescriptionReview> findReviews(Long prescriptionId);
 }

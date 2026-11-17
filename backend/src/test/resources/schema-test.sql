@@ -1,6 +1,7 @@
 -- 测试库结构：只建接口测试需要的表，字段与 database/schema.sql 中的 sys_user 保持一致。
 -- 说明：H2 以 MySQL 兼容模式运行，类型与自增语义与生产库一致；生产 DDL 仍以 database/schema.sql 为准。
 
+DROP TABLE IF EXISTS prescription_review;
 DROP TABLE IF EXISTS prescription_item;
 DROP TABLE IF EXISTS prescription;
 DROP TABLE IF EXISTS consultation_message;
@@ -90,3 +91,17 @@ CREATE TABLE prescription_item (
 );
 
 CREATE INDEX idx_rx_item ON prescription_item (prescription_id, sort_no);
+
+-- 处方审核记录（R4-B）：只追加不改写，列名与 database/schema.sql 的 prescription_review 一致。
+CREATE TABLE prescription_review (
+    id              BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    prescription_id BIGINT        NOT NULL,
+    pharmacist_id   BIGINT        NOT NULL,
+    action          VARCHAR(16)   NOT NULL,
+    review_comment  VARCHAR(500)  NOT NULL,
+    signature       VARCHAR(128)  NULL,
+    signed_at       TIMESTAMP(3)  NOT NULL,
+    created_at      TIMESTAMP(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+);
+
+CREATE INDEX idx_review_rx ON prescription_review (prescription_id, id);

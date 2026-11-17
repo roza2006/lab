@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@RestControllerAdvice(assignableTypes = PrescriptionController.class)
+@RestControllerAdvice(assignableTypes = {PrescriptionController.class, PrescriptionReviewController.class})
 public class PrescriptionExceptionHandler {
 
     @ExceptionHandler(PrescriptionException.class)

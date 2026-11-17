@@ -1,6 +1,8 @@
 -- 测试库结构：只建接口测试需要的表，字段与 database/schema.sql 中的 sys_user 保持一致。
 -- 说明：H2 以 MySQL 兼容模式运行，类型与自增语义与生产库一致；生产 DDL 仍以 database/schema.sql 为准。
 
+DROP TABLE IF EXISTS prescription_item;
+DROP TABLE IF EXISTS prescription;
 DROP TABLE IF EXISTS consultation_message;
 DROP TABLE IF EXISTS consultation_session;
 DROP TABLE IF EXISTS sys_user;
@@ -47,3 +49,44 @@ CREATE TABLE consultation_message (
 );
 
 CREATE INDEX idx_msg_session ON consultation_message (session_id, id);
+
+-- 处方上下文（R4-A）：字段按 openapi.yaml 的 Prescription 结构落库。
+CREATE TABLE prescription (
+    id            BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    rx_no         VARCHAR(32)   NOT NULL,
+    session_id    BIGINT        NOT NULL,
+    patient_id    BIGINT        NOT NULL,
+    doctor_id     BIGINT        NOT NULL,
+    diagnosis     VARCHAR(500)  NOT NULL,
+    status        VARCHAR(32)   NOT NULL,
+    signed_hash   VARCHAR(64)   NULL,
+    reviewer_id   BIGINT        NULL,
+    reviewed_at   TIMESTAMP(3)  NULL,
+    reject_reason VARCHAR(500)  NULL,
+    valid_until   TIMESTAMP(3)  NULL,
+    version       INT           NOT NULL DEFAULT 1,
+    created_at    TIMESTAMP(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at    TIMESTAMP(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+);
+
+CREATE UNIQUE INDEX uk_rx_no ON prescription (rx_no);
+CREATE INDEX idx_rx_patient ON prescription (patient_id, status);
+CREATE INDEX idx_rx_doctor ON prescription (doctor_id, status);
+
+CREATE TABLE prescription_item (
+    id              BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    prescription_id BIGINT        NOT NULL,
+    drug_code       VARCHAR(64)   NOT NULL,
+    drug_name       VARCHAR(128)  NOT NULL,
+    specification   VARCHAR(128)  NULL,
+    dosage          VARCHAR(32)   NOT NULL,
+    frequency       VARCHAR(32)   NOT NULL,
+    duration        VARCHAR(32)   NOT NULL,
+    quantity        INT           NOT NULL,
+    unit_price      DECIMAL(10,2) NOT NULL DEFAULT 0,
+    subtotal        DECIMAL(12,2) NOT NULL DEFAULT 0,
+    sort_no         INT           NOT NULL DEFAULT 0,
+    created_at      TIMESTAMP(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+);
+
+CREATE INDEX idx_rx_item ON prescription_item (prescription_id, sort_no);

@@ -53,7 +53,7 @@ public class CirculationAppService {
      * 创建流转单。一张处方只有一张流转单，重复调用返回已存在的那张。
      */
     @Transactional
-    public CirculationView create(CurrentUser user, CreateCirculationCommand command) {
+    public CirculationCreateResult create(CurrentUser user, CreateCirculationCommand command) {
         Long pharmacyId = resolvePharmacy(user, command.pharmacyId());
         Prescription prescription = loadPrescription(command.rxId());
 
@@ -61,7 +61,7 @@ public class CirculationAppService {
                 .findByPrescriptionId(prescription.getId())
                 .orElse(null);
         if (existing != null) {
-            return viewOf(existing);
+            return new CirculationCreateResult(viewOf(existing), false);
         }
         if (prescription.getStatus() != PrescriptionStatus.APPROVED) {
             throw new CirculationException(CirculationError.CIRC_STATE_INVALID,
@@ -81,7 +81,8 @@ public class CirculationAppService {
                 circulationNoGenerator.next(),
                 idempotencyKey(command.idempotencyKey(), prescription.getId()),
                 now);
-        return viewOf(circulationRepository.insert(order));
+        return new CirculationCreateResult(
+                viewOf(circulationRepository.insert(order)), true);
     }
 
     public CirculationPageView list(CurrentUser user, String statusParam, int page, int size) {

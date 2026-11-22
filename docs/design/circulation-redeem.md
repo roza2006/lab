@@ -1,4 +1,4 @@
-# 处方流转核销模块设计与实现说明（Redeem · R5-B）
+# 处方流转核销模块设计与实现说明（Redeem · R5-李梓语）
 
 | 项目 | 内容 |
 |---|---|
@@ -7,8 +7,8 @@
 | 负责人 | 李梓语（问诊域、处方域） |
 | 对应轮次 | 第 5 轮：流转、核销与部署 |
 | 对应提交 | `feat(redeem): add idempotent redeem API [R5][李梓语]` |
-| 上游依赖 | 刘飞燕（R5-A）：流转单创建与药房接方；魏宇佳（R5-E）：`circulation_order` / `dispense_record` / `idempotency_record` 建表与部署 |
-| 下游依赖 | 代香晰（R5-C）：药师核销页与患者处方追踪；郝佳鑫（R5-D）：重放、并发、越权用例；班国勇（R5-F）：发布说明 |
+| 上游依赖 | 刘飞燕（R5 流转单与接方）：流转单创建与药房接方；魏宇佳（R5 建表与部署）：`circulation_order` / `dispense_record` / `idempotency_record` 建表与部署 |
+| 下游依赖 | 代香晰（R5 前端）：药师核销页与患者处方追踪；郝佳鑫（R5 测试）：重放、并发、越权用例；班国勇（R5 发布）：发布说明 |
 | 依据文档 | `docs/test/circulation-idempotency-cases.md`（CI-01~CI-11、ST-12~ST-16）、`docs/design/api-contract.md` §3.7 与 §5.5、`database/schema.sql` §8 与 §10.3 |
 
 ## 1 目标与范围
@@ -21,7 +21,7 @@
 - 并发：同一流转单只允许一次成功核销，数据库唯一键兜底；
 - 追踪：`GET /prescriptions/{id}/trace` 返回处方全链路时间线，供患者端与药师端展示。
 
-不在本轮范围：流转单创建与药房接方（刘飞燕，R5-A）、药房拒接、库存扣减与真实药品主数据、核销短信通知（后续迭代）。核销实现只读取 R5-A 的流转单，不重复实现接方逻辑。
+不在本轮范围：流转单创建与药房接方（刘飞燕，R5 流转单与接方）、药房拒接、库存扣减与真实药品主数据、核销短信通知（后续迭代）。核销实现只读取刘飞燕 R5 的流转单，不重复实现接方逻辑。
 
 ## 2 代码结构
 
@@ -89,10 +89,10 @@ Content-Type: application/json
 
 ```mermaid
 stateDiagram-v2
-    [*] --> CREATED: 刘飞燕 R5-A 流转处方
+    [*] --> CREATED: 刘飞燕 R5 流转处方
     CREATED --> ACCEPTED: 药房接方
     CREATED --> REJECTED: 药房拒接
-    ACCEPTED --> REDEEMED: 李梓语 R5-B 核销（本文件）
+    ACCEPTED --> REDEEMED: 李梓语 R5 核销（本文件）
     REDEEMED --> [*]
     REJECTED --> [*]
 ```
@@ -160,7 +160,7 @@ stateDiagram-v2
 | `pharmacist_profile` | 药师所属药房，做数据范围校验 | `uk_pharmacist_user`、`pharmacy_id` |
 | `prescription` | 核销回写 `status=REDEEMED` | 复用 `PrescriptionRepository.updateHeader` 的版本条件更新 |
 
-**交接魏宇佳（R5-E）**：`database/migrations/` 目前只有 `V002`、`V003`、`V004`，请在 `V005__circulation.sql` 固化上述三张表与索引，并在 `database/seed.sql` 中给演示药师补 `pharmacist_profile`（含 `pharmacy_id`），否则演示账号核销会被 403 拦截。
+**交接魏宇佳（R5 建表与部署）**：`database/migrations/` 目前只有 `V002`、`V003`、`V004`，请在 `V005__circulation.sql` 固化上述三张表与索引，并在 `database/seed.sql` 中给演示药师补 `pharmacist_profile`（含 `pharmacy_id`），否则演示账号核销会被 403 拦截。
 
 ## 8 错误码
 
@@ -210,11 +210,11 @@ BUILD SUCCESS
 
 | 对象 | 事项 |
 |---|---|
-| 刘飞燕（R5-A） | 流转单创建需写 `idempotency_key`（`uk_idem`）与 `circulated_at`；接方置 `ACCEPTED`、`accepted_at`、`version+1`；本模块只读这些字段 |
-| 代香晰（R5-C） | 核销请求体为 `{batchNo, evidence}`，响应为 `CirculationOrder`（含 `dispenseRecord`）；`trace` 返回 `{prescriptionId,status,events[]}`，`events[].status` 复用处方/流转状态名 |
-| 郝佳鑫（R5-D） | `CirculationIdempotencyTest` 已启用并补齐 `givenOrder` 前置数据；`schema-test.sql` 已加三张表与药师档案 |
-| 魏宇佳（R5-E） | 见 §7 的 `V005__circulation.sql` 与 `seed.sql` 药师档案要求 |
-| 班国勇（R5-F） | 发布说明需写明“核销强制 `Idempotency-Key`”与新增错误码，避免前端按旧语义处理 409 |
+| 刘飞燕（R5 流转单） | 流转单创建需写 `idempotency_key`（`uk_idem`）与 `circulated_at`；接方置 `ACCEPTED`、`accepted_at`、`version+1`；本模块只读这些字段 |
+| 代香晰（R5 前端） | 核销请求体为 `{batchNo, evidence}`，响应为 `CirculationOrder`（含 `dispenseRecord`）；`trace` 返回 `{prescriptionId,status,events[]}`，`events[].status` 复用处方/流转状态名 |
+| 郝佳鑫（R5 测试） | `CirculationIdempotencyTest` 已启用并补齐 `givenOrder` 前置数据；`schema-test.sql` 已加三张表与药师档案 |
+| 魏宇佳（R5 建表） | 见 §7 的 `V005__circulation.sql` 与 `seed.sql` 药师档案要求 |
+| 班国勇（R5 发布） | 发布说明需写明“核销强制 `Idempotency-Key`”与新增错误码，避免前端按旧语义处理 409 |
 
 ## 11 AI 使用与人工修改
 

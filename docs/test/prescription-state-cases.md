@@ -9,7 +9,7 @@
 | 用例前缀 | `SM`（状态机）、`ST`（安全/越权） |
 | 覆盖范围 | 处方 8 个状态的全部合法迁移与非法迁移、状态变更端点的认证边界 |
 | 前置依赖 | R4-A 处方聚合与状态迁移、R4-B 药师审核；R5 流转与核销（`circulate` / `redeem` / `expire`） |
-| 当前状态 | 迁移用例已写好并标 `@Disabled`；实现合入后逐个启用 |
+| 当前状态 | R4-A / R4-B 已合入，迁移用例全部启用（17 例全绿） |
 
 ---
 
@@ -118,8 +118,8 @@
 
 | 编号 | 差异 | 影响 | 建议 |
 |---|---|---|---|
-| Q1 | 契约写 `submit` 允许 `DRAFT/REJECTED → PENDING_REVIEW`；domain-model §8.1 要求先 `revise` 回 `DRAFT` | 驳回后医生能否“直接重提” | 采用契约：`PUT` 在 `REJECTED` 上等于 `revise`，随后 `submit`；矩阵中 `REJECTED:submit` 记为不可直接提交，由 `PUT` 承担 |
-| Q2 | 契约错误码是 `ILLEGAL_STATE`，domain-model §11 写 `RX_STATE_INVALID` | 前后端错误码不一致 | 以契约为准（`ILLEGAL_STATE`），§11 表格在 R4 评审时统一 |
+| Q1 | 契约写 `submit` 允许 `DRAFT/REJECTED → PENDING_REVIEW`；domain-model §8.1 要求先 `revise` 回 `DRAFT` | 驳回后医生能否“直接重提” | **已按实现确定**：`PrescriptionStatus.canApply` 中 `SUBMIT` 只允许 `DRAFT`，`REJECTED` 需先 `PUT`（等同 revise）再 submit；契约措辞待同步 |
+| Q2 | 契约错误码是 `ILLEGAL_STATE`，domain-model §11 写 `RX_STATE_INVALID` | 前后端错误码不一致 | **已按实现确定**：`PrescriptionError` 使用 `RX_STATE_INVALID`，契约 §4 的 `ILLEGAL_STATE` 需替换 |
 | Q3 | `expire` 没有对外接口，靠 `validUntil` 定时扫描 | 无法用 HTTP 用例覆盖 | R5 用领域单元测试或定时任务测试覆盖 |
 
 ## 8 覆盖统计
@@ -130,4 +130,4 @@
 | 合法迁移 | 10 | SM-01 ~ SM-10 |
 | 非法迁移 | 12（矩阵 54） | SM-11 ~ SM-22 覆盖关键分支，矩阵给出全量 |
 | 安全边界 | 3（ST-07 ~ ST-09） | ST-07/ST-08 已生效 |
-| 当前可执行 | 6 | 状态机自检 4 + 认证边界 2 |
+| 当前可执行 | 17 | 状态机自检 4 + 认证边界 2 + 正向迁移 4 + 非法迁移 7（含 3 个终态） |

@@ -87,9 +87,11 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R4-刘飞燕：处方聚合、明细与 8 状态机（`backend/src/main/java/com/medical/platform/prescription`）
 - [x] R4-李梓语：药师审核，通过/驳回与审核记录（`prescription_review`）
 - [x] R4-魏宇佳：V004 处方/明细/审核记录迁移，索引与字段对齐（`database/migrations/`）
+- [x] R4-郝佳鑫：处方状态机用例启用（17 例全绿；补齐 `RX_STATE_INVALID`、`PUT` 改草稿等断言）
+- [x] R5-郝佳鑫：流转核销幂等用例（重放/并发/越权，`docs/test/circulation-idempotency-cases.md`、`backend/src/test/java/com/medical/platform/circulation/CirculationIdempotencyTest.java`）
 - [ ] R4-B/E/F：药师审核、处方迁移、安全文档
 - [ ] R2：演示种子数据
-- [ ] R5-B/E：流转与核销后端、部署，R6：测试与发布
+- [ ] R5-A/B/E：流转核销后端与部署，R6：测试与发布
 
 ## 8. 本地开发
 

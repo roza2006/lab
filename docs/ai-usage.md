@@ -22,6 +22,7 @@
 | 2026-11-17 | 李梓语 | DeepSeek Harness（deepseek 模型） | 实现 R4 审核上下文：待审队列、审核通过（SHA-256 电子签名摘要）、驳回（≥10 字）、审核记录追溯、`prescription_review` 建表与 5 个用例，并写 `docs/design/prescription-review.md` | 领域/应用/接口/基础设施四层代码初稿、签名摘要算法、H2 测试表结构、文档初稿 | 人工核对：审核是否只经聚合方法迁移、并发是否用 version 条件更新、签名是否覆盖版本与药师、驳回理由边界、队列路径与 `/prescriptions/{id}` 是否冲突 | `mvn -B -ntp test`：53 例运行、0 失败、9 跳过（状态迁移用例待郝佳鑫启用）；逐条比对 `openapi.yaml` 的 `Review` 字段与错误码 |
 | 2026-11-22 | 代香晰 | DeepSeek Harness（deepseek 模型） | 实现 R5 药房核销与患者处方追踪：流转 API 适配、药房工作台（接方/拒接/核销）、患者处方列表与追踪时间线 | 页面与 API 层、mock 流转/核销接口与种子数据、README 初稿 | 待代香晰复核：流转契约字段、幂等键生成与重试策略、与 R5-B 联调 | `pnpm build` 通过；mock 实测接方、核销、同键重放 200、异键重放 409 |
 | 2026-11-22 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | R5 测试：① 按 R4 实现启用 `PrescriptionStateTest` 的 11 个迁移用例（改为真实接口驱动 + `RX_STATE_INVALID` 断言）；② 新增 `docs/test/circulation-idempotency-cases.md`（CI-01~CI-10、ST-12~ST-16）与 `CirculationIdempotencyTest` | 状态用例的接口驱动改造、幂等/重放/并发的判定标准与用例骨架、`Q1/Q2` 契约差异的结论回填 | 待郝佳鑫复核：并发用例在 H2 与 MySQL 的差异、`givenCirculatedOrder` 的构造路径、核销错误码命名 | JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B test`：67 例运行、0 失败、10 跳过（流转未合入）；处方状态机 17 例全绿 |
+| 2026-11-22 | 李梓语 | DeepSeek Harness（deepseek 模型） | 实现 R5 核销上下文：核销、幂等键（三层防线）、发药记录、处方全链路追踪，启用郝佳鑫的重放/并发/越权用例，补 H2 表结构与 `docs/design/circulation-redeem.md` | 领域/应用/接口/基础设施四层代码初稿、幂等判定表、H2 三张表、文档初稿 | 人工核对：幂等记录是否与业务同事务、并发是否先锁流转单再复查、药师药房范围是否必须绑档案、处方回写是否复用聚合方法、批号缺省策略是否兼容前端与测试 | `mvn -B -ntp test`：68 例运行、0 失败、0 跳过；新增 `CirculationIdempotencyTest` 13 例全绿（含同键重放、同键换参数 409、异键 409、并发同键/异键、缺键、未接方、三类越权） |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

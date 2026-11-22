@@ -22,7 +22,14 @@ const PORT = Number(process.env.MOCK_PORT || 8080)
 const USERS = [
   { id: 1002, username: 'patient', password: '123456', role: 'PATIENT', realName: '张小明' },
   { id: 1001, username: 'doctor', password: '123456', role: 'DOCTOR', realName: '李医生' },
-  { id: 1003, username: 'pharmacist', password: '123456', role: 'PHARMACIST', realName: '王药师' },
+  {
+    id: 1003,
+    username: 'pharmacist',
+    password: '123456',
+    role: 'PHARMACIST',
+    realName: '王药师',
+    pharmacyId: 1,
+  },
   { id: 1004, username: 'admin', password: '123456', role: 'ADMIN', realName: '管理员' },
 ]
 
@@ -156,6 +163,87 @@ const prescriptions = [
     createdAt: iso(-50),
     updatedAt: iso(-40),
   },
+  {
+    id: 4006,
+    rxNo: 'RX202611220006',
+    consultationId: 2001,
+    patientId: 1002,
+    doctorId: 1001,
+    diagnosis: '2 型糖尿病（血糖控制不佳）',
+    status: 'APPROVED',
+    items: [
+      {
+        id: 5006,
+        drugCode: 'DRUG001',
+        drugName: '盐酸二甲双胍片',
+        specification: '0.5g*20 片',
+        dosage: '0.5g',
+        frequency: '每日 2 次',
+        duration: '30 天',
+        quantity: 2,
+        unitPrice: 15,
+        subtotal: 30,
+      },
+    ],
+    totalAmount: 30,
+    version: 2,
+    createdAt: iso(-300),
+    updatedAt: iso(-240),
+  },
+  {
+    id: 4007,
+    rxNo: 'RX202611220007',
+    consultationId: 2001,
+    patientId: 1002,
+    doctorId: 1001,
+    diagnosis: '原发性高血压 2 级',
+    status: 'CIRCULATED',
+    items: [
+      {
+        id: 5007,
+        drugCode: 'DRUG003',
+        drugName: '苯磺酸氨氯地平片',
+        specification: '5mg*28 片',
+        dosage: '5mg',
+        frequency: '每日 1 次',
+        duration: '28 天',
+        quantity: 1,
+        unitPrice: 22,
+        subtotal: 22,
+      },
+    ],
+    totalAmount: 22,
+    version: 3,
+    createdAt: iso(-200),
+    updatedAt: iso(-150),
+  },
+  {
+    id: 4008,
+    rxNo: 'RX202611220008',
+    consultationId: 2003,
+    patientId: 1002,
+    doctorId: 1001,
+    diagnosis: '急性咽炎',
+    status: 'REDEEMED',
+    items: [
+      {
+        id: 5008,
+        drugCode: 'DRUG004',
+        drugName: '阿莫西林胶囊',
+        specification: '0.25g*24 粒',
+        dosage: '0.5g',
+        frequency: '每日 3 次',
+        duration: '5 天',
+        quantity: 1,
+        unitPrice: 9.8,
+        subtotal: 9.8,
+      },
+    ],
+    totalAmount: 9.8,
+    version: 4,
+    createdAt: iso(-1500),
+    updatedAt: iso(-1380),
+  },
 ]
 
 const reviews = []
@@ -164,6 +252,124 @@ function canAccessPrescription(user, prescription) {
   if (user.role === 'PATIENT') return prescription.patientId === user.id
   if (user.role === 'DOCTOR') return prescription.doctorId === user.id
   return true
+}
+
+const PHARMACIES = { 1: '仁和药房', 2: '惠民药房' }
+
+const circulations = [
+  {
+    id: 7001,
+    circulationNo: 'C202611220001',
+    rxId: 4006,
+    pharmacyId: 1,
+    status: 'CREATED',
+    idempotencyKey: 'seed-7001',
+    circulatedAt: iso(-20),
+    acceptedAt: null,
+    redeemedAt: null,
+    rejectReason: null,
+    version: 1,
+  },
+  {
+    id: 7002,
+    circulationNo: 'C202611220002',
+    rxId: 4007,
+    pharmacyId: 1,
+    status: 'ACCEPTED',
+    idempotencyKey: 'seed-7002',
+    circulatedAt: iso(-90),
+    acceptedAt: iso(-60),
+    redeemedAt: null,
+    rejectReason: null,
+    version: 2,
+  },
+  {
+    id: 7003,
+    circulationNo: 'C202611220003',
+    rxId: 4008,
+    pharmacyId: 1,
+    status: 'REDEEMED',
+    idempotencyKey: 'seed-7003',
+    circulatedAt: iso(-1400),
+    acceptedAt: iso(-1390),
+    redeemedAt: iso(-1380),
+    rejectReason: null,
+    version: 2,
+    dispenseRecord: {
+      id: 8001,
+      batchNo: 'B20261122001',
+      evidence: 'PICK-8821',
+      redeemedAt: iso(-1380),
+    },
+  },
+]
+
+const idempotencyStore = new Map()
+
+function orderView(order) {
+  const rx = prescriptions.find((item) => item.id === order.rxId)
+  const patient = rx ? USERS.find((item) => item.id === rx.patientId) : null
+  return {
+    ...order,
+    pharmacyName: PHARMACIES[order.pharmacyId] || `药房 #${order.pharmacyId}`,
+    patientName: patient?.realName,
+    prescription: rx
+      ? {
+          id: rx.id,
+          rxNo: rx.rxNo,
+          diagnosis: rx.diagnosis,
+          patientId: rx.patientId,
+          totalAmount: rx.totalAmount,
+          items: rx.items.map((item) => ({
+            drugName: item.drugName,
+            dosage: item.dosage,
+            frequency: item.frequency,
+            duration: item.duration,
+            quantity: item.quantity,
+          })),
+        }
+      : undefined,
+  }
+}
+
+function canAccessCirculation(user, order) {
+  if (user.role === 'PHARMACIST') return order.pharmacyId === user.pharmacyId
+  if (user.role === 'ADMIN') return true
+  const rx = prescriptions.find((item) => item.id === order.rxId)
+  return user.role === 'PATIENT' && rx?.patientId === user.id
+}
+
+function traceOf(prescription) {
+  const order = circulations.find((item) => item.rxId === prescription.id)
+  const anchor = order?.circulatedAt ?? prescription.updatedAt
+  const before = (minutes) => new Date(new Date(anchor).getTime() - minutes * 60_000).toISOString()
+  const events = [{ status: 'DRAFT', at: prescription.createdAt, note: '处方已创建' }]
+  const status = prescription.status
+  if (['PENDING_REVIEW', 'APPROVED', 'REJECTED', 'CIRCULATED', 'REDEEMED', 'EXPIRED'].includes(status)) {
+    events.push({ status: 'PENDING_REVIEW', at: before(90), note: '已提交药师审核' })
+  }
+  if (['APPROVED', 'CIRCULATED', 'REDEEMED'].includes(status)) {
+    events.push({ status: 'APPROVED', at: before(60), note: '药师审核通过并签名' })
+  }
+  if (status === 'REJECTED') {
+    events.push({ status: 'REJECTED', at: prescription.updatedAt, note: '药师审核驳回' })
+  }
+  if (order) {
+    events.push({
+      status: 'CIRCULATED',
+      at: order.circulatedAt,
+      note: `已流转至${PHARMACIES[order.pharmacyId]}`,
+    })
+  }
+  if (order?.status === 'REDEEMED') {
+    events.push({
+      status: 'REDEEMED',
+      at: order.redeemedAt,
+      note: `药房已核销发药（批号 ${order.dispenseRecord?.batchNo}）`,
+    })
+  }
+  events.sort((a, b) => String(a.at).localeCompare(String(b.at)))
+  return { prescriptionId: prescription.id, status, events }
 }
 
 function normalizePrescriptionBody(body) {
@@ -639,6 +845,127 @@ const server = createServer(async (req, res) => {
         sendJson(res, 200, prescription)
         return
       }
+    }
+
+    // ---------- 流转与核销 ----------
+    if (path === '/api/v1/circulations' && req.method === 'GET') {
+      const status = url.searchParams.get('status')
+      const mine = circulations
+        .filter((item) => canAccessCirculation(user, item))
+        .filter((item) => (status ? item.status === status : true))
+        .sort((a, b) => String(b.circulatedAt).localeCompare(String(a.circulatedAt)))
+        .map(orderView)
+      sendJson(res, 200, pageOf(mine, url))
+      return
+    }
+
+    const circActionMatch = path.match(/^\/api\/v1\/circulations\/(\d+)\/(accept|reject|redeem)$/)
+    if (req.method === 'POST' && circActionMatch) {
+      if (user.role !== 'PHARMACIST') {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '仅药房账号可处理流转单' })
+        return
+      }
+      const order = circulations.find((item) => item.id === Number(circActionMatch[1]))
+      if (!order) {
+        sendJson(res, 404, { code: 'CIRCULATION_NOT_FOUND', message: '流转单不存在' })
+        return
+      }
+      if (!canAccessCirculation(user, order)) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '无权处理其他药房的流转单' })
+        return
+      }
+      const action = circActionMatch[2]
+
+      if (action === 'accept') {
+        if (order.status !== 'CREATED') {
+          sendJson(res, 409, { code: 'CIRC_STATE_INVALID', message: '流转单当前状态不可接方' })
+          return
+        }
+        order.status = 'ACCEPTED'
+        order.acceptedAt = iso()
+        order.version += 1
+        const rx = prescriptions.find((item) => item.id === order.rxId)
+        if (rx && rx.status === 'APPROVED') {
+          rx.status = 'CIRCULATED'
+          rx.version += 1
+          rx.updatedAt = iso()
+        }
+        sendJson(res, 200, orderView(order))
+        return
+      }
+
+      if (action === 'reject') {
+        if (order.status !== 'CREATED') {
+          sendJson(res, 409, { code: 'CIRC_STATE_INVALID', message: '流转单当前状态不可拒接' })
+          return
+        }
+        const body = await readBody(req)
+        const reason = String(body.reason || '').trim()
+        if (reason.length < 2) {
+          sendJson(res, 422, { code: 'VALIDATION_FAILED', message: '拒接原因至少 2 个字' })
+          return
+        }
+        order.status = 'REJECTED'
+        order.rejectReason = reason
+        order.version += 1
+        sendJson(res, 200, orderView(order))
+        return
+      }
+
+      // redeem
+      if (order.status === 'REDEEMED') {
+        const key = String(req.headers['idempotency-key'] || '')
+        if (idempotencyStore.has(`${order.id}:${key}`)) {
+          sendJson(res, 200, orderView(order))
+          return
+        }
+        sendJson(res, 409, { code: 'RX_ALREADY_REDEEMED', message: '该流转单已核销，不能重复发药' })
+        return
+      }
+      if (order.status !== 'ACCEPTED') {
+        sendJson(res, 409, { code: 'CIRC_STATE_INVALID', message: '药房接方后才能核销' })
+        return
+      }
+      const body = await readBody(req)
+      const batchNo = String(body.batchNo || '').trim()
+      const evidence = String(body.evidence || '').trim()
+      if (!batchNo) {
+        sendJson(res, 422, { code: 'VALIDATION_FAILED', message: '药品批号不能为空' })
+        return
+      }
+      order.status = 'REDEEMED'
+      order.redeemedAt = iso()
+      order.version += 1
+      order.dispenseRecord = {
+        id: nextId(),
+        batchNo,
+        evidence: evidence || undefined,
+        redeemedAt: order.redeemedAt,
+      }
+      idempotencyStore.set(`${order.id}:${String(req.headers['idempotency-key'] || '')}`, true)
+      const redeemedRx = prescriptions.find((item) => item.id === order.rxId)
+      if (redeemedRx) {
+        redeemedRx.status = 'REDEEMED'
+        redeemedRx.version += 1
+        redeemedRx.updatedAt = iso()
+      }
+      sendJson(res, 200, orderView(order))
+      return
+    }
+
+    const traceMatch = path.match(/^\/api\/v1\/prescriptions\/(\d+)\/trace$/)
+    if (req.method === 'GET' && traceMatch) {
+      const prescription = prescriptions.find((item) => item.id === Number(traceMatch[1]))
+      if (!prescription) {
+        sendJson(res, 404, { code: 'PRESCRIPTION_NOT_FOUND', message: '处方不存在' })
+        return
+      }
+      if (!canAccessPrescription(user, prescription)) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '无权查看该处方' })
+        return
+      }
+      sendJson(res, 200, traceOf(prescription))
+      return
     }
 
     sendJson(res, 404, { code: 'NOT_FOUND', message: `未实现的接口：${req.method} ${path}` })

@@ -2,7 +2,6 @@ package com.medical.platform.prescription;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,15 +43,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <p>状态与迁移以 {@code docs/design/domain-model.md} §8.1 与《实验报告》表 2-10 为准，
  * 用例编号与前置条件见 {@code docs/test/prescription-state-cases.md}。
  *
- * <p><b>当前状态</b>：处方上下文（R4-A 聚合、R4-B 审核）尚未合入 main，
- * 迁移用例暂时 {@link Disabled}，现在只运行两类可执行的检查：
+ * <p><b>当前状态</b>：R4-A（处方聚合与状态迁移）与 R4-B（药师审核）已合入 main，
+ * 因此通过接口真实驱动状态迁移的用例已全部启用；`circulate` / `redeem` / `expire`
+ * 三个事件属于第 5 轮流转链路，这里只做迁移表自检，运行期覆盖留到 R5。
+ *
+ * <p>覆盖三类检查：
  * <ol>
- *   <li>安全边界：处方/审核的全部端点都必须先认证；</li>
- *   <li>状态机自检：迁移表覆盖 8 个状态、10 条合法迁移，且与设计文档 §8.1 逐条一致。</li>
+ *   <li>状态机自检：8 个状态、10 条合法迁移、终态无出边、全部状态可达，且与设计文档 §8.1 逐条一致；</li>
+ *   <li>安全边界：处方/审核的全部端点未认证一律 401；</li>
+ *   <li>正向与非法迁移：经真实接口驱动，非法迁移统一 409 {@code RX_STATE_INVALID}。</li>
  * </ol>
- * 实现合入后：去掉迁移用例上的 {@code @Disabled}，在 {@code schema-test.sql} 补
- * {@code prescription} / {@code prescription_item} 表（字段见 {@code database/schema.sql}），
- * 并实现 {@link #givenPrescriptionIn(String)}。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -62,6 +62,18 @@ class PrescriptionStateTest {
 
     private static final String RX = "/api/v1/prescriptions";
     private static final String PASSWORD = "Passw0rd!";
+
+    /** 开方请求体，字段与 {@code openapi.yaml} 的 {@code PrescriptionSaveRequest} 一致。 */
+    private static final String RX_BODY = """
+            {
+              "diagnosis": "2 型糖尿病",
+              "items": [
+                {"drugCode": "DRUG001", "drugName": "盐酸二甲双胍片", "specification": "0.5g*20 片",
+                 "dosage": "0.5g", "frequency": "每日 2 次", "duration": "30 天",
+                 "quantity": 2, "unitPrice": 15.00}
+              ]
+            }
+            """;
 
     /** 8 个状态，与 domain-model §8.1 一致。 */
     private static final Set<String> STATES = Set.of(
@@ -116,8 +128,14 @@ class PrescriptionStateTest {
 
     @BeforeEach
     void seedUsers() {
-        String hash = passwordEncoder.encode(PASSWORD);
+        jdbcTemplate.update("DELETE FROM prescription_review");
+        jdbcTemplate.update("DELETE FROM prescription_item");
+        jdbcTemplate.update("DELETE FROM prescription");
+        jdbcTemplate.update("DELETE FROM consultation_message");
+        jdbcTemplate.update("DELETE FROM consultation_session");
         jdbcTemplate.update("DELETE FROM sys_user");
+
+        String hash = passwordEncoder.encode(PASSWORD);
         insertUser(1L, "patient01", hash, "PATIENT", 1);
         insertUser(2L, "doctor01", hash, "DOCTOR", 1);
         insertUser(3L, "doctor02", hash, "DOCTOR", 1);
@@ -234,11 +252,10 @@ class PrescriptionStateTest {
     }
 
     // ------------------------------------------------------------------
-    // 待 R4-A / R4-B 合入后启用：正向迁移
+    // 正向迁移（经真实接口驱动）
     // ------------------------------------------------------------------
 
     @Test
-    @Disabled("等待 R4-A 处方聚合与状态迁移合入 main 后启用")
     @DisplayName("正向：DRAFT --submit--> PENDING_REVIEW，版本号 +1")
     void submitFromDraft() throws Exception {
         long rxId = givenPrescriptionIn("DRAFT");
@@ -246,11 +263,11 @@ class PrescriptionStateTest {
         mockMvc.perform(post(RX + "/" + rxId + "/submit")
                         .header("Authorization", bearer("doctor01")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("PENDING_REVIEW"));
+                .andExpect(jsonPath("$.status").value("PENDING_REVIEW"))
+                .andExpect(jsonPath("$.version").value(2));
     }
 
     @Test
-    @Disabled("等待 R4-B 药师审核合入 main 后启用")
     @DisplayName("正向：PENDING_REVIEW --approve--> APPROVED，写入签名摘要")
     void approveFromPendingReview() throws Exception {
         long rxId = givenPrescriptionIn("PENDING_REVIEW");
@@ -258,27 +275,31 @@ class PrescriptionStateTest {
         mockMvc.perform(post(RX + "/" + rxId + "/reviews/approve")
                         .header("Authorization", bearer("pharmacist01"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"signature\":\"pharmacist-signature\"}"))
+                        .content("{\"comment\":\"用法用量与诊断相符，同意调配\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("APPROVED"));
+                .andExpect(jsonPath("$.action").value("APPROVED"))
+                .andExpect(jsonPath("$.signature").isNotEmpty());
+
+        assertThat(statusOf(rxId)).isEqualTo("APPROVED");
+        assertThat(signedHashOf(rxId)).isNotBlank();
     }
 
     @Test
-    @Disabled("等待 R4-B 药师审核合入 main 后启用")
-    @DisplayName("正向：PENDING_REVIEW --reject--> REJECTED，驳回意见必填")
+    @DisplayName("正向：PENDING_REVIEW --reject--> REJECTED，驳回意见落库")
     void rejectFromPendingReview() throws Exception {
         long rxId = givenPrescriptionIn("PENDING_REVIEW");
 
         mockMvc.perform(post(RX + "/" + rxId + "/reviews/reject")
                         .header("Authorization", bearer("pharmacist01"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"reason\":\"用法用量与说明书不符，请修改后重提\"}"))
+                        .content("{\"comment\":\"用法用量与说明书不符，请修改后重提\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("REJECTED"));
+                .andExpect(jsonPath("$.action").value("REJECTED"));
+
+        assertThat(statusOf(rxId)).isEqualTo("REJECTED");
     }
 
     @Test
-    @Disabled("等待 R4-A 处方聚合合入 main 后启用")
     @DisplayName("正向：DRAFT --cancel--> CANCELLED（终态）")
     void cancelFromDraft() throws Exception {
         long rxId = givenPrescriptionIn("DRAFT");
@@ -290,64 +311,67 @@ class PrescriptionStateTest {
     }
 
     // ------------------------------------------------------------------
-    // 待 R4-A / R4-B 合入后启用：非法迁移
+    // 非法迁移（统一 409 RX_STATE_INVALID）
     // ------------------------------------------------------------------
 
     @Test
-    @Disabled("等待 R4-A 处方聚合合入 main 后启用")
-    @DisplayName("非法：DRAFT 直接审核通过 --> 409 ILLEGAL_STATE")
+    @DisplayName("非法：DRAFT 直接审核通过 --> 409 RX_STATE_INVALID")
     void approveFromDraftIsRejected() throws Exception {
         long rxId = givenPrescriptionIn("DRAFT");
 
         mockMvc.perform(post(RX + "/" + rxId + "/reviews/approve")
                         .header("Authorization", bearer("pharmacist01"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content("{\"comment\":\"跳过提交直接通过\"}"))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("ILLEGAL_STATE"));
+                .andExpect(jsonPath("$.code").value("RX_STATE_INVALID"));
+
+        assertThat(statusOf(rxId)).isEqualTo("DRAFT");
     }
 
     @Test
-    @Disabled("等待 R4-A 处方聚合合入 main 后启用")
-    @DisplayName("非法：重复提交（已 PENDING_REVIEW 再 submit）--> 409 ILLEGAL_STATE")
+    @DisplayName("非法：重复提交（已 PENDING_REVIEW 再 submit）--> 409 RX_STATE_INVALID")
     void submitTwiceIsRejected() throws Exception {
         long rxId = givenPrescriptionIn("PENDING_REVIEW");
 
         mockMvc.perform(post(RX + "/" + rxId + "/submit")
                         .header("Authorization", bearer("doctor01")))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("ILLEGAL_STATE"));
+                .andExpect(jsonPath("$.code").value("RX_STATE_INVALID"));
+
+        assertThat(statusOf(rxId)).isEqualTo("PENDING_REVIEW");
     }
 
     @Test
-    @Disabled("等待 R4-A 处方聚合合入 main 后启用")
-    @DisplayName("非法：APPROVED 后撤销 --> 409 ILLEGAL_STATE（只能作废重开）")
+    @DisplayName("非法：APPROVED 后撤销 --> 409 RX_STATE_INVALID（只能作废重开）")
     void cancelFromApprovedIsRejected() throws Exception {
         long rxId = givenPrescriptionIn("APPROVED");
 
         mockMvc.perform(post(RX + "/" + rxId + "/cancel")
                         .header("Authorization", bearer("doctor01")))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("ILLEGAL_STATE"));
+                .andExpect(jsonPath("$.code").value("RX_STATE_INVALID"));
+
+        assertThat(statusOf(rxId)).isEqualTo("APPROVED");
     }
 
     @Test
-    @Disabled("等待 R4-A 处方聚合合入 main 后启用")
-    @DisplayName("非法：待审核状态直接修改内容（PUT）--> 409 ILLEGAL_STATE")
+    @DisplayName("非法：待审核状态直接改内容（PUT）--> 409 RX_STATE_INVALID")
     void updateFromPendingReviewIsRejected() throws Exception {
         long rxId = givenPrescriptionIn("PENDING_REVIEW");
 
         mockMvc.perform(put(RX + "/" + rxId)
                         .header("Authorization", bearer("doctor01"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"items\":[]}"))
+                        .content(RX_BODY))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("ILLEGAL_STATE"));
+                .andExpect(jsonPath("$.code").value("RX_STATE_INVALID"));
+
+        assertThat(statusOf(rxId)).isEqualTo("PENDING_REVIEW");
     }
 
-    @ParameterizedTest(name = "终态 {0} 再提交 --> 409 ILLEGAL_STATE")
+    @ParameterizedTest(name = "终态 {0} 再提交 --> 409 RX_STATE_INVALID")
     @ValueSource(strings = {"CANCELLED", "REDEEMED", "EXPIRED"})
-    @Disabled("等待 R4-A 处方聚合合入 main 后启用")
     @DisplayName("非法：三个终态都拒绝 submit")
     void terminalStatesRejectSubmit(String terminalState) throws Exception {
         long rxId = givenPrescriptionIn(terminalState);
@@ -355,7 +379,9 @@ class PrescriptionStateTest {
         mockMvc.perform(post(RX + "/" + rxId + "/submit")
                         .header("Authorization", bearer("doctor01")))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("ILLEGAL_STATE"));
+                .andExpect(jsonPath("$.code").value("RX_STATE_INVALID"));
+
+        assertThat(statusOf(rxId)).isEqualTo(terminalState);
     }
 
     // ------------------------------------------------------------------
@@ -365,12 +391,95 @@ class PrescriptionStateTest {
     /**
      * 造一张处于指定状态的处方。
      *
-     * <p>待 R4-A / R4-B 合入后实现：DRAFT 直接 insert；PENDING_REVIEW 为 DRAFT + submit；
-     * APPROVED 为 submit + approve；CANCELLED/EXPIRED 用 SQL 直接落终态（定时任务驱动）。
+     * <p>DRAFT 直接开方；PENDING_REVIEW 为开方 + 提交；APPROVED / REJECTED 再经药师审核；
+     * CANCELLED 用撤销；REDEEMED / EXPIRED 由第 5 轮流转与定时任务产生，这里直接落库，
+     * 只用于验证终态拒绝后续事件的行为。
      */
-    private long givenPrescriptionIn(String state) {
-        throw new UnsupportedOperationException(
-                "待 R4-A/R4-B 合入后实现：造出状态为 " + state + " 的处方（schema-test.sql 需补 prescription 表）");
+    private long givenPrescriptionIn(String state) throws Exception {
+        long rxId = createDraft();
+        switch (state) {
+            case "DRAFT" -> {
+                // 开方即 DRAFT，无需额外操作
+            }
+            case "PENDING_REVIEW" -> submit(rxId);
+            case "APPROVED" -> {
+                submit(rxId);
+                review(rxId, "approve");
+            }
+            case "REJECTED" -> {
+                submit(rxId);
+                review(rxId, "reject");
+            }
+            case "CANCELLED" -> cancel(rxId);
+            case "CIRCULATED", "REDEEMED", "EXPIRED" ->
+                    jdbcTemplate.update("UPDATE prescription SET status = ? WHERE id = ?", state, rxId);
+            default -> throw new IllegalArgumentException("未知状态：" + state);
+        }
+        return rxId;
+    }
+
+    private String acceptedSession() throws Exception {
+        MvcResult created = mockMvc.perform(post("/api/v1/consultations")
+                        .header("Authorization", bearer("patient01"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"department\":\"内科\",\"diseaseName\":\"2 型糖尿病\",\"chiefComplaint\":\"复诊开药\"}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String sessionId = objectMapper
+                .readTree(created.getResponse().getContentAsString(StandardCharsets.UTF_8))
+                .get("id").asText();
+
+        mockMvc.perform(post("/api/v1/consultations/" + sessionId + "/accept")
+                        .header("Authorization", bearer("doctor01")))
+                .andExpect(status().isOk());
+        return sessionId;
+    }
+
+    private long createDraft() throws Exception {
+        String sessionId = acceptedSession();
+        MvcResult result = mockMvc.perform(post("/api/v1/consultations/" + sessionId + "/prescriptions")
+                        .header("Authorization", bearer("doctor01"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(RX_BODY))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("DRAFT"))
+                .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString(StandardCharsets.UTF_8))
+                .get("id").asLong();
+    }
+
+    private void submit(long rxId) throws Exception {
+        mockMvc.perform(post(RX + "/" + rxId + "/submit")
+                        .header("Authorization", bearer("doctor01")))
+                .andExpect(status().isOk());
+    }
+
+    private void review(long rxId, String action) throws Exception {
+        mockMvc.perform(post(RX + "/" + rxId + "/reviews/" + action)
+                        .header("Authorization", bearer("pharmacist01"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"comment\":\"用法用量与诊断相符，同意调配\"}"))
+                .andExpect(status().isOk());
+    }
+
+    private void cancel(long rxId) throws Exception {
+        mockMvc.perform(post(RX + "/" + rxId + "/cancel")
+                        .header("Authorization", bearer("doctor01")))
+                .andExpect(status().isOk());
+    }
+
+    private String statusOf(long rxId) throws Exception {
+        MvcResult result = mockMvc.perform(get(RX + "/" + rxId)
+                        .header("Authorization", bearer("doctor01")))
+                .andExpect(status().isOk())
+                .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString(StandardCharsets.UTF_8))
+                .get("status").asText();
+    }
+
+    private String signedHashOf(long rxId) {
+        return jdbcTemplate.queryForObject("SELECT signed_hash FROM prescription WHERE id = ?",
+                String.class, rxId);
     }
 
     private String bearer(String username) throws Exception {

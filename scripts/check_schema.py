@@ -1,7 +1,7 @@
 ﻿"""校验 database/schema.sql 的结构完整性（无 MySQL 实例时的静态检查）。
 
 检查项：
-1. CREATE TABLE 数量是否等于预期的 24 张；
+1. CREATE TABLE 数量是否等于预期的 25 张；
 2. 每个 FOREIGN KEY ... REFERENCES 的目标表是否已在文件中定义；
 3. 括号是否配平（排除字符串与注释）；
 4. 每张表是否都有 PRIMARY KEY；
@@ -15,7 +15,7 @@ import re
 import sys
 from pathlib import Path
 
-EXPECTED_TABLES = 24
+EXPECTED_TABLES = 25
 
 
 def strip_comments(sql: str) -> str:

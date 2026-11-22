@@ -11,6 +11,9 @@
 | `design/domain-model.md` | 聚合根、实体、值对象、关系 | 郝佳鑫 | 已提交（R1，v0.1 待评审） |
 | `design/architecture.md` | DDD 分层、模块化单体、架构决策 | 刘飞燕 | 已提交（R2，v1.0 待评审） |
 | `design/api-contract.md` | 认证/问诊/处方 API 契约 | 李梓语 | 已提交（R2，v1.0 待评审） |
+| `design/consultation.md` | 问诊模块实现说明：状态机、数据范围、错误码、验证记录 | 李梓语 | 已提交（R3，v1.0） |
+| `design/prescription-review.md` | 处方审核模块实现说明：队列、电子签名、驳回、记录追溯 | 李梓语 | 已提交（R4，v1.0） |
+| `design/circulation-redeem.md` | 流转核销模块实现说明：核销、幂等键、发药记录、全链路追踪 | 李梓语 | 已提交（R5，v1.0） |
 | `design/er.md` | ER 图与表关系 | 魏宇佳 | 待 R2 |
 | `design/adr/` | 架构决策记录 | 刘飞燕 | 已提交 ADR-001（R2） |
 | `test/test-plan.md` | 测试策略、环境、进入/退出准则 | 班国勇 | 已提交（R1，待评审） |
@@ -53,13 +56,16 @@ process/sprint-*.md + test/test-report.md
 
 | 文件（仓库根目录相对） | 内容 | 状态 |
 |---|---|---|
-| `database/schema.sql` | 24 张表 DDL 草案：主外键、索引、CHECK 枚举、安全列 | R1 草案 v0.1 待评审 |
-| `database/README.md` | 数据库目录说明、本地验证、与报告的差异 | R1 |
-| `docs/database/table-list.md` | 24 张表清单与核心表字段要点 | R1 |
-| `docs/database/dictionary.xlsx` | 数据字典：表清单、235 个字段、索引、外键 | R1 |
-| `docs/database/er.md` | 表关系说明与核心 ER 图 | R1（R2 定稿并入 `design/er.md`） |
+| `database/schema.sql` | 当前完整结构：主外键、索引、CHECK 枚举、安全列 | v0.2（第 3 轮同步） |
+| `database/migrations/V002__core.sql` | 建 24 张表，Flyway 基线 | 第 2 轮 |
+| `database/migrations/V003__auth_consult.sql` | 问诊字段调整与认证/问诊索引 | 第 3 轮 |
+| `database/migrations/V004__prescription.sql` | 处方、明细与审核记录表 | 第 4 轮 |
+| `database/README.md` | 数据库目录说明、本地验证、与报告的差异 | 持续更新 |
+| `docs/database/table-list.md` | 25 张表清单与核心表字段要点 | 持续更新 |
+| `docs/database/dictionary.xlsx` | 数据字典：表清单、248 个字段、索引、外键 | 由 DDL 生成 |
+| `docs/database/er.md` | 表关系说明与核心 ER 图 | R1 |
 | `docs/database/diagrams/er-core.png` | ER 图，2600×1480，可直接插入报告 | R1 |
-| `docs/database/diagrams/table-overview.png` | 24 张表按业务域分组的总览图 | R1 |
+| `docs/database/diagrams/table-overview.png` | 25 张表按业务域分组的总览图 | 第 4 轮更新 |
 | `docs/database/diagrams/deployment.png` | 系统部署图：四区分区、MySQL 主从、备份 | R1 |
 | `docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | R1 |
 | `deploy/README.md` | 部署结构、端口、环境变量、备份策略 | R1 |

@@ -115,7 +115,7 @@ http(s)://{host}:{port}/api/v1
 
 ### 3.7 幂等约定
 
-携带 `Idempotency-Key` 的写请求，服务端对同一 key 缓存首次处理结果；重复请求直接返回首次结果，不重复创建业务数据。未携带 key 的请求按正常流程处理，客户端须自行防重。
+携带 `Idempotency-Key` 的写请求，服务端对同一 key 缓存首次处理结果；重复请求直接返回首次结果，不重复创建业务数据。未携带 key 的请求按端点约定处理：普通写请求照常执行，**R5 核销端点强制要求**，缺失返回 400 `IDEMPOTENCY_KEY_REQUIRED`。同一 key 携带不同参数返回 409 `IDEMPOTENCY_CONFLICT`。
 
 ---
 
@@ -146,10 +146,12 @@ http(s)://{host}:{port}/api/v1
 | HTTP | 业务错误码 | 含义 | 触发示例 |
 |---|---|---|---|
 | 400 | `BAD_REQUEST` | 请求格式或参数错误 | JSON 格式非法、分页参数越界 |
+| 400 | `IDEMPOTENCY_KEY_REQUIRED` | 核销缺少幂等键 | 未携带 `Idempotency-Key` |
 | 401 | `UNAUTHORIZED` | 未认证或令牌失效 | 缺失/过期 Bearer Token |
-| 403 | `FORBIDDEN` | 已认证但无权限/越权访问 | 药师调用开方接口、医生操作他人会话 |
-| 404 | `*_NOT_FOUND` | 资源不存在 | 会话/处方 ID 不存在 |
-| 409 | `ILLEGAL_STATE` | 资源状态不允许该操作 | 对已审核处方再次提交、重复接诊 |
+| 403 | `FORBIDDEN` / `SCOPE_DENIED` / `RX_SCOPE_DENIED` | 已认证但无权限/越权访问 | 药师调用开方接口、跨药房核销、患者查看他人处方 |
+| 404 | `*_NOT_FOUND` | 资源不存在 | 会话/处方/流转单 ID 不存在 |
+| 409 | `ILLEGAL_STATE` / `CIRC_STATE_INVALID` / `RX_ALREADY_REDEEMED` | 资源状态不允许该操作 | 对已审核处方再次提交、重复接诊、重复核销 |
+| 409 | `IDEMPOTENCY_CONFLICT` | 同一幂等键参数不一致 | 同 key 换核销凭证 |
 | 422 | `VALIDATION_FAILED` | 字段校验失败 | 密码长度不足、明细为空、药品数量 ≤ 0 |
 | 429 | `RATE_LIMITED` | 触发限流 | 短时间内重复发送消息 |
 | 500 | `INTERNAL_ERROR` | 服务端未预期异常 | 统一兜底，禁止泄露堆栈信息 |
@@ -200,6 +202,26 @@ http(s)://{host}:{port}/api/v1
 | POST | `/prescriptions/{id}/reviews/reject` | 药师 | 驳回并必填意见，→ REJECTED |
 | GET | `/prescriptions/{id}/reviews` | 医生/药师 | 审核记录追溯 |
 
+### 5.5 流转与核销域（Circulation · R5）
+
+| 方法 | 路径 | 权限 | 说明 |
+|---|---|---|---|
+| POST | `/circulations/{id}/redeem` | 药师（本药房） | 核销并发药，`ACCEPTED → REDEEMED`；**强制** `Idempotency-Key` |
+| GET | `/prescriptions/{id}/trace` | 患者（本人）/医生（本人开具）/药师（本药房）/管理员（只读） | 处方“开方 → 审核 → 流转 → 接方 → 核销”时间线 |
+
+核销请求体：
+
+```json
+{ "batchNo": "B20261122-01", "evidence": "PICKUP-123456" }
+```
+
+- `batchNo` 可省略，服务端按流转单号生成 `AUTO-<circulationNo>` 批次，保证 `dispense_record.batch_no` 非空可追溯；
+- `evidence` 为取药码/人脸流水号等核验凭证，可省略；
+- 同一 `Idempotency-Key` 重试必须返回首次结果；同一 key 换参数返回 409 `IDEMPOTENCY_CONFLICT`；
+- 核销成功回写处方为 `REDEEMED`，并在同一事务写 `dispense_record` 与 `idempotency_record`。
+
+流转单状态：`CREATED → ACCEPTED → REDEEMED`，或 `CREATED → REJECTED`。核销只允许 `ACCEPTED`，未接方返回 409 `CIRC_STATE_INVALID`；换新 key 重复核销返回 409 `RX_ALREADY_REDEEMED`。
+
 ---
 
 ## 6 关键业务接口编排
@@ -246,6 +268,8 @@ sequenceDiagram
 | 会话消息 | ●（本人会话） | ●（本人接诊） | － | 只读监管 |
 | 开方/修改/提交/撤销 | － | ● | － | － |
 | 审核队列/通过/驳回 | － | － | ● | － |
+| 核销 `/circulations/{id}/redeem` | － | － | ●（本药房） | － |
+| 处方轨迹 `/prescriptions/{id}/trace` | ●（本人） | ●（本人开具） | ●（本药房） | ●（只读） |
 | GET /prescriptions | ●（本人） | ●（本人开具） | ● | ●（脱敏） |
 
 > 所有"本人"限制由服务端依据 JWT 中的用户 ID 与资源归属字段二次校验，前端隐藏入口不等于安全边界。
@@ -261,7 +285,7 @@ sequenceDiagram
 | FR-RX-01~04 | `/consultations/{id}/prescriptions`、`/prescriptions/*` |
 | FR-REV-01~04 | `/prescriptions/review-queue`、`/prescriptions/{id}/reviews/*` |
 | NFR-SEC-03（越权拒绝） | 权限矩阵 + 403 错误码 |
-| NFR-SEC-05（幂等） | `Idempotency-Key` 约定 |
+| NFR-SEC-05（幂等） | `Idempotency-Key` 约定、核销端点与 `idempotency_record` |
 
 ---
 

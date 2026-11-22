@@ -18,8 +18,8 @@ export default defineConfig({
   server: {
     port: 5173,
     watch: {
-      // mock 服务由 node 直接运行，且会写临时文件，避免触发 Vite watcher
-      ignored: ['**/mock/**'],
+      // mock 服务由 node 直接运行；编辑器原子保存会留下临时目录，避免触发 Vite watcher
+      ignored: ['**/mock/**', '**/*.tmpdir/**', '**/*.tmp/**'],
     },
     proxy: {
       '/api': {

@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2600" height="1000" viewBox="0 0 2600 1000">
-  <title>数据库表总览（24 张）</title>
-  <desc>按业务域分组的 24 张表清单，含规模与约束统计。</desc>
+  <title>数据库表总览（25 张）</title>
+  <desc>按业务域分组的 25 张表清单，含规模与约束统计。</desc>
   <rect width="2600" height="1000" fill="#FFFFFF"/>
-  <text x="100" y="78" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="46" font-weight="bold" fill="#1F4E79" text-anchor="start">数据库表总览（24 张）</text>
-  <text x="100" y="118" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="normal" fill="#7A8B9A" text-anchor="start">按业务域分组：核心表 12 张、支撑表 12 张。字段、索引与约束见 database/schema.sql</text>
+  <text x="100" y="78" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="46" font-weight="bold" fill="#1F4E79" text-anchor="start">数据库表总览（25 张）</text>
+  <text x="100" y="118" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="normal" fill="#7A8B9A" text-anchor="start">按业务域分组：核心表 13 张、支撑表 12 张。字段、索引与约束见 database/schema.sql</text>
   <polyline points="100,138 2500,138" fill="none" stroke="#DEEAF6" stroke-width="2" stroke-linejoin="round"/>
   <rect x="100" y="200" width="580" height="290" rx="14" ry="14" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
   <rect x="100" y="200" width="580" height="54" rx="14" ry="14" fill="#1F4E79"/>
@@ -89,7 +89,7 @@
   <rect x="100" y="520" width="780" height="54" rx="14" ry="14" fill="#BF9000"/>
   <rect x="100" y="560" width="780" height="14" fill="#BF9000"/>
   <text x="120" y="556" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">处方与流转</text>
-  <text x="860" y="556" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#E3EEF8" text-anchor="end">4 张</text>
+  <text x="860" y="556" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#E3EEF8" text-anchor="end">5 张</text>
   <rect x="116" y="588" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
   <rect x="116" y="588" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
   <text x="134" y="614" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">电子处方</text>
@@ -100,12 +100,16 @@
   <text x="516" y="636" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">prescription_item</text>
   <rect x="116" y="664" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
   <rect x="116" y="664" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
-  <text x="134" y="690" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">处方流转单</text>
-  <text x="134" y="712" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">circulation_order</text>
+  <text x="134" y="690" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">处方审核</text>
+  <text x="134" y="712" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">prescription_review</text>
   <rect x="498" y="664" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
   <rect x="498" y="664" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
-  <text x="516" y="690" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">发药核销</text>
-  <text x="516" y="712" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">dispense_record</text>
+  <text x="516" y="690" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">处方流转单</text>
+  <text x="516" y="712" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">circulation_order</text>
+  <rect x="116" y="740" width="366" height="62" rx="8" ry="8" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="1"/>
+  <rect x="116" y="740" width="6" height="62" rx="3" ry="3" fill="#BF9000"/>
+  <text x="134" y="766" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">发药核销</text>
+  <text x="134" y="788" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">dispense_record</text>
   <rect x="920" y="520" width="780" height="290" rx="14" ry="14" fill="#FAFCFE" stroke="#C4D6E7" stroke-width="2"/>
   <rect x="920" y="520" width="780" height="54" rx="14" ry="14" fill="#5B6B7A"/>
   <rect x="920" y="560" width="780" height="14" fill="#5B6B7A"/>
@@ -133,18 +137,18 @@
   <text x="954" y="788" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="start">idempotency_record</text>
   <rect x="1740" y="520" width="760" height="290" rx="14" ry="14" fill="#F4F8FC" stroke="#C4D6E7" stroke-width="2"/>
   <text x="1764" y="564" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F4E79" text-anchor="start">规模与约束统计</text>
-  <text x="1764" y="644" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">24</text>
+  <text x="1764" y="644" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">25</text>
   <text x="1840" y="640" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">张表</text>
-  <text x="1840" y="666" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">核心 12 + 支撑 12</text>
+  <text x="1840" y="666" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">核心 13 + 支撑 12</text>
   <text x="2124" y="644" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">29</text>
   <text x="2200" y="640" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">条外键</text>
   <text x="2200" y="666" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">核心表建物理外键</text>
-  <text x="1764" y="764" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">27</text>
+  <text x="1764" y="764" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">26</text>
   <text x="1840" y="760" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">个唯一键</text>
   <text x="1840" y="786" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">业务唯一性由库保证</text>
-  <text x="2124" y="764" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">30</text>
+  <text x="2124" y="764" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="40" font-weight="bold" fill="#BF9000" text-anchor="start">29</text>
   <text x="2200" y="760" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">条 CHECK</text>
   <text x="2200" y="786" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">状态列枚举约束</text>
   <text x="100" y="900" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#7A8B9A" text-anchor="start">统一约定：主键 BIGINT 自增；时间 DATETIME(3)；状态 VARCHAR + CHECK 枚举；敏感字段 _enc 密文 + _hash 盲索引；审计/事件/幂等表不建外键。</text>
-  <text x="2500" y="900" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="end">R1 · v0.1</text>
+  <text x="2500" y="900" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="end">v0.3 · 第 4 轮</text>
 </svg>

@@ -2,7 +2,6 @@ package com.medical.platform.consultation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * 问诊会话接口测试：发起、接诊、越权与结束后的写保护。
  *
- * <p><b>当前状态</b>：问诊上下文（R3-B）的实现尚未合入 main，因此业务用例暂时
- * {@link Disabled}，只保留已经生效的安全边界用例；实现合入后逐个去掉 {@code @Disabled}
- * 并补齐会话种子数据即可启用，断言按《实验报告》§5 的接口清单与
- * {@code docs/design/domain-model.md} §11 的错误码编写。
+ * <p><b>当前状态</b>：问诊上下文（R3-B / 李梓语）已合入 main，会话、消息与接诊链路均可用，
+ * 因此业务用例已启用；断言按《实验报告》§5 的接口清单、{@code docs/design/api-contract.md}
+ * v1.0 的字段（`department` / `diseaseName` / `contentType`）与 {@code docs/design/domain-model.md}
+ * §11 的错误码编写。
  *
  * <p>用例编号：FT-02（发起/接诊）、ST-03（越权）、SM-02（结束后不可写）。
  */
@@ -73,7 +72,7 @@ class ConsultationTest {
     void unauthenticatedCreateIsRejected() throws Exception {
         mockMvc.perform(post(SESSIONS)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"departmentId\":1,\"chiefComplaint\":\"咳嗽三天\"}"))
+                        .content("{\"department\":\"内科\",\"diseaseName\":\"复诊\",\"chiefComplaint\":\"咳嗽三天\"}"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -106,20 +105,18 @@ class ConsultationTest {
     // ------------------------------------------------------------------
 
     @Test
-    @Disabled("等待 R3-B 问诊实现合入 main 后启用")
     @DisplayName("患者发起问诊：返回 WAITING 状态会话与候诊号")
     void patientCreatesSession() throws Exception {
         mockMvc.perform(post(SESSIONS)
                         .header("Authorization", "Bearer " + login("patient01"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"departmentId\":1,\"doctorId\":3,\"chiefComplaint\":\"咳嗽三天，夜间加重\"}"))
-                .andExpect(status().isOk())
+                        .content("{\"department\":\"内科\",\"diseaseName\":\"2 型糖尿病\",\"chiefComplaint\":\"咳嗽三天，夜间加重\"}"))
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("WAITING"))
                 .andExpect(jsonPath("$.patientId").value(1));
     }
 
     @Test
-    @Disabled("等待 R3-B 问诊实现合入 main 后启用")
     @DisplayName("医生接诊：会话进入 IN_PROGRESS 并写入接诊医生")
     void doctorAcceptsWaitingSession() throws Exception {
         String sessionId = createSessionFor("patient01");
@@ -132,7 +129,6 @@ class ConsultationTest {
     }
 
     @Test
-    @Disabled("等待 R3-B 问诊实现合入 main 后启用")
     @DisplayName("越权：患者调用接诊接口返回 403")
     void patientCannotAcceptSession() throws Exception {
         String sessionId = createSessionFor("patient01");
@@ -144,7 +140,6 @@ class ConsultationTest {
     }
 
     @Test
-    @Disabled("等待 R3-B 问诊实现合入 main 后启用")
     @DisplayName("越权：医生接诊他人已接诊的会话返回 409 而不是覆盖")
     void doctorCannotTakeOverAcceptedSession() throws Exception {
         String sessionId = createSessionFor("patient01");
@@ -157,7 +152,6 @@ class ConsultationTest {
     }
 
     @Test
-    @Disabled("等待 R3-B 问诊实现合入 main 后启用")
     @DisplayName("越权：患者读取他人会话返回 403")
     void patientCannotReadAnotherPatientsSession() throws Exception {
         String sessionId = createSessionFor("patient02");
@@ -169,7 +163,6 @@ class ConsultationTest {
     }
 
     @Test
-    @Disabled("等待 R3-B 问诊实现合入 main 后启用")
     @DisplayName("结束后的会话不可再发消息：409 SESSION_CLOSED")
     void endedSessionRejectsNewMessage() throws Exception {
         String sessionId = createSessionFor("patient01");
@@ -181,7 +174,7 @@ class ConsultationTest {
         mockMvc.perform(post(SESSIONS + "/" + sessionId + "/messages")
                         .header("Authorization", "Bearer " + login("patient01"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"type\":\"TEXT\",\"content\":\"还在吗\"}"))
+                        .content("{\"contentType\":\"TEXT\",\"content\":\"还在吗\"}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("SESSION_CLOSED"));
     }
@@ -190,8 +183,8 @@ class ConsultationTest {
         MvcResult result = mockMvc.perform(post(SESSIONS)
                         .header("Authorization", "Bearer " + login(patientUsername))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"departmentId\":1,\"chiefComplaint\":\"复诊开药\"}"))
-                .andExpect(status().isOk())
+                        .content("{\"department\":\"内科\",\"diseaseName\":\"复诊\",\"chiefComplaint\":\"复诊开药\"}"))
+                .andExpect(status().isCreated())
                 .andReturn();
         return objectMapper.readTree(result.getResponse().getContentAsString(StandardCharsets.UTF_8))
                 .get("id")

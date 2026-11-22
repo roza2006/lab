@@ -31,6 +31,13 @@ services:
       - "${DB_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+      # 首次初始化（数据卷为空时）按文件名顺序建表并导入演示数据；
+      # 想重新初始化：docker compose -f deploy/docker-compose.yml down -v 再 up
+      - ../database/migrations/V002__core.sql:/docker-entrypoint-initdb.d/10-core.sql:ro
+      - ../database/migrations/V003__auth_consult.sql:/docker-entrypoint-initdb.d/20-auth-consult.sql:ro
+      - ../database/migrations/V004__prescription.sql:/docker-entrypoint-initdb.d/30-prescription.sql:ro
+      - ../database/migrations/V005__circulation.sql:/docker-entrypoint-initdb.d/40-circulation.sql:ro
+      - ../database/seed.sql:/docker-entrypoint-initdb.d/90-seed.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot --silent"]
       interval: 10s

@@ -29,6 +29,7 @@
 | 2026-11-22 | 班国勇 | DeepSeek Harness（deepseek 模型） | 编写 `docs/process/sprint-03.md` 与 `docs/process/release-notes.md`：按 main 上实际合入情况整理 Sprint 3 进度、偏差与剩余工作，并起草 v1.0.0 发布说明 | 迭代记录（目标达成、计划与实际对照、5 条偏差、4 条风险）、发布说明草案（本版包含与未包含、运行方式、演示路径、已知限制） | 人工核对已合并 PR 编号、`circulation` 包仍为空、`CirculationIdempotencyTest` 中 10 个用例标 `@Disabled`、无 `seed.sql` 等事实；把未合入项从完成项中剔除 | 用 `git ls-tree` 与 `git log` 核对目录与提交；文档内不使用符号标记；本 PR 仅新增文档 |
 | 2026-11-22 | 刘飞燕 | DeepSeek Harness（deepseek 模型） | 实现 R5-A 流转单：创建、列表、详情、药房接方/拒接，补 OpenAPI 与接口测试 | 聚合方法、应用服务、Mapper、DTO、接口测试初稿 | 人工核对：处方 `CIRCULATED` 回写与流转单同事务、药房归属取 `pharmacist_profile`、接方/拒接用 version 条件更新、重复创建按处方幂等 | `mvn -B verify`：72 例通过；接口测试覆盖重复创建、跨药房 403、重复接方 409、拒接终态与患者列表 |
 | 2026-11-22 | 刘飞燕 | DeepSeek Harness（deepseek 模型） | 执行 R6 回归并写 `docs/test/test-report.md`：汇总 72 例结果、环境、覆盖范围与未覆盖项；修复重复创建流转单仍返回 201 的缺陷 | 回归报告初稿、缺陷 D-01 的修复、OpenAPI 200 响应与接口测试断言 | 人工核对：测试数来自 surefire 报告而非估算；未执行的前端、MySQL、部署演练如实列为限制；缺陷修复后重跑全量 | `mvn verify`：72 例通过、0 跳过；第二次创建流转单返回 200，接口测试断言通过 |
+| 2026-11-22 | 魏宇佳 | DeepSeek Harness（deepseek 模型） | 写 `V005__circulation.sql` 与 `seed.sql`：按流转 Mapper 的查询换索引，准备一套可登录、可审核的演示数据，并把建表与种子挂进 compose 初始化目录 | 迁移脚本、种子数据、compose 挂载改动 | 对照 `CirculationOrderMapper` 的 join 与排序调整索引；用 bcrypt 生成 4 个账号哈希并逐个校验；把固定 ID 只能空库执行写进文件头 | 临时 MySQL 按 V002~V005 建表后导入 seed，账号/科室/药房/药品/问诊/处方计数正确，处方与明细可联查；4 个 bcrypt 哈希用 `Demo@2026` 校验通过 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

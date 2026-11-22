@@ -476,7 +476,150 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError422'
 
-  # ---------- 流转与核销域（R5-B） ----------
+  # ---------- 流转与核销域（R5-A / R5-B） ----------
+  /circulations:
+    get:
+      tags: [Circulation]
+      summary: 流转单列表
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [CREATED, ACCEPTED, REDEEMED, REJECTED]
+          description: 按流转状态过滤
+      responses:
+        '200':
+          description: 分页流转单列表，按角色做数据范围过滤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+    post:
+      tags: [Circulation]
+      summary: 创建流转单
+      description: 处方必须已审核通过；同一处方重复创建返回已存在的那张。
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCirculationRequest'
+      responses:
+        '201':
+          description: 流转单已创建，处方进入 CIRCULATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CirculationOrder'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+
+  /circulations/{id}:
+    get:
+      tags: [Circulation]
+      summary: 流转单详情
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 流转单详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CirculationOrder'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+
+  /circulations/{id}/accept:
+    post:
+      tags: [Circulation]
+      summary: 药房接方
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 接方成功，状态 ACCEPTED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CirculationOrder'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+
+  /circulations/{id}/reject:
+    post:
+      tags: [Circulation]
+      summary: 药房拒接
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectCirculationRequest'
+      responses:
+        '200':
+          description: 拒接成功，状态 REJECTED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CirculationOrder'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+
   /circulations/{id}/redeem:
     post:
       tags: [Circulation]
@@ -1063,6 +1206,30 @@ components:
           format: date-time
           example: 2026-11-22T20:15:30+08:00
 
+    CreateCirculationRequest:
+      type: object
+      required: [rxId]
+      properties:
+        rxId:
+          type: integer
+          format: int64
+          example: 501
+        pharmacyId:
+          type: integer
+          format: int64
+          description: 管理员指定药房；药师账号以自己绑定的药房为准
+          example: 1
+
+    RejectCirculationRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 2
+          maxLength: 255
+          example: 药品库存不足
+
     CirculationOrder:
       type: object
       properties:
@@ -1110,6 +1277,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/DispenseRecord'
           nullable: true
+        prescription:
+          allOf:
+            - $ref: '#/components/schemas/Prescription'
+          nullable: true
+          description: 流转单对应的处方摘要，列表页用于展示处方号与诊断
 
     TraceEvent:
       type: object

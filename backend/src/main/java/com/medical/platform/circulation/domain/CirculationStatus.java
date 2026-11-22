@@ -20,4 +20,12 @@ public enum CirculationStatus {
     public boolean canRedeem() {
         return this == ACCEPTED;
     }
+
+    public boolean canAccept() {
+        return this == CREATED;
+    }
+
+    public boolean canReject() {
+        return this == CREATED;
+    }
 }

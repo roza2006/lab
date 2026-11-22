@@ -26,6 +26,7 @@
 | 2026-11-22 | 代香晰 | DeepSeek Harness（deepseek 模型） | 实现 R5 药房核销与患者处方追踪：流转 API 适配、药房工作台（接方/拒接/核销）、患者处方列表与追踪时间线 | 页面与 API 层、mock 流转/核销接口与种子数据、README 初稿 | 待代香晰复核：流转契约字段、幂等键生成与重试策略、与 R5-B 联调 | `pnpm build` 通过；mock 实测接方、核销、同键重放 200、异键重放 409 |
 | 2026-11-22 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | R5 测试：① 按 R4 实现启用 `PrescriptionStateTest` 的 11 个迁移用例（改为真实接口驱动 + `RX_STATE_INVALID` 断言）；② 新增 `docs/test/circulation-idempotency-cases.md`（CI-01~CI-10、ST-12~ST-16）与 `CirculationIdempotencyTest` | 状态用例的接口驱动改造、幂等/重放/并发的判定标准与用例骨架、`Q1/Q2` 契约差异的结论回填 | 待郝佳鑫复核：并发用例在 H2 与 MySQL 的差异、`givenCirculatedOrder` 的构造路径、核销错误码命名 | JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B test`：67 例运行、0 失败、10 跳过（流转未合入）；处方状态机 17 例全绿 |
 | 2026-11-22 | 李梓语 | DeepSeek Harness（deepseek 模型） | 实现 R5 核销上下文：核销、幂等键（三层防线）、发药记录、处方全链路追踪，启用郝佳鑫的重放/并发/越权用例，补 H2 表结构与 `docs/design/circulation-redeem.md` | 领域/应用/接口/基础设施四层代码初稿、幂等判定表、H2 三张表、文档初稿 | 人工核对：幂等记录是否与业务同事务、并发是否先锁流转单再复查、药师药房范围是否必须绑档案、处方回写是否复用聚合方法、批号缺省策略是否兼容前端与测试 | `mvn -B -ntp test`：68 例运行、0 失败、0 跳过；新增 `CirculationIdempotencyTest` 13 例全绿（含同键重放、同键换参数 409、异键 409、并发同键/异键、缺键、未接方、三类越权） |
+| 2026-11-22 | 刘飞燕 | DeepSeek Harness（deepseek 模型） | 实现 R5-A 流转单：创建、列表、详情、药房接方/拒接，补 OpenAPI 与接口测试 | 聚合方法、应用服务、Mapper、DTO、接口测试初稿 | 人工核对：处方 `CIRCULATED` 回写与流转单同事务、药房归属取 `pharmacist_profile`、接方/拒接用 version 条件更新、重复创建按处方幂等 | `mvn -B verify`：72 例通过；接口测试覆盖重复创建、跨药房 403、重复接方 409、拒接终态与患者列表 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

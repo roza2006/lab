@@ -58,6 +58,49 @@ public class CirculationOrder {
     }
 
     /**
+     * 创建流转单：处方审核通过后由药房或管理员发起，初始状态 {@code CREATED}。
+     */
+    public static CirculationOrder create(Long rxId,
+                                          Long pharmacyId,
+                                          String circulationNo,
+                                          String idempotencyKey,
+                                          LocalDateTime now) {
+        return new CirculationOrder(null, circulationNo, rxId, pharmacyId,
+                CirculationStatus.CREATED, idempotencyKey, now, null, null,
+                null, 1, now, now);
+    }
+
+    /**
+     * 药房接方：{@code CREATED -> ACCEPTED}，重复接方返回 409。
+     */
+    public void accept(LocalDateTime now) {
+        if (!status.canAccept()) {
+            throw new CirculationException(CirculationError.CIRC_STATE_INVALID,
+                    "流转单当前状态为 " + status + "，不能接方");
+        }
+        this.status = CirculationStatus.ACCEPTED;
+        this.acceptedAt = now;
+        touch(now);
+    }
+
+    /**
+     * 药房拒接：{@code CREATED -> REJECTED}，必须写明原因。
+     */
+    public void reject(String reason, LocalDateTime now) {
+        if (!status.canReject()) {
+            throw new CirculationException(CirculationError.CIRC_STATE_INVALID,
+                    "流转单当前状态为 " + status + "，不能拒接");
+        }
+        String normalized = reason == null ? "" : reason.trim();
+        if (normalized.length() < 2 || normalized.length() > 255) {
+            throw new CirculationException(CirculationError.CIRC_REJECT_REASON_INVALID);
+        }
+        this.status = CirculationStatus.REJECTED;
+        this.rejectReason = normalized;
+        touch(now);
+    }
+
+    /**
      * 核销：{@code ACCEPTED -> REDEEMED}，写核销时间并递增版本。
      * 已核销的单子给出可区分的 {@code RX_ALREADY_REDEEMED}，便于客户端停止重试。
      */

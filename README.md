@@ -76,6 +76,7 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R2-代香晰：前端四端骨架（`frontend/`，Vue 3 + Vite，18 个页面）
 - [x] R3-代香晰：患者端登录、发起问诊与问诊会话（`frontend/src/views/patient`）
 - [x] R4-代香晰：医生开方与药师审核页面（`frontend/src/views/doctor`、`frontend/src/views/pharmacist`）
+- [x] R5-代香晰：药房核销与患者处方追踪（`frontend/src/views/pharmacist`、`frontend/src/views/patient`）
 - [x] R2-李梓语：API 契约与 OpenAPI（`docs/design/api-contract.md`、`backend/src/main/resources/openapi.yaml`）
 - [x] R2-班国勇：本地编排与 CI（`deploy/`、`.github/workflows/ci.yml`）
 - [x] R3-刘飞燕：登录、JWT、角色权限（`backend/src/main/java/com/medical/platform/identity`）
@@ -88,7 +89,7 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R4-魏宇佳：V004 处方/明细/审核记录迁移，索引与字段对齐（`database/migrations/`）
 - [ ] R4-B/E/F：药师审核、处方迁移、安全文档
 - [ ] R2：演示种子数据
-- [ ] R5–R6：流转与部署、测试与发布
+- [ ] R5-B/E：流转与核销后端、部署，R6：测试与发布
 
 ## 8. 本地开发
 

@@ -1,7 +1,7 @@
 # deploy —— 部署配置与本地编排（魏宇佳、班国勇）
 
-第 1 轮只确定部署结构和网络分区，`docker-compose.yml`、Nginx 配置、初始化脚本在第 5 轮补上。
-本目录现在的产出是部署图与部署说明，供第 2 轮搭骨架时对照。
+`docker-compose.yml` 在第 2 轮打好底（MySQL + Redis + 后端），第 5 轮把建表脚本和演示数据
+挂进 MySQL 初始化目录，`up` 一次就能带数据启动。
 
 ## 1. 部署图
 
@@ -10,6 +10,28 @@
 - 位图：[`deployment.png`](../docs/database/diagrams/deployment.png)
 - 矢量：[`deployment.svg`](../docs/database/diagrams/deployment.svg)
 - 生成脚本：[`scripts/render_deployment.py`](../scripts/render_deployment.py)
+
+## 1.1 一条命令起演示环境
+
+```bash
+docker compose -f deploy/docker-compose.yml up -d --build
+docker compose -f deploy/docker-compose.yml ps
+```
+
+MySQL 第一次初始化（数据卷为空）会按文件名顺序执行
+`10-core → 20-auth-consult → 30-prescription → 40-circulation → 90-seed`，
+建完表直接带演示数据。想重置数据就 `down -v` 后再 `up`。
+
+演示账号（密码都是 `Demo@2026`）：
+
+| 账号 | 角色 | 能做什么 |
+|---|---|---|
+| `patient01` | 患者 | 发起问诊、查看处方 |
+| `doctor01` | 医生 | 接诊、开方 |
+| `pharmacist01` | 药师 | 审核、流转、核销 |
+| `admin` | 管理员 | 查看全部数据 |
+
+种子里有一条进行中的问诊和一张待审核处方，登录药师账号就能直接演示审核。
 
 ## 2. 分区与职责
 

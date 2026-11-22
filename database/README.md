@@ -7,10 +7,12 @@ Flyway 脚本，第 3 轮按问诊代码调整会话/消息两张表并补查询
 
 | 文件 | 作用 | 状态 |
 |---|---|---|
-| `schema.sql` | 当前完整结构（表注释、字段注释、索引、CHECK 约束） | v0.2，第 3 轮已同步 |
+| `schema.sql` | 当前完整结构（表注释、字段注释、索引、CHECK 约束） | v0.4，第 5 轮已同步 |
 | `migrations/V002__core.sql` | 建 24 张表：主键、唯一键、外键、CHECK、命名索引 | 第 2 轮 |
 | `migrations/V003__auth_consult.sql` | 问诊字段调整 + 认证/问诊索引 | 第 3 轮 |
 | `migrations/V004__prescription.sql` | 处方、明细、审核记录表 | 第 4 轮 |
+| `migrations/V005__circulation.sql` | 流转单按药房/状态查的索引 | 第 5 轮 |
+| `seed.sql` | 演示数据：4 个账号、科室、药房、药品、一条问诊和一张待审核处方 | 第 5 轮 |
 | `../docs/database/table-list.md` | 表清单：中文名、分类、主键、关键字段、关联 | R1 |
 | `../docs/database/dictionary.xlsx` | 数据字典：表清单、248 个字段、索引、外键 | 由 DDL 解析生成 |
 | `../docs/database/er.md` | 表关系说明与 ER 图 | R1 |
@@ -118,8 +120,8 @@ FLYWAY_ENABLED=true mvn spring-boot:run
 | R1 | `schema.sql`、数据字典、ER 图、部署图 | 表清单、核心字段、索引与安全列草案 | 已提交 |
 | R2 | `V002__core.sql` | 24 张表落成可执行脚本，接入 Flyway | 已提交 |
 | R3 | `V003__auth_consult.sql`、`er.md` | 会话/消息字段对齐代码、补查询索引 | 已提交 |
-| R4 | `V004__prescription.sql`、`audit.md` | 处方/审计表、版本字段、哈希链 | 待做 |
-| R5 | `deploy/`、`seed.sql` | 演示部署、种子数据、一键启动 | 待做 |
+| R4 | `V004__prescription.sql` | 处方/审核表、版本字段、索引 | 已提交 |
+| R5 | `V005__circulation.sql`、`seed.sql`、`deploy/` | 流转索引、演示数据、一键启动 | 已提交 |
 | R6 | `README.md`、报告部署章节 | 部署说明、最终文档 | 待做 |
 
 ## 7. 数据与合规

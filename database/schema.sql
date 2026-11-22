@@ -1,8 +1,8 @@
 -- =============================================================================
--- 智慧医疗在线问诊与处方流转平台 —— 数据库 Schema（v0.3）
+-- 智慧医疗在线问诊与处方流转平台 —— 数据库 Schema（v0.4）
 -- -----------------------------------------------------------------------------
 -- 文件      : database/schema.sql
--- 轮次      : 第 1 轮起草，第 3、4 轮按代码调整
+-- 轮次      : 第 1 轮起草，第 3~5 轮按代码调整
 -- 负责人    : 魏宇佳
 -- 对应报告  : 表 3-6（表清单）、表 3-7 ~ 表 3-13（核心表字段）、图 3-5（ER 图）
 -- 目标库    : MySQL 8.0.16+（CHECK 约束从 8.0.16 起生效）
@@ -13,7 +13,8 @@
 --     V002__core.sql           建 24 张表（第 2 轮）
 --     V003__auth_consult.sql   问诊字段与索引调整（第 3 轮）
 --     V004__prescription.sql   处方、明细、审核记录（第 4 轮）
---   本文件已同步这些变化，目前共 25 张表。
+--     V005__circulation.sql    流转单索引（第 5 轮）
+--   演示数据见 database/seed.sql，本文件已同步到 25 张表。
 -- -----------------------------------------------------------------------------
 -- 约定（详见 docs/database/conventions.md）：
 --   * 主键统一 BIGINT AUTO_INCREMENT，业务编号单独建唯一键；
@@ -476,7 +477,8 @@ CREATE TABLE circulation_order (
     UNIQUE KEY uk_circ_no (circulation_no),
     UNIQUE KEY uk_rx (rx_id),
     UNIQUE KEY uk_idem (idempotency_key),
-    KEY idx_pharmacy_status (pharmacy_id, status, created_at),
+    KEY idx_circ_pharmacy (pharmacy_id, id),
+    KEY idx_circ_status (status, id),
     CONSTRAINT fk_circ_rx FOREIGN KEY (rx_id) REFERENCES prescription (id),
     CONSTRAINT fk_circ_pharmacy FOREIGN KEY (pharmacy_id) REFERENCES pharmacy (id),
     CONSTRAINT ck_circ_status CHECK (status IN ('CREATED', 'ACCEPTED', 'REDEEMED', 'REJECTED'))

@@ -2,6 +2,7 @@ package com.medical.platform.circulation.application;
 
 import com.medical.platform.circulation.domain.CirculationOrder;
 import com.medical.platform.circulation.domain.DispenseRecord;
+import com.medical.platform.prescription.application.PrescriptionView;
 
 import java.time.LocalDateTime;
 
@@ -24,9 +25,16 @@ public record CirculationView(
         LocalDateTime redeemedAt,
         String rejectReason,
         int version,
-        DispenseView dispenseRecord) {
+        DispenseView dispenseRecord,
+        PrescriptionView prescription) {
 
     public static CirculationView from(CirculationOrder order, DispenseRecord dispense) {
+        return from(order, dispense, null);
+    }
+
+    public static CirculationView from(CirculationOrder order,
+                                       DispenseRecord dispense,
+                                       PrescriptionView prescription) {
         return new CirculationView(
                 order.getId(),
                 order.getCirculationNo(),
@@ -39,6 +47,7 @@ public record CirculationView(
                 order.getRedeemedAt(),
                 order.getRejectReason(),
                 order.getVersion(),
-                dispense == null ? null : DispenseView.from(dispense));
+                dispense == null ? null : DispenseView.from(dispense),
+                prescription);
     }
 }

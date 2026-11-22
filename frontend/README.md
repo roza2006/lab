@@ -117,11 +117,31 @@ POST /api/v1/prescriptions/{id}/reviews/reject  驳回
 
 > 药品目录（`DRUG_CATALOG`）暂为前端演示数据，待 R4 目录服务/接口就绪后替换；审核接口由 R4-B 实现，mock 已先行支持。
 
-## 7. 页面骨架约定
+## 7. R5 流转与核销
 
-尚未进入实现轮次的页面（药师发药、管理端等）仍通过 `src/components/PageStub.vue` 渲染“标题 + 用例编号 + 目标说明 + 计划区域”，评审时可直接对照用例。实现时替换对应 `views/<角色>/*.vue` 即可，路由与菜单无需改动。
+| 页面 | 路由 | 用例 | 说明 |
+|---|---|---|---|
+| 药房工作台 | `/pharmacist/dispense` | UC-H05 / UC-F01 / UC-F02 | 待接方 / 待核销 / 已核销分栏；接方、拒接、核验身份后核销（强制幂等键） |
+| 我的处方 | `/patient/prescriptions` | UC-P06 | 处方列表与状态筛选 |
+| 处方详情与追踪 | `/patient/prescriptions/:id` | UC-P06 | 药品明细、金额与流转/核销时间线 |
 
-## 8. 边界
+接口收敛在 `src/api/circulation.ts`（契约尚未定义流转端点，先按《代码实现方案》§5 收敛）：
+
+```text
+GET  /api/v1/circulations                流转单列表（药房 / 患者按归属过滤）
+POST /api/v1/circulations/{id}/accept    药房接方
+POST /api/v1/circulations/{id}/reject    药房拒接（必填原因）
+POST /api/v1/circulations/{id}/redeem    核销（Idempotency-Key 必带；批号 + 取药凭证）
+GET  /api/v1/prescriptions/{id}/trace    处方全链路追踪
+```
+
+> 核销重复提交时：同一幂等键返回首次结果，不同幂等键返回 409 `RX_ALREADY_REDEEMED`；流转/核销接口由 R5-B 实现，mock 已先行支持。
+
+## 8. 页面骨架约定
+
+尚未进入实现轮次的页面（管理端、药房发药后续扩展等）仍通过 `src/components/PageStub.vue` 渲染“标题 + 用例编号 + 目标说明 + 计划区域”，评审时可直接对照用例。实现时替换对应 `views/<角色>/*.vue` 即可，路由与菜单无需改动。
+
+## 9. 边界
 
 - 本目录只放前端代码；接口契约由 B 在 `docs/design/api-contract.md` 维护；
 - 不提交 `node_modules/`、`dist/`、`.env*`（已在根 `.gitignore` 中忽略）；

@@ -9,6 +9,7 @@ import com.medical.platform.circulation.infrastructure.mapper.CirculationOrderMa
 import com.medical.platform.circulation.infrastructure.mapper.DispenseRecordMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,6 +22,13 @@ public class MyBatisCirculationRepository implements CirculationRepository {
                                         DispenseRecordMapper dispenseMapper) {
         this.orderMapper = orderMapper;
         this.dispenseMapper = dispenseMapper;
+    }
+
+    @Override
+    public CirculationOrder insert(CirculationOrder order) {
+        CirculationOrderPO po = toPO(order);
+        orderMapper.insert(po);
+        return toDomain(po);
     }
 
     @Override
@@ -52,6 +60,62 @@ public class MyBatisCirculationRepository implements CirculationRepository {
                 .stream()
                 .findFirst()
                 .map(this::toDomain);
+    }
+
+    @Override
+    public boolean updateStatus(CirculationOrder order, int expectedVersion) {
+        int rows = orderMapper.update(null, Wrappers.<CirculationOrderPO>lambdaUpdate()
+                .eq(CirculationOrderPO::getId, order.getId())
+                .eq(CirculationOrderPO::getVersion, expectedVersion)
+                .set(CirculationOrderPO::getStatus, order.getStatus().name())
+                .set(CirculationOrderPO::getAcceptedAt, order.getAcceptedAt())
+                .set(CirculationOrderPO::getRejectReason, order.getRejectReason())
+                .set(CirculationOrderPO::getVersion, order.getVersion())
+                .set(CirculationOrderPO::getUpdatedAt, order.getUpdatedAt()));
+        return rows > 0;
+    }
+
+    @Override
+    public List<CirculationOrder> findForPatient(Long patientId, CirculationStatus status,
+                                                 int offset, int size) {
+        return mapRows(orderMapper.selectPatientPage(patientId, statusName(status), offset, size));
+    }
+
+    @Override
+    public long countForPatient(Long patientId, CirculationStatus status) {
+        return orderMapper.countPatient(patientId, statusName(status));
+    }
+
+    @Override
+    public List<CirculationOrder> findForDoctor(Long doctorId, CirculationStatus status,
+                                                int offset, int size) {
+        return mapRows(orderMapper.selectDoctorPage(doctorId, statusName(status), offset, size));
+    }
+
+    @Override
+    public long countForDoctor(Long doctorId, CirculationStatus status) {
+        return orderMapper.countDoctor(doctorId, statusName(status));
+    }
+
+    @Override
+    public List<CirculationOrder> findForPharmacy(Long pharmacyId, CirculationStatus status,
+                                                  int offset, int size) {
+        return mapRows(orderMapper.selectPharmacyPage(pharmacyId, statusName(status), offset, size));
+    }
+
+    @Override
+    public long countForPharmacy(Long pharmacyId, CirculationStatus status) {
+        return orderMapper.countPharmacy(pharmacyId, statusName(status));
+    }
+
+    @Override
+    public List<CirculationOrder> findAll(CirculationStatus status, int offset, int size) {
+        return mapRows(orderMapper.selectAllPage(statusName(status), offset, size));
+    }
+
+    @Override
+    public long countAll(CirculationStatus status) {
+        return orderMapper.countAll(statusName(status));
     }
 
     @Override
@@ -97,6 +161,32 @@ public class MyBatisCirculationRepository implements CirculationRepository {
             return Optional.empty();
         }
         return Optional.ofNullable(orderMapper.selectPharmacistPharmacyId(userId));
+    }
+
+    private CirculationOrderPO toPO(CirculationOrder order) {
+        CirculationOrderPO po = new CirculationOrderPO();
+        po.setId(order.getId());
+        po.setCirculationNo(order.getCirculationNo());
+        po.setRxId(order.getRxId());
+        po.setPharmacyId(order.getPharmacyId());
+        po.setStatus(order.getStatus().name());
+        po.setIdempotencyKey(order.getIdempotencyKey());
+        po.setCirculatedAt(order.getCirculatedAt());
+        po.setAcceptedAt(order.getAcceptedAt());
+        po.setRejectReason(order.getRejectReason());
+        po.setRedeemedAt(order.getRedeemedAt());
+        po.setVersion(order.getVersion());
+        po.setCreatedAt(order.getCreatedAt());
+        po.setUpdatedAt(order.getUpdatedAt());
+        return po;
+    }
+
+    private List<CirculationOrder> mapRows(List<CirculationOrderPO> rows) {
+        return rows.stream().map(this::toDomain).toList();
+    }
+
+    private String statusName(CirculationStatus status) {
+        return status == null ? null : status.name();
     }
 
     private CirculationOrder toDomain(CirculationOrderPO po) {

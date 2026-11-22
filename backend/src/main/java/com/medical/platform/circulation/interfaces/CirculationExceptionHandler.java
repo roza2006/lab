@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -23,6 +24,16 @@ public class CirculationExceptionHandler {
     public ResponseEntity<ProblemDetail> handleCirculation(CirculationException ex) {
         CirculationError error = ex.error();
         return problem(HttpStatus.valueOf(error.httpStatus()), error.code(), ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ProblemDetail> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(error -> error.getDefaultMessage() == null ? "参数不合法" : error.getDefaultMessage())
+                .orElse("参数不合法");
+        return problem(HttpStatus.UNPROCESSABLE_ENTITY,
+                CirculationError.CIRC_VALIDATION_FAILED.code(), message);
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})

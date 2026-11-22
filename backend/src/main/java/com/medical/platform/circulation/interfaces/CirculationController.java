@@ -1,35 +1,78 @@
 package com.medical.platform.circulation.interfaces;
 
+import com.medical.platform.circulation.application.CirculationAppService;
+import com.medical.platform.circulation.application.CirculationPageView;
 import com.medical.platform.circulation.application.CirculationRedeemAppService;
 import com.medical.platform.circulation.application.CirculationView;
+import com.medical.platform.circulation.application.CreateCirculationCommand;
 import com.medical.platform.circulation.application.RedeemCommand;
+import com.medical.platform.circulation.interfaces.dto.CreateCirculationRequest;
 import com.medical.platform.circulation.interfaces.dto.RedeemRequest;
+import com.medical.platform.circulation.interfaces.dto.RejectCirculationRequest;
 import com.medical.platform.identity.application.security.CurrentUser;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 药房核销接口（R5-B）。
- *
- * <p>{@code POST /api/v1/circulations/{id}/redeem} 强制 {@code Idempotency-Key}：
- * 同一 key 重试返回首次结果，不会重复发药；缺 key 直接 400。
- *
- * <p>Controller 只做参数绑定，角色/药房归属/状态判断都在
- * {@link CirculationRedeemAppService}，避免“接口层放行、服务层假设已鉴权”。
+ * 流转接口：创建、列表、详情、接方、拒接（R5-A）与核销（R5-B）。
  */
 @RestController
 @RequestMapping("/api/v1/circulations")
 public class CirculationController {
 
+    private final CirculationAppService circulationAppService;
     private final CirculationRedeemAppService redeemAppService;
 
-    public CirculationController(CirculationRedeemAppService redeemAppService) {
+    public CirculationController(CirculationAppService circulationAppService,
+                                 CirculationRedeemAppService redeemAppService) {
+        this.circulationAppService = circulationAppService;
         this.redeemAppService = redeemAppService;
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CirculationView create(@AuthenticationPrincipal CurrentUser currentUser,
+                                  @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+                                  @Valid @RequestBody CreateCirculationRequest request) {
+        return circulationAppService.create(currentUser, new CreateCirculationCommand(
+                request.rxId(), request.pharmacyId(), idempotencyKey));
+    }
+
+    @GetMapping
+    public CirculationPageView list(@AuthenticationPrincipal CurrentUser currentUser,
+                                    @RequestParam(required = false) String status,
+                                    @RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "20") int size) {
+        return circulationAppService.list(currentUser, status, page, size);
+    }
+
+    @GetMapping("/{id}")
+    public CirculationView detail(@AuthenticationPrincipal CurrentUser currentUser,
+                                  @PathVariable Long id) {
+        return circulationAppService.detail(currentUser, id);
+    }
+
+    @PostMapping("/{id}/accept")
+    public CirculationView accept(@AuthenticationPrincipal CurrentUser currentUser,
+                                  @PathVariable Long id) {
+        return circulationAppService.accept(currentUser, id);
+    }
+
+    @PostMapping("/{id}/reject")
+    public CirculationView reject(@AuthenticationPrincipal CurrentUser currentUser,
+                                  @PathVariable Long id,
+                                  @RequestBody(required = false) RejectCirculationRequest request) {
+        return circulationAppService.reject(currentUser, id, request == null ? null : request.reason());
     }
 
     @PostMapping("/{id}/redeem")

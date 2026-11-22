@@ -8,8 +8,8 @@
 |---|---|
 | 用例前缀 | `CI`（幂等与并发）、`ST`（安全/越权） |
 | 覆盖范围 | 流转单接方、核销、重放、并发核销、幂等键缺失、越权与轨迹查询 |
-| 前置依赖 | R5-A 流转单与药房接方、R5-B 核销与幂等记录（`circulation_order` / `dispense_record` / `idempotency_record`） |
-| 当前状态 | R5-B（李梓语）核销与幂等实现已合入，13 例全部启用并通过（`mvn -B -ntp test`：68 例、0 失败、0 跳过） |
+| 前置依赖 | 刘飞燕的流转单与接方、李梓语的核销与幂等记录（`circulation_order` / `dispense_record` / `idempotency_record`） |
+| 当前状态 | 李梓语核销与幂等实现已合入，13 例全部启用并通过（`mvn -B -ntp test`：68 例、0 失败、0 跳过） |
 
 ---
 
@@ -25,7 +25,7 @@
 | R4 | 缺少 `Idempotency-Key` 直接拒绝（400），不进入业务逻辑 | 无任何写库副作用 |
 
 幂等键的落库形式：`idempotency_record` 唯一键 `(biz_type, biz_id, operation, idem_key)`。
-R5-B 实现采用“事务内先锁流转单 → 复查幂等 → 业务与 SUCCESS 记录同事务提交”，
+李梓语 R5 实现采用“事务内先锁流转单 → 复查幂等 → 业务与 SUCCESS 记录同事务提交”，
 冲突时回放首次结果（见 `docs/design/circulation-redeem.md` §5）。
 
 ---
@@ -82,24 +82,24 @@ CountDownLatch start = new CountDownLatch(1);
 ## 4 前置数据与启用方式
 
 1. `schema-test.sql` 已增加三张表：`circulation_order`、`dispense_record`、`idempotency_record`
-   （字段以 `database/schema.sql` 为准，`V005__circulation.sql` 由魏宇佳在 R5-E 固化），并给
+   （字段以 `database/schema.sql` 为准，`V005__circulation.sql` 由魏宇佳在 R5 固化），并给
    `dispense_record.circulation_id` 建唯一索引；另加 `pharmacist_profile` 支撑药房范围校验。
 2. `CirculationIdempotencyTest#givenCirculatedOrder()` 已实现：直接写入 `CIRCULATED` 处方与
-   `ACCEPTED` 流转单，避免测试重复覆盖 R3/R4/R5-A 的接口链路；`givenOrder("CREATED")` 用于未接方用例。
-3. 12 个业务用例已去掉 `@Disabled`，执行 `mvn -B -ntp test -Dtest=CirculationIdempotencyTest` 全绿。
+   `ACCEPTED` 流转单，避免测试重复覆盖 R3/R4/刘飞燕 R5 的接口链路；`givenOrder("CREATED")` 用于未接方用例。
+3. 13 个业务用例已去掉 `@Disabled`，执行 `mvn -B -ntp test -Dtest=CirculationIdempotencyTest` 全绿。
 
 ## 5 与契约的待确认项
 
 | # | 问题 | 结论 |
 |---|---|---|
-| Q4 | 契约未定义流转/核销端点 | R5-B 已在 `docs/design/api-contract.md` §5.5 与 `openapi.yaml` 补 `POST /api/v1/circulations/{id}/redeem`、`GET /api/v1/prescriptions/{id}/trace`；接方端点由刘飞燕在 R5-A 补 |
-| Q5 | 重复接方是“幂等 200”还是“409” | 接方属 R5-A，本文件不覆盖 |
+| Q4 | 契约未定义流转/核销端点 | 李梓语 R5 已在 `docs/design/api-contract.md` §5.5 与 `openapi.yaml` 补 `POST /api/v1/circulations/{id}/redeem`、`GET /api/v1/prescriptions/{id}/trace`；接方端点由刘飞燕在 R5 补 |
+| Q5 | 重复接方是“幂等 200”还是“409” | 接方属刘飞燕 R5，本文件不覆盖 |
 | Q6 | 缺少幂等键返回 400 还是 422 | 已定为 400 `IDEMPOTENCY_KEY_REQUIRED`（未进入 Bean Validation） |
 
 ## 6 覆盖统计
 
 | 维度 | 数量 | 当前可执行 |
 |---|---|---|
-| 幂等与并发 | 11（CI-01 ~ CI-11） | 9（CI-01~CI-07、CI-10、CI-11；CI-08/CI-09 属 R5-A 接方与流转幂等） |
+| 幂等与并发 | 11（CI-01 ~ CI-11） | 9（CI-01~CI-07、CI-10、CI-11；CI-08/CI-09 属刘飞燕 R5 接方与流转幂等） |
 | 越权与认证 | 5（ST-12 ~ ST-16） | 5（全部） |
 | 合计 | 16 | 13 个测试方法（部分方法覆盖多条用例） |

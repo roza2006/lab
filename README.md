@@ -94,6 +94,7 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R5-刘飞燕：流转单创建、列表、药房接方与拒接（`backend/src/main/java/com/medical/platform/circulation`、`docs/design/circulation-order.md`）
 - [ ] R5-魏宇佳：V005 流转迁移、部署与种子数据
 - [x] R4-班国勇：安全文档（STRIDE 与隐私检查表）
+- [x] R6-刘飞燕：后端回归与测试报告（`docs/test/test-report.md`，72 例全绿）
 - [ ] R2：演示种子数据
 - [ ] R6：测试与发布
 

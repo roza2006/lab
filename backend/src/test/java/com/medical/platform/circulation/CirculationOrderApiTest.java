@@ -91,7 +91,7 @@ class CirculationOrderApiTest {
                         .header("Authorization", "Bearer " + login("pharmacist01"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"rxId\":" + rxId + "}"))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8))
                 .get("id").asText();
 

@@ -1,6 +1,7 @@
 package com.medical.platform.circulation.interfaces;
 
 import com.medical.platform.circulation.application.CirculationAppService;
+import com.medical.platform.circulation.application.CirculationCreateResult;
 import com.medical.platform.circulation.application.CirculationPageView;
 import com.medical.platform.circulation.application.CirculationRedeemAppService;
 import com.medical.platform.circulation.application.CirculationView;
@@ -12,6 +13,7 @@ import com.medical.platform.circulation.interfaces.dto.RejectCirculationRequest;
 import com.medical.platform.identity.application.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -40,12 +41,14 @@ public class CirculationController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CirculationView create(@AuthenticationPrincipal CurrentUser currentUser,
-                                  @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
-                                  @Valid @RequestBody CreateCirculationRequest request) {
-        return circulationAppService.create(currentUser, new CreateCirculationCommand(
-                request.rxId(), request.pharmacyId(), idempotencyKey));
+    public ResponseEntity<CirculationView> create(
+            @AuthenticationPrincipal CurrentUser currentUser,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @Valid @RequestBody CreateCirculationRequest request) {
+        CirculationCreateResult result = circulationAppService.create(currentUser,
+                new CreateCirculationCommand(request.rxId(), request.pharmacyId(), idempotencyKey));
+        HttpStatus status = result.created() ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(result.view());
     }
 
     @GetMapping

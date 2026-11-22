@@ -18,12 +18,12 @@
 | `design/er.md` | ER 图与表关系 | 魏宇佳 | 待 R2 |
 | `design/adr/` | 架构决策记录 | 刘飞燕 | 已提交 ADR-001（R2） |
 | `test/test-plan.md` | 测试策略、环境、进入/退出准则 | 班国勇 | 已提交（R1，待评审） |
-| `test/test-report.md` | 回归执行、缺陷与结论 | 刘飞燕 | 待 R6 |
+| `test/test-report.md` | 回归执行、缺陷与结论 | 刘飞燕 | 已提交（R6） |
 | `test/acceptance.md` | 最终验收用例 | 郝佳鑫 | 待 R6 |
-| `process/sprint-01.md` | 第 1 次迭代目标与完成情况 | 班国勇 | 待 R3 |
-| `process/review-01.md` | 需求/设计评审记录 | 班国勇 | 待 R3 |
-| `process/sprint-03.md` | 第 3 次迭代记录 | 班国勇 | 待 R5 |
-| `process/release-notes.md` | 版本与演示说明 | 班国勇 | 待 R5 |
+| `process/sprint-01.md` | 第 1 次迭代目标与完成情况 | 班国勇 | 已提交（R3） |
+| `process/review-01.md` | 需求/设计评审记录 | 班国勇 | 已提交（R3） |
+| `process/sprint-03.md` | 第 3 次迭代记录 | 班国勇 | 已提交（R5） |
+| `process/release-notes.md` | 版本与演示说明 | 班国勇 | 已提交（R5） |
 | `security/threat-model.md` | STRIDE、信任边界、威胁清单 | 班国勇 | 待 R4 |
 | `security/checklist.md` | 隐私与安全检查表 | 班国勇 | 待 R4 |
 | `report/` | 最终实验报告与过程证据包 | 魏宇佳 | 待 R6 |

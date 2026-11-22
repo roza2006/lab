@@ -58,6 +58,7 @@ deploy/      docker-compose、Nginx、部署说明
 
 - [提交计划](COMMIT_PLAN.md)：6 轮 × 6 人，每轮的任务、目录与 commit message
 - [文档索引](docs/README.md)：需求、设计、测试、过程、安全、报告
+- [核销与幂等设计](docs/design/circulation-redeem.md)：R5-B 核销、幂等键与发药记录
 - [AI 使用记录](docs/ai-usage.md)：工具、范围、人工修改与验证
 - [远程仓库重置说明](RESET_GUIDE.md)：已完成记录与回滚参考
 
@@ -89,9 +90,12 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R4-魏宇佳：V004 处方/明细/审核记录迁移，索引与字段对齐（`database/migrations/`）
 - [x] R4-郝佳鑫：处方状态机用例启用（17 例全绿；补齐 `RX_STATE_INVALID`、`PUT` 改草稿等断言）
 - [x] R5-郝佳鑫：流转核销幂等用例（重放/并发/越权，`docs/test/circulation-idempotency-cases.md`、`backend/src/test/java/com/medical/platform/circulation/CirculationIdempotencyTest.java`）
+- [x] R5-李梓语：核销、幂等键与发药记录（`backend/src/main/java/com/medical/platform/circulation`、`docs/design/circulation-redeem.md`）
+- [ ] R5-刘飞燕：流转单创建与药房接方
+- [ ] R5-魏宇佳：V005 流转迁移、部署与种子数据
 - [ ] R4-B/E/F：药师审核、处方迁移、安全文档
 - [ ] R2：演示种子数据
-- [ ] R5-A/B/E：流转核销后端与部署，R6：测试与发布
+- [ ] R6：测试与发布
 
 ## 8. 本地开发
 

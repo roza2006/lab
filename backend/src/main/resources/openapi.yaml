@@ -2,11 +2,11 @@ openapi: 3.0.3
 info:
   title: 互联网医院在线问诊与处方流转平台 API
   description: |
-    平台 v1 版本 HTTP API 契约，覆盖认证、图文问诊、电子处方与药师审核三个业务域。
+    平台 v1 版本 HTTP API 契约，覆盖认证、图文问诊、电子处方、药师审核与处方流转核销五个业务域。
     契约设计说明见 docs/design/api-contract.md。
   version: 1.0.0
   contact:
-    name: 李梓语（角色 B：问诊域、处方域负责人）
+    name: 李梓语（问诊域、处方域负责人）
 servers:
   - url: http://localhost:8080/api/v1
     description: 本地开发环境
@@ -19,6 +19,8 @@ tags:
     description: 电子处方
   - name: Review
     description: 药师处方审核
+  - name: Circulation
+    description: 处方流转、核销与全链路追踪
 security:
   - bearerAuth: []
 
@@ -473,6 +475,77 @@ paths:
           $ref: '#/components/responses/Conflict409'
         '422':
           $ref: '#/components/responses/ValidationError422'
+
+  # ---------- 流转与核销域（R5-B） ----------
+  /circulations/{id}/redeem:
+    post:
+      tags: [Circulation]
+      summary: 药房核销并发药（强制 Idempotency-Key）
+      description: |
+        流转单 ACCEPTED → REDEEMED，处方 CIRCULATED → REDEEMED，并追加一条发药记录。
+        同一 Idempotency-Key 重试返回首次结果；换 key 重复核销返回 409 RX_ALREADY_REDEEMED。
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: 客户端生成的幂等键，同一动作重试必须复用
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 64
+            example: 6f1c2a9e-4b7d-4f2a-9c1e-2d8b7a6f5e4d
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedeemRequest'
+      responses:
+        '200':
+          description: 核销成功，返回流转单与发药记录
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CirculationOrder'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
+        '409':
+          $ref: '#/components/responses/Conflict409'
+        '422':
+          $ref: '#/components/responses/ValidationError422'
+
+  /prescriptions/{id}/trace:
+    get:
+      tags: [Circulation]
+      summary: 处方全链路追踪
+      description: 返回“开方 → 审核 → 流转 → 接方 → 核销”时间线；患者、医生只能查看本人相关处方。
+      parameters:
+        - $ref: '#/components/parameters/PrescriptionId'
+      responses:
+        '200':
+          description: 处方轨迹
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionTrace'
+        '401':
+          $ref: '#/components/responses/Unauthorized401'
+        '403':
+          $ref: '#/components/responses/Forbidden403'
+        '404':
+          $ref: '#/components/responses/NotFound404'
 
 components:
   securitySchemes:
@@ -952,6 +1025,123 @@ components:
           type: string
           format: date-time
           example: 2026-11-06T15:00:00+08:00
+
+    # ---------- 流转与核销（R5-B） ----------
+    RedeemRequest:
+      type: object
+      properties:
+        batchNo:
+          type: string
+          maxLength: 64
+          description: 药品批号；省略时服务端生成 AUTO-<circulationNo>
+          example: B20261122-01
+        evidence:
+          type: string
+          maxLength: 255
+          description: 取药码、人脸流水号等核验凭证
+          example: PICKUP-123456
+
+    DispenseRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 88
+        batchNo:
+          type: string
+          example: B20261122-01
+        evidence:
+          type: string
+          example: PICKUP-123456
+        operatorId:
+          type: integer
+          format: int64
+          example: 1004
+        redeemedAt:
+          type: string
+          format: date-time
+          example: 2026-11-22T20:15:30+08:00
+
+    CirculationOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1001
+        circulationNo:
+          type: string
+          example: C202611220001
+        rxId:
+          type: integer
+          format: int64
+          example: 501
+        pharmacyId:
+          type: integer
+          format: int64
+          example: 1
+        status:
+          type: string
+          enum: [CREATED, ACCEPTED, REDEEMED, REJECTED]
+          example: REDEEMED
+        idempotencyKey:
+          type: string
+          description: 创建流转单时使用的幂等键
+        circulatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        acceptedAt:
+          type: string
+          format: date-time
+          nullable: true
+        redeemedAt:
+          type: string
+          format: date-time
+          nullable: true
+        rejectReason:
+          type: string
+          nullable: true
+        version:
+          type: integer
+          example: 3
+        dispenseRecord:
+          allOf:
+            - $ref: '#/components/schemas/DispenseRecord'
+          nullable: true
+
+    TraceEvent:
+      type: object
+      properties:
+        status:
+          type: string
+          example: REDEEMED
+        at:
+          type: string
+          format: date-time
+          example: 2026-11-22T20:15:30+08:00
+        actor:
+          type: string
+          example: 药师 #1004
+        note:
+          type: string
+          example: 药房核销并发药
+
+    PrescriptionTrace:
+      type: object
+      properties:
+        prescriptionId:
+          type: integer
+          format: int64
+          example: 501
+        status:
+          type: string
+          example: REDEEMED
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/TraceEvent'
 
     # ---------- 通用模型 ----------
     SimpleResult:

@@ -4,6 +4,7 @@
 DROP TABLE IF EXISTS idempotency_record;
 DROP TABLE IF EXISTS dispense_record;
 DROP TABLE IF EXISTS circulation_order;
+DROP TABLE IF EXISTS pharmacy;
 DROP TABLE IF EXISTS prescription_review;
 DROP TABLE IF EXISTS prescription_item;
 DROP TABLE IF EXISTS prescription;
@@ -122,6 +123,15 @@ CREATE TABLE pharmacist_profile (
 );
 
 CREATE UNIQUE INDEX uk_pharmacist_user ON pharmacist_profile (user_id);
+
+-- 合作药房：患者选择取药药房、药师归属校验都要用；测试库只保留状态校验所需字段。
+CREATE TABLE pharmacy (
+    id           BIGINT      NOT NULL PRIMARY KEY,
+    pharmacy_code VARCHAR(32) NOT NULL,
+    name         VARCHAR(128) NOT NULL,
+    license_no   VARCHAR(64) NOT NULL,
+    status       TINYINT     NOT NULL DEFAULT 1
+);
 
 -- 处方流转单（R5）：字段与 database/schema.sql 的 circulation_order 保持一致。
 CREATE TABLE circulation_order (

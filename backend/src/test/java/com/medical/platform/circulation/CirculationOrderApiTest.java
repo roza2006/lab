@@ -52,6 +52,7 @@ class CirculationOrderApiTest {
         jdbcTemplate.update("DELETE FROM idempotency_record");
         jdbcTemplate.update("DELETE FROM dispense_record");
         jdbcTemplate.update("DELETE FROM circulation_order");
+        jdbcTemplate.update("DELETE FROM pharmacy");
         jdbcTemplate.update("DELETE FROM prescription_review");
         jdbcTemplate.update("DELETE FROM prescription_item");
         jdbcTemplate.update("DELETE FROM prescription");
@@ -66,8 +67,11 @@ class CirculationOrderApiTest {
         insertUser(3L, "pharmacist01", hash, "PHARMACIST");
         insertUser(4L, "pharmacy02", hash, "PHARMACIST");
         insertUser(5L, "admin", hash, "ADMIN");
+        insertUser(6L, "patient02", hash, "PATIENT");
         insertPharmacist(3L, "药师甲", 1L);
         insertPharmacist(4L, "药师乙", 2L);
+        insertPharmacy(1L, "PH001");
+        insertPharmacy(2L, "PH002");
     }
 
     @Test
@@ -151,7 +155,7 @@ class CirculationOrderApiTest {
     }
 
     @Test
-    @DisplayName("未审核通过的处方不能流转；患者不能创建流转单")
+    @DisplayName("未审核通过的处方不能流转，即使患者本人发起也返回状态错误")
     void onlyApprovedPrescriptionCanCirculate() throws Exception {
         long rxId = prescription("DRAFT");
         mockMvc.perform(post(CIRC)
@@ -164,9 +168,55 @@ class CirculationOrderApiTest {
         mockMvc.perform(post(CIRC)
                         .header("Authorization", "Bearer " + login("patient01"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"rxId\":" + rxId + "}"))
+                        .content("{\"rxId\":" + rxId + ",\"pharmacyId\":1}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("CIRC_STATE_INVALID"));
+    }
+
+    @Test
+    @DisplayName("患者可为本人 APPROVED 处方选择药房并流转，重复提交返回同一张")
+    void patientCanCirculateOwnApprovedPrescription() throws Exception {
+        long rxId = approvedPrescription();
+
+        MvcResult first = mockMvc.perform(post(CIRC)
+                        .header("Authorization", "Bearer " + login("patient01"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"rxId\":" + rxId + ",\"pharmacyId\":1}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.pharmacyId").value(1))
+                .andExpect(jsonPath("$.status").value("CREATED"))
+                .andExpect(jsonPath("$.prescription.status").value("CIRCULATED"))
+                .andReturn();
+        long firstId = objectMapper.readTree(first.getResponse().getContentAsString(StandardCharsets.UTF_8))
+                .get("id").asLong();
+
+        mockMvc.perform(post(CIRC)
+                        .header("Authorization", "Bearer " + login("patient01"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"rxId\":" + rxId + ",\"pharmacyId\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(firstId))
+                .andExpect(jsonPath("$.status").value("CREATED"));
+    }
+
+    @Test
+    @DisplayName("患者不能流转他人处方，也不能选择不存在或已停用的药房")
+    void patientCirculationScopeAndPharmacyAreChecked() throws Exception {
+        long rxId = approvedPrescription();
+
+        mockMvc.perform(post(CIRC)
+                        .header("Authorization", "Bearer " + login("patient02"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"rxId\":" + rxId + ",\"pharmacyId\":1}"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("SCOPE_DENIED"));
+                .andExpect(jsonPath("$.code").value("RX_SCOPE_DENIED"));
+
+        mockMvc.perform(post(CIRC)
+                        .header("Authorization", "Bearer " + login("patient01"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"rxId\":" + rxId + ",\"pharmacyId\":999}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("CIRC_PHARMACY_INVALID"));
     }
 
     private long createAsPharmacist(long rxId, String username) throws Exception {
@@ -219,5 +269,11 @@ class CirculationOrderApiTest {
                         + "(user_id, real_name, pharmacy_id, license_no, review_right, status) "
                         + "VALUES (?, ?, ?, ?, 1, 1)",
                 userId, realName, pharmacyId, "LIC-" + userId);
+    }
+
+    private void insertPharmacy(Long id, String code) {
+        jdbcTemplate.update("INSERT INTO pharmacy "
+                        + "(id, pharmacy_code, name, license_no, status) VALUES (?, ?, ?, ?, 1)",
+                id, code, "测试药房" + id, "PH-LIC-" + id);
     }
 }

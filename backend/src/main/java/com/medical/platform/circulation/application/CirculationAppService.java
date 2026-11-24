@@ -54,13 +54,14 @@ public class CirculationAppService {
      */
     @Transactional
     public CirculationCreateResult create(CurrentUser user, CreateCirculationCommand command) {
-        Long pharmacyId = resolvePharmacy(user, command.pharmacyId());
         Prescription prescription = loadPrescription(command.rxId());
+        Long pharmacyId = resolvePharmacy(user, command.pharmacyId(), prescription);
 
         CirculationOrder existing = circulationRepository
                 .findByPrescriptionId(prescription.getId())
                 .orElse(null);
         if (existing != null) {
+            authorizeExisting(user, prescription, existing, pharmacyId);
             return new CirculationCreateResult(viewOf(existing), false);
         }
         if (prescription.getStatus() != PrescriptionStatus.APPROVED) {
@@ -170,18 +171,71 @@ public class CirculationAppService {
         return CirculationView.from(order, dispense, PrescriptionView.from(prescription));
     }
 
-    private Long resolvePharmacy(CurrentUser user, Long requestedPharmacyId) {
+    /**
+     * 解析流转目标药房。
+     *
+     * <p>v1 口径：患者可为本人已通过处方选择取药药房；药师只能流转到本人所属药房；
+     * 管理员可指定药房。三条路径都要求药房处于启用状态。
+     */
+    private Long resolvePharmacy(CurrentUser user, Long requestedPharmacyId,
+                                 Prescription prescription) {
+        if (user == null) {
+            throw new CirculationException(CirculationError.SCOPE_DENIED);
+        }
         String role = user.roleCode();
         if (ROLE_ADMIN.equals(role)) {
-            if (requestedPharmacyId == null || requestedPharmacyId <= 0) {
-                throw new CirculationException(CirculationError.CIRC_PHARMACY_INVALID);
-            }
+            requireActivePharmacy(requestedPharmacyId);
             return requestedPharmacyId;
         }
         if (ROLE_PHARMACIST.equals(role)) {
-            return requirePharmacy(user);
+            Long pharmacyId = requirePharmacy(user);
+            if (!circulationRepository.isActivePharmacy(pharmacyId)) {
+                throw new CirculationException(CirculationError.CIRC_PHARMACY_INVALID,
+                        "当前药师所属药房已停用，不能流转");
+            }
+            return pharmacyId;
+        }
+        if (ROLE_PATIENT.equals(role)) {
+            if (!prescription.isOwnedByPatient(user.id())) {
+                throw new CirculationException(CirculationError.RX_SCOPE_DENIED);
+            }
+            requireActivePharmacy(requestedPharmacyId);
+            return requestedPharmacyId;
         }
         throw new CirculationException(CirculationError.SCOPE_DENIED);
+    }
+
+    private void requireActivePharmacy(Long pharmacyId) {
+        if (!circulationRepository.isActivePharmacy(pharmacyId)) {
+            throw new CirculationException(CirculationError.CIRC_PHARMACY_INVALID,
+                    "药房不存在或已停用，请选择其他药房");
+        }
+    }
+
+    /**
+     * 重复创建命中已有流转单时，仍要按角色校验可见性，避免患者或别家药房
+     * 通过“重复建单”拿到不属于自己的流转单。
+     */
+    private void authorizeExisting(CurrentUser user,
+                                   Prescription prescription,
+                                   CirculationOrder existing,
+                                   Long pharmacyId) {
+        String role = user.roleCode();
+        if (ROLE_PATIENT.equals(role)) {
+            if (!prescription.isOwnedByPatient(user.id())) {
+                throw new CirculationException(CirculationError.RX_SCOPE_DENIED);
+            }
+            return;
+        }
+        if (ROLE_PHARMACIST.equals(role)) {
+            if (!existing.belongsToPharmacy(pharmacyId)) {
+                throw new CirculationException(CirculationError.RX_SCOPE_DENIED);
+            }
+            return;
+        }
+        if (!ROLE_ADMIN.equals(role)) {
+            throw new CirculationException(CirculationError.SCOPE_DENIED);
+        }
     }
 
     private Long requirePharmacy(CurrentUser user) {

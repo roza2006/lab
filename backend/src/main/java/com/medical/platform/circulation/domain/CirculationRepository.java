@@ -52,4 +52,10 @@ public interface CirculationRepository {
      * 没有档案的账号视为未绑定药房，不能核销。
      */
     Optional<Long> findPharmacistPharmacyId(Long userId);
+
+    /**
+     * 药房是否处于启用状态。患者为本人处方选择药房时必须校验，
+     * 避免把流转单写到不存在或已停用的药房。
+     */
+    boolean isActivePharmacy(Long pharmacyId);
 }

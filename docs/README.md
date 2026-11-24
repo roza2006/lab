@@ -26,8 +26,10 @@
 | `process/release-notes.md` | 版本与演示说明 | 班国勇 | 已提交（R5） |
 | `security/threat-model.md` | STRIDE、信任边界、威胁清单 | 班国勇 | 待 R4 |
 | `security/checklist.md` | 隐私与安全检查表 | 班国勇 | 待 R4 |
+| `security/r6-hardening.md` | R6 限流、越权与处方状态边界修复说明 | 李梓语 | 已提交（R6） |
 | `report/` | 最终实验报告与过程证据包 | 魏宇佳 | 待 R6 |
 | `demo/demo-script.md` | 答辩演示脚本 | 班国勇 | 待 R6 |
+| `demo/ui-walkthrough.md` | 四端演示走查与截图（R6-C） | 代香晰 | 已提交（R6） |
 | `ai-usage.md` | AI 工具、范围、人工修改、验证 | 全员 | 持续更新 |
 
 ## 2. 文档之间的追踪

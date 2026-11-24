@@ -69,14 +69,24 @@ public class PrescriptionAppService {
         return PrescriptionView.from(prescriptionRepository.insert(prescription));
     }
 
-    /** 修改草稿：整体替换诊断和明细，仅开方医生可操作。 */
+    /**
+     * 修改草稿：整体替换诊断和明细，仅开方医生可操作。
+     *
+     * <p>R6-B 起放行驳回态：{@code REJECTED} 先经聚合的 {@code revise()} 退回 {@code DRAFT}，
+     * 再替换明细，最后用一次版本条件更新落库。这样医生在驳回后可以直接点“保存并重新提交”，
+     * 与 {@code openapi.yaml} 中 PUT“修改草稿/驳回态处方”的契约一致，也不会留下绕过状态机的入口。
+     */
     @Transactional
     public PrescriptionView update(CurrentUser user, Long id, SavePrescriptionCommand command) {
         Prescription prescription = load(id);
         requireDoctorOwner(user, prescription);
 
+        LocalDateTime now = LocalDateTime.now();
         int expectedVersion = prescription.getVersion();
-        prescription.replaceItems(command.diagnosis(), toItems(command), LocalDateTime.now());
+        if (prescription.getStatus() == PrescriptionStatus.REJECTED) {
+            prescription.revise(now);
+        }
+        prescription.replaceItems(command.diagnosis(), toItems(command), now);
         prescriptionRepository.replaceItems(id, prescription.getItems());
         if (!prescriptionRepository.updateHeader(prescription, expectedVersion)) {
             throw new PrescriptionException(PrescriptionError.RX_VERSION_CONFLICT);

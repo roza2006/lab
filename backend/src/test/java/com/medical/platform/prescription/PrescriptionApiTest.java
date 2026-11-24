@@ -72,6 +72,7 @@ class PrescriptionApiTest {
 
     @BeforeEach
     void seedUsers() {
+        jdbcTemplate.update("DELETE FROM prescription_review");
         jdbcTemplate.update("DELETE FROM prescription_item");
         jdbcTemplate.update("DELETE FROM prescription");
         jdbcTemplate.update("DELETE FROM consultation_message");
@@ -82,6 +83,7 @@ class PrescriptionApiTest {
         insertUser(1L, "patient01", hash, "PATIENT");
         insertUser(2L, "doctor01", hash, "DOCTOR");
         insertUser(3L, "doctor02", hash, "DOCTOR");
+        insertUser(4L, "pharmacist01", hash, "PHARMACIST");
     }
 
     @Test
@@ -147,6 +149,60 @@ class PrescriptionApiTest {
                         .header("Authorization", "Bearer " + login("doctor01")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("RX_STATE_INVALID"));
+    }
+
+    @Test
+    @DisplayName("药师驳回后医生改明细退回草稿，并可重新提交")
+    void rejectedPrescriptionCanBeRevisedAndResubmitted() throws Exception {
+        String rxId = createPrescription(acceptedSession(), "doctor01");
+        submit(rxId, "doctor01");
+        reject(rxId, "剂量与诊断不符，请核对后重新提交");
+
+        mockMvc.perform(put(BASE + "/prescriptions/" + rxId)
+                        .header("Authorization", "Bearer " + login("doctor01"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(RX_BODY_ONE_ITEM))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("DRAFT"))
+                .andExpect(jsonPath("$.version").value(5))
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.rejectReason").doesNotExist());
+
+        mockMvc.perform(post(BASE + "/prescriptions/" + rxId + "/submit")
+                        .header("Authorization", "Bearer " + login("doctor01")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PENDING_REVIEW"));
+    }
+
+    @Test
+    @DisplayName("非开方医生不能修改驳回态处方")
+    void otherDoctorCannotReviseRejectedPrescription() throws Exception {
+        String rxId = createPrescription(acceptedSession(), "doctor01");
+        submit(rxId, "doctor01");
+        reject(rxId, "诊断依据不足，请补充检查结果后重提");
+
+        mockMvc.perform(put(BASE + "/prescriptions/" + rxId)
+                        .header("Authorization", "Bearer " + login("doctor02"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(RX_BODY_ONE_ITEM))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("RX_SCOPE_DENIED"));
+    }
+
+    private void submit(String rxId, String doctorUsername) throws Exception {
+        mockMvc.perform(post(BASE + "/prescriptions/" + rxId + "/submit")
+                        .header("Authorization", "Bearer " + login(doctorUsername)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PENDING_REVIEW"));
+    }
+
+    private void reject(String rxId, String comment) throws Exception {
+        mockMvc.perform(post(BASE + "/prescriptions/" + rxId + "/reviews/reject")
+                        .header("Authorization", "Bearer " + login("pharmacist01"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("comment", comment))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.action").value("REJECTED"));
     }
 
     private String acceptedSession() throws Exception {

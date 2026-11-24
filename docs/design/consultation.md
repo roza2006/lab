@@ -4,7 +4,7 @@
 |---|---|
 | 版本 | v1.0 |
 | 更新日期 | 2026-11-10 |
-| 负责人 | 李梓语（角色 B：问诊域、处方域） |
+| 负责人 | 李梓语（问诊域、处方域） |
 | 对应轮次 | 第 3 轮：认证与图文问诊 |
 | 对应提交 | `feat(consult): add session and message flow [R3][李梓语]` |
 | 依据文档 | `docs/design/api-contract.md` v1.0、`backend/src/main/resources/openapi.yaml`、`docs/design/domain-model.md` §5.1/§8.2/§11、`docs/requirements/use-cases.md` UC-P03/P04、UC-D01/D02 |

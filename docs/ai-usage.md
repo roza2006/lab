@@ -35,6 +35,7 @@
 | 2026-11-24 | 代香晰 | DeepSeek Harness（deepseek 模型） | 打磨演示流程：补医生队列/接诊会话、患者选药房流转，按 R5 后端流转实现对齐接口，并生成四端演示截图与走查文档 | 页面与 API 适配、mock 接诊/流转接口、`docs/demo/ui-walkthrough.md` 与 12 张截图 | 待代香晰复核：真实后端联调、演示脚本与答辩口径 | `pnpm build` 通过；mock 实测医生接诊→开方→药师审核→患者流转→药房核销全链路 |
 | 2026-11-24 | 李梓语 | DeepSeek Harness（deepseek 模型） | 实现 R6 安全加固：新增登录/消息/全局限流过滤器，放行驳回态处方修改并补 OpenAPI、测试与 `docs/security/r6-hardening.md` | 限流过滤器、阈值配置、`REJECTED→DRAFT` 修改链路、测试与文档初稿 | 人工确认阈值与单机实现取舍、复用 PUT 而非新增端点、驳回态版本与字段清空、残余风险表述 | `mvn -B -ntp test`：80 例运行，0 失败，0 跳过；新增 3 例（登录 429、驳回后修改重提、非本人修改 403） |
 | 2026-11-24 | 刘飞燕 | DeepSeek Harness（deepseek 模型） | 统一 v1 架构口径与患者流转：补患者本人处方流转与药房校验，重画 ER 图、拆分目标/单机部署图，改需求/用例/领域/API/发布/测试文档，补局域网多机说明 | 代码改动、2 个接口用例、ER 与部署图、文档修订、局域网说明 | 人工决定“审核阶段全平台、流转阶段按药房隔离”的 v1 口径；患者流转只允许本人 `APPROVED` 处方并校验药房启用；部署图区分目标态与当前 compose | `mvn -B -ntp test`：82 例通过、0 失败、0 跳过；`pnpm build` 通过（仅有 chunk >500 kB 警告）；文档与 `schema.sql`/Controller 逐条对照 |
+| 2026-11-24 | 魏宇佳 | DeepSeek Harness（deepseek 模型） | 写 `docs/report/deployment.md` 与 `docs/report/README.md`：部署步骤、演示账号、排错表，以及按报告章节组织的交付物索引；补 `deploy/env.example`，重写 README 的本地开发小节 | 文档初稿、索引表、环境变量示例 | 对照 `docker-compose.yml`、`seed.sql` 核对账号、端口和初始化顺序；把 README 里“第 2 轮起”“骨架加入后”这类过时说法换掉 | 脚本检查新增 markdown 的相对链接均可解析；`env.example` 的变量名与 compose 里的占位符一一对应 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

@@ -5,6 +5,8 @@ import { ElMessage } from 'element-plus'
 
 import {
   circulationApi,
+  newIdempotencyKey,
+  PHARMACY_OPTIONS,
   type PrescriptionTrace,
   type TraceEvent,
 } from '@/api/circulation'
@@ -90,6 +92,32 @@ async function load() {
   }
 }
 
+const circulateDialog = ref({
+  visible: false,
+  pharmacyId: PHARMACY_OPTIONS[0].id as number,
+  submitting: false,
+})
+
+async function circulate() {
+  if (!prescription.value) {
+    return
+  }
+  circulateDialog.value.submitting = true
+  try {
+    await circulationApi.create(
+      { rxId: prescription.value.id, pharmacyId: circulateDialog.value.pharmacyId },
+      newIdempotencyKey(),
+    )
+    ElMessage.success('已流转至合作药房，等待药房接方')
+    circulateDialog.value.visible = false
+    await load()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '流转失败')
+  } finally {
+    circulateDialog.value.submitting = false
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -109,9 +137,19 @@ onMounted(load)
                 诊断：{{ prescription.diagnosis }} · 开具时间：{{ formatDateTime(prescription.createdAt) }}
               </span>
             </div>
-            <el-tag :type="PRESCRIPTION_STATUS_TAG[prescription.status]" effect="light">
-              {{ PRESCRIPTION_STATUS_LABELS[prescription.status] }}
-            </el-tag>
+            <div class="rx-detail__actions">
+              <el-button
+                v-if="prescription.status === 'APPROVED'"
+                type="primary"
+                size="small"
+                @click="circulateDialog.visible = true"
+              >
+                选择药房并流转
+              </el-button>
+              <el-tag :type="PRESCRIPTION_STATUS_TAG[prescription.status]" effect="light">
+                {{ PRESCRIPTION_STATUS_LABELS[prescription.status] }}
+              </el-tag>
+            </div>
           </div>
         </template>
 
@@ -163,6 +201,28 @@ onMounted(load)
         </el-button>
       </el-empty>
     </el-card>
+
+    <el-dialog v-model="circulateDialog.visible" title="选择合作药房" width="420px">
+      <el-form label-width="72px" label-position="left">
+        <el-form-item label="药房">
+          <el-select v-model="circulateDialog.pharmacyId" class="rx-detail__select">
+            <el-option
+              v-for="pharmacy in PHARMACY_OPTIONS"
+              :key="pharmacy.id"
+              :label="pharmacy.name"
+              :value="pharmacy.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <p class="rx-detail__dialog-tip">流转后由药房接方，患者凭取药码到店核验取药。</p>
+      <template #footer>
+        <el-button @click="circulateDialog.visible = false">取消</el-button>
+        <el-button type="primary" :loading="circulateDialog.submitting" @click="circulate">
+          确认流转
+        </el-button>
+      </template>
+    </el-dialog>
   </section>
 </template>
 
@@ -189,6 +249,22 @@ onMounted(load)
   margin-left: 10px;
   color: var(--mp-text-secondary);
   font-size: 13px;
+}
+
+.rx-detail__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rx-detail__select {
+  width: 200px;
+}
+
+.rx-detail__dialog-tip {
+  margin: 0;
+  color: var(--mp-text-secondary);
+  font-size: 12px;
 }
 
 .rx-detail__drug {

@@ -102,6 +102,8 @@ export const consultationApi = {
 
   detail: (id: number | string) => http.get<ConsultationSession>(`/consultations/${id}`),
 
+  accept: (id: number | string) => http.post<ConsultationSession>(`/consultations/${id}/accept`),
+
   create: (payload: CreateConsultationPayload) =>
     http.post<ConsultationSession>('/consultations', payload),
 

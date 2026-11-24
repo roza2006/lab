@@ -75,6 +75,17 @@ export interface RedeemPayload {
   evidence?: string
 }
 
+export interface CreateCirculationPayload {
+  rxId: number
+  pharmacyId: number
+}
+
+/** 合作药房演示数据；R5 尚未提供药房目录接口 */
+export const PHARMACY_OPTIONS = [
+  { id: 1, name: '仁和药房' },
+  { id: 2, name: '惠民药房' },
+] as const
+
 export const CIRCULATION_STATUS_LABELS: Record<CirculationStatus, string> = {
   CREATED: '待接方',
   ACCEPTED: '待核销',
@@ -103,6 +114,15 @@ export const circulationApi = {
     const data = await http.get<ListResponse<CirculationOrder>>('/circulations', { status })
     return unwrapList(data)
   },
+
+  detail: (id: number | string) => http.get<CirculationOrder>(`/circulations/${id}`),
+
+  create: (payload: CreateCirculationPayload, idempotencyKey: string) =>
+    request<CirculationOrder>('/circulations', {
+      method: 'POST',
+      body: payload,
+      headers: { 'Idempotency-Key': idempotencyKey },
+    }),
 
   accept: (id: number | string, idempotencyKey: string) =>
     request<CirculationOrder>(`/circulations/${id}/accept`, {

@@ -244,6 +244,33 @@ const prescriptions = [
     createdAt: iso(-1500),
     updatedAt: iso(-1380),
   },
+  {
+    id: 4009,
+    rxNo: 'RX202611220009',
+    consultationId: 2004,
+    patientId: 1002,
+    doctorId: 1001,
+    diagnosis: '原发性高血压 2 级',
+    status: 'APPROVED',
+    items: [
+      {
+        id: 5009,
+        drugCode: 'DRUG003',
+        drugName: '苯磺酸氨氯地平片',
+        specification: '5mg*28 片',
+        dosage: '5mg',
+        frequency: '每日 1 次',
+        duration: '28 天',
+        quantity: 1,
+        unitPrice: 22,
+        subtotal: 22,
+      },
+    ],
+    totalAmount: 22,
+    version: 2,
+    createdAt: iso(-45),
+    updatedAt: iso(-35),
+  },
 ]
 
 const reviews = []
@@ -464,7 +491,10 @@ const publicUser = (user) => ({
 
 function canAccess(user, consultation) {
   if (user.role === 'PATIENT') return consultation.patientId === user.id
-  if (user.role === 'DOCTOR') return consultation.doctorId === user.id
+  if (user.role === 'DOCTOR') {
+    return consultation.doctorId === user.id
+      || (consultation.doctorId == null && consultation.status === 'WAITING')
+  }
   return user.role === 'ADMIN'
 }
 
@@ -623,6 +653,27 @@ const server = createServer(async (req, res) => {
         sendJson(res, 201, message)
         return
       }
+    }
+
+    const acceptMatch = path.match(/^\/api\/v1\/consultations\/(\d+)\/accept$/)
+    if (req.method === 'POST' && acceptMatch) {
+      if (user.role !== 'DOCTOR') {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '仅医生可接诊' })
+        return
+      }
+      const consultation = consultations.find((item) => item.id === Number(acceptMatch[1]))
+      if (!consultation) {
+        sendJson(res, 404, { code: 'CONSULTATION_NOT_FOUND', message: '会话不存在' })
+        return
+      }
+      if (consultation.status !== 'WAITING') {
+        sendJson(res, 409, { code: 'ILLEGAL_STATE', message: '会话已被接诊或已结束' })
+        return
+      }
+      consultation.status = 'IN_PROGRESS'
+      consultation.doctorId = user.id
+      sendJson(res, 200, consultation)
+      return
     }
 
     const endMatch = path.match(/^\/api\/v1\/consultations\/(\d+)\/end$/)
@@ -848,6 +899,62 @@ const server = createServer(async (req, res) => {
     }
 
     // ---------- 流转与核销 ----------
+    if (path === '/api/v1/circulations' && req.method === 'POST') {
+      if (user.role !== 'PATIENT') {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '仅患者可发起处方流转' })
+        return
+      }
+      const body = await readBody(req)
+      const rxId = Number(body.rxId)
+      const pharmacyId = Number(body.pharmacyId || 0)
+      const prescription = prescriptions.find((item) => item.id === rxId)
+      if (!prescription) {
+        sendJson(res, 404, { code: 'PRESCRIPTION_NOT_FOUND', message: '处方不存在' })
+        return
+      }
+      if (prescription.patientId !== user.id) {
+        sendJson(res, 403, { code: 'FORBIDDEN', message: '只能流转本人处方' })
+        return
+      }
+      if (prescription.status !== 'APPROVED') {
+        sendJson(res, 409, { code: 'RX_STATE_INVALID', message: '处方审核通过后才能流转' })
+        return
+      }
+      const existing = circulations.find((item) => item.rxId === rxId)
+      if (existing) {
+        sendJson(res, 200, orderView(existing))
+        return
+      }
+      if (!PHARMACIES[pharmacyId]) {
+        sendJson(res, 422, { code: 'VALIDATION_FAILED', message: '药房不存在或未开通' })
+        return
+      }
+      const key = String(req.headers['idempotency-key'] || '')
+      const id = circulations.reduce((max, item) => Math.max(max, item.id), 7000) + 1
+      const order = {
+        id,
+        circulationNo: `C${new Date().toISOString().slice(0, 10).replaceAll('-', '')}${id}`,
+        rxId,
+        pharmacyId,
+        status: 'CREATED',
+        idempotencyKey: key || `rx-${rxId}`,
+        circulatedAt: iso(),
+        acceptedAt: null,
+        redeemedAt: null,
+        rejectReason: null,
+        version: 1,
+      }
+      circulations.push(order)
+      prescription.status = 'CIRCULATED'
+      prescription.version += 1
+      prescription.updatedAt = iso()
+      if (key) {
+        idempotencyStore.set(`create:${key}`, order)
+      }
+      sendJson(res, 201, orderView(order))
+      return
+    }
+
     if (path === '/api/v1/circulations' && req.method === 'GET') {
       const status = url.searchParams.get('status')
       const mine = circulations

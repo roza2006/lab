@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1350" viewBox="0 0 2400 1350">
+  <title>v1 演示环境部署（单机）</title>
+  <desc>单机 Docker Compose + 局域网浏览器；只有 Vite 5173 对外，无需云服务器。</desc>
+  <rect width="2400" height="1350" fill="#FFFFFF"/>
+  <text x="100" y="78" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="46" font-weight="bold" fill="#1F4E79" text-anchor="start">v1 演示环境部署（单机）</text>
+  <text x="100" y="118" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="normal" fill="#7A8B9A" text-anchor="start">一台电脑跑全部服务；客户端只访问 5173；不需要云服务器，也不需要独立数据库服务器</text>
+  <polyline points="100,138 2300,138" fill="none" stroke="#DEEAF6" stroke-width="2" stroke-linejoin="round"/>
+  <text x="2300" y="118" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#7A8B9A" text-anchor="end">2026-11-24</text>
+  <rect x="60" y="200" width="1460" height="760" rx="16" ry="16" fill="#F7FAFD" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="60" y="200" width="1460" height="52" rx="16" ry="16" fill="#1F4E79"/>
+  <rect x="60" y="236" width="1460" height="16" fill="#1F4E79"/>
+  <text x="82" y="235" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">主机 A（Windows / macOS / Linux）</text>
+  <text x="1500" y="235" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#DCE9F5" text-anchor="end">运行全部服务</text>
+  <rect x="1620" y="200" width="700" height="760" rx="16" ry="16" fill="#F7FAFD" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1620" y="200" width="700" height="52" rx="16" ry="16" fill="#2E75B6"/>
+  <rect x="1620" y="236" width="700" height="16" fill="#2E75B6"/>
+  <text x="1642" y="235" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="start">局域网客户端</text>
+  <text x="2300" y="235" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#DCE9F5" text-anchor="end">只开浏览器</text>
+  <rect x="104" y="305" width="360" height="110" rx="10" ry="10" fill="#E8EEF5"/>
+  <rect x="100" y="300" width="360" height="110" rx="10" ry="10" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="100" y="300" width="8" height="110" rx="4" ry="4" fill="#1F4E79"/>
+  <text x="124" y="338" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F2D3D" text-anchor="start">浏览器 A</text>
+  <text x="124" y="366" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">患者 / 医生 / 药师</text>
+  <rect x="398.0" y="316" width="48.0" height="26" rx="13" ry="13" fill="#1F4E79"/>
+  <text x="422.0" y="334" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="middle">本机</text>
+  <rect x="544" y="305" width="900" height="420" rx="10" ry="10" fill="#E8EEF5"/>
+  <rect x="540" y="300" width="900" height="420" rx="10" ry="10" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="540" y="300" width="8" height="420" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="564" y="338" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F2D3D" text-anchor="start">Docker Compose 网络</text>
+  <text x="564" y="366" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">服务名互连，端口默认只绑 127.0.0.1</text>
+  <rect x="584" y="385" width="360" height="120" rx="10" ry="10" fill="#E8EEF5"/>
+  <rect x="580" y="380" width="360" height="120" rx="10" ry="10" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="580" y="380" width="8" height="120" rx="4" ry="4" fill="#2F8F83"/>
+  <text x="604" y="418" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F2D3D" text-anchor="start">Spring Boot 后端</text>
+  <text x="604" y="446" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">127.0.0.1:8080</text>
+  <rect x="865.0" y="396" width="61.0" height="26" rx="13" ry="13" fill="#2F8F83"/>
+  <text x="895.5" y="414" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="middle">单实例</text>
+  <rect x="1014" y="385" width="390" height="120" rx="10" ry="10" fill="#E8EEF5"/>
+  <rect x="1010" y="380" width="390" height="120" rx="10" ry="10" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1010" y="380" width="8" height="120" rx="4" ry="4" fill="#BF9000"/>
+  <text x="1034" y="418" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F2D3D" text-anchor="start">MySQL 8</text>
+  <text x="1034" y="446" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">127.0.0.1:3306</text>
+  <rect x="1325.0" y="396" width="61.0" height="26" rx="13" ry="13" fill="#BF9000"/>
+  <text x="1355.5" y="414" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="middle">业务库</text>
+  <rect x="1014" y="545" width="390" height="120" rx="10" ry="10" fill="#E8EEF5"/>
+  <rect x="1010" y="540" width="390" height="120" rx="10" ry="10" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1010" y="540" width="8" height="120" rx="4" ry="4" fill="#BF9000"/>
+  <text x="1034" y="578" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F2D3D" text-anchor="start">Redis 7</text>
+  <text x="1034" y="606" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">127.0.0.1:6379</text>
+  <rect x="1338.0" y="556" width="48.0" height="26" rx="13" ry="13" fill="#BF9000"/>
+  <text x="1362.0" y="574" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="middle">预留</text>
+  <rect x="584" y="725" width="860" height="110" rx="10" ry="10" fill="#E8EEF5"/>
+  <rect x="580" y="720" width="860" height="110" rx="10" ry="10" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="580" y="720" width="8" height="110" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="604" y="758" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F2D3D" text-anchor="start">Vite 开发服务器</text>
+  <text x="604" y="786" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">0.0.0.0:5173，/api 反向代理到 8080</text>
+  <rect x="1326.0" y="736" width="100.0" height="26" rx="13" ry="13" fill="#2E75B6"/>
+  <text x="1376.0" y="754" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="middle">唯一对外端口</text>
+  <rect x="1664" y="335" width="580" height="120" rx="10" ry="10" fill="#E8EEF5"/>
+  <rect x="1660" y="330" width="580" height="120" rx="10" ry="10" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1660" y="330" width="8" height="120" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="1684" y="368" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F2D3D" text-anchor="start">电脑 B</text>
+  <text x="1684" y="396" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">医生 + 药师</text>
+  <rect x="2165.0" y="346" width="61.0" height="26" rx="13" ry="13" fill="#2E75B6"/>
+  <text x="2195.5" y="364" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="middle">浏览器</text>
+  <rect x="1664" y="515" width="580" height="120" rx="10" ry="10" fill="#E8EEF5"/>
+  <rect x="1660" y="510" width="580" height="120" rx="10" ry="10" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1660" y="510" width="8" height="120" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="1684" y="548" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F2D3D" text-anchor="start">电脑 C</text>
+  <text x="1684" y="576" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">患者 / 第三人</text>
+  <rect x="2165.0" y="526" width="61.0" height="26" rx="13" ry="13" fill="#2E75B6"/>
+  <text x="2195.5" y="544" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="middle">浏览器</text>
+  <rect x="1664" y="695" width="580" height="120" rx="10" ry="10" fill="#E8EEF5"/>
+  <rect x="1660" y="690" width="580" height="120" rx="10" ry="10" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
+  <rect x="1660" y="690" width="8" height="120" rx="4" ry="4" fill="#2E75B6"/>
+  <text x="1684" y="728" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="21" font-weight="bold" fill="#1F2D3D" text-anchor="start">手机 / 平板</text>
+  <text x="1684" y="756" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">同一 Wi-Fi 即可</text>
+  <rect x="2178.0" y="706" width="48.0" height="26" rx="13" ry="13" fill="#2E75B6"/>
+  <text x="2202.0" y="724" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="middle">可选</text>
+  <polyline points="280,410 280,760 570,775" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="570,775 557.9,779.7 558.4,769.1" fill="#2E75B6"/>
+  <text x="300" y="700" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" fill="#7A8B9A" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke">HTTP</text>
+  <polyline points="760,720 760,500" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="760,500 765.3,511.9 754.7,511.9" fill="#2E75B6"/>
+  <text x="780" y="620" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" fill="#7A8B9A" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke">代理 /api</text>
+  <polyline points="940,440 1010,440" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="1010,440 998.1,445.3 998.1,434.7" fill="#2E75B6"/>
+  <text x="975" y="420" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" fill="#7A8B9A" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke">JDBC</text>
+  <polyline points="940,600 1010,600" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="1010,600 998.1,605.3 998.1,594.7" fill="#2E75B6"/>
+  <text x="975" y="580" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" fill="#7A8B9A" text-anchor="middle" stroke="#FFFFFF" stroke-width="4" paint-order="stroke">6379</text>
+  <polyline points="1660,390 1440,760" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="1440,760 1441.5,747.1 1450.6,752.5" fill="#2E75B6"/>
+  <polyline points="1660,570 1440,790" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="1440,790 1444.6,777.9 1452.1,785.4" fill="#2E75B6"/>
+  <polyline points="1660,750 1440,815" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
+  <polygon points="1440,815 1449.9,806.6 1452.9,816.7" fill="#2E75B6"/>
+  <text x="1545" y="470" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" fill="#7A8B9A" text-anchor="start" stroke="#FFFFFF" stroke-width="4" paint-order="stroke">http://A-IP:5173</text>
+  <text x="100" y="1030" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="20" font-weight="bold" fill="#1F4E79" text-anchor="start">部署要点</text>
+  <text x="100" y="1070" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="17" font-weight="normal" fill="#1F2D3D" text-anchor="start">① 只有 5173 需要对局域网开放；MySQL 3306、Redis 6379、后端 8080 默认绑 127.0.0.1，不暴露。</text>
+  <text x="100" y="1106" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="17" font-weight="normal" fill="#1F2D3D" text-anchor="start">② 浏览器只访问 Vite，Vite 在主机 A 内把 /api 代理到后端，因此不需要 CORS，也不需要给前端配后端地址。</text>
+  <text x="100" y="1142" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="17" font-weight="normal" fill="#1F2D3D" text-anchor="start">③ 一台电脑就够：多开 Chrome 普通 / 无痕 / Edge 分别登录三个角色；两台或三台只是演示更直观。</text>
+  <text x="100" y="1178" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="17" font-weight="normal" fill="#1F2D3D" text-anchor="start">④ 没有云服务器：同一 Wi-Fi / 手机热点即可；跨城市用 Tailscale/ZeroTier，不需要公网 IP。</text>
+  <text x="100" y="1240" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#7A8B9A" text-anchor="start">详细步骤见 docs/demo/local-network-test.md</text>
+</svg>

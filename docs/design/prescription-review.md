@@ -14,7 +14,7 @@
 
 第 4 轮审核域交付“药师取待审队列 → 通过（电子签名）/ 驳回（必填意见）→ 医生与药师追溯审核记录”的闭环：
 
-- 队列：只返回 `PENDING_REVIEW` 处方，按提交先后分页；
+- 队列：只返回 `PENDING_REVIEW` 处方，按提交先后分页；v1 审核阶段不绑定药房，队列是全平台待审，药房隔离从流转单开始；
 - 通过：`PENDING_REVIEW → APPROVED`，写入签名摘要、审核药师、审核时间与 72 小时有效期；
 - 驳回：`PENDING_REVIEW → REJECTED`，理由至少 10 个字，医生修改后可重新提交；
 - 记录：每次审核追加一条 `prescription_review`，`GET /prescriptions/{id}/reviews` 按时间追溯；
@@ -46,7 +46,7 @@
 
 | 方法 | 路径 | 允许角色 | 成功状态码 | 说明 |
 |---|---|---|---|---|
-| GET | `/api/v1/prescriptions/review-queue` | 药师 | 200 | 待审队列，固定 `PENDING_REVIEW`，按 id 倒序分页 |
+| GET | `/api/v1/prescriptions/review-queue` | 药师 | 200 | 全平台待审队列，固定 `PENDING_REVIEW`，按 id 倒序分页 |
 | POST | `/api/v1/prescriptions/{id}/reviews/approve` | 药师 | 200 | 通过：写签名、审核人、审核时间、有效期；`version+1` |
 | POST | `/api/v1/prescriptions/{id}/reviews/reject` | 药师 | 200 | 驳回：`comment` 至少 10 字；写驳回理由；不产生签名 |
 | GET | `/api/v1/prescriptions/{id}/reviews` | 开方医生、药师、管理员 | 200 | 审核记录列表，按 `id` 升序 |
@@ -127,9 +127,11 @@ rxNo | prescriptionId | version(迁移前) | pharmacistId | yyyyMMddHHmmssSSS
 | `signed_at` | DATETIME(3) | 审核时间 |
 | `created_at` | DATETIME(3) | 记录入库时间，默认当前时间 |
 
-**需魏宇佳在 `V004__prescription.sql` 固化**：`prescription_review` 建表与本轮索引；同时注意 `database/schema.sql` 的 `prescription_item` 仍使用报告口径的 `drug_id / dosage / dosage_unit / days`，而 R4-A 实现与测试库使用 `drug_code / drug_name / spec / duration`，二者需在 V004 前统一（建议以实现的字符串口径为准并在 `schema.sql` 加注）。
+**已在 V004 统一**：`prescription_review` 建表与索引已落地；`prescription_item` 采用 `drug_code / drug_name / specification / dosage / duration` 的药品快照口径，`schema.sql` 与本文件一致，旧 `drug_id / dosage_unit / days` 已移除。
 
 ## 9 验证记录
+
+> 以下为 R4 当时的验证记录；最终全量结果（82 例）见 `docs/test/test-report.md`。
 
 环境：Microsoft OpenJDK 17.0.13 + Maven 3.9.9，H2 内存库（MySQL 兼容模式），`spring.profiles.active=test`。
 

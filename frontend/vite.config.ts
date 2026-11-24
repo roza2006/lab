@@ -16,11 +16,25 @@ export default defineConfig({
     },
   },
   server: {
+    // 监听所有网卡，便于同一局域网内其他电脑访问；生产环境不要直接用 Vite。
+    host: '0.0.0.0',
     port: 5173,
+    strictPort: true,
     watch: {
       // mock 服务由 node 直接运行；编辑器原子保存会留下临时目录，避免触发 Vite watcher
       ignored: ['**/mock/**', '**/*.tmpdir/**', '**/*.tmp/**'],
     },
+    proxy: {
+      '/api': {
+        target: proxyTarget,
+        changeOrigin: true,
+      },
+    },
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 4173,
+    strictPort: true,
     proxy: {
       '/api': {
         target: proxyTarget,

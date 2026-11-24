@@ -6,7 +6,9 @@
 
 | 文档版本 | 更新日期 | 负责人 | 状态 | 关联文档 |
 |---|---|---|---|---|
-| v0.1 | 2026-11-03 | 郝佳鑫 | 待评审 | `docs/requirements/use-cases.md`（代香晰，R1）、`docs/design/architecture.md`（刘飞燕，R2）、`docs/design/er.md`（魏宇佳，R2） |
+| v1.1 | 2026-11-24 | 郝佳鑫、刘飞燕 | 已按 v1 实现回写；目标模型保留 | `docs/requirements/use-cases.md`、`docs/design/architecture.md`、`docs/design/er.md` |
+
+> **v1 实现边界**：本文件描述目标领域模型。实际代码只落地 Identity、Consultation、Prescription、Circulation 四个上下文；Catalog、Audit、Notification、Admin、`outbox_event` 与通知投递未实现。`MedicalRecord`、知情同意、药品目录校验仍是设计项，不应按“已实现”答辩。
 
 ---
 
@@ -111,13 +113,13 @@ flowchart LR
 | # | 聚合根 | 内部实体 / 值对象 | 关键不变量 | 主要状态 | 事务边界 |
 |---|---|---|---|---|---|
 | 1 | `ConsultationSession` | `Message`、`MedicalRecord`、`SessionStatus` | 仅参与方可读写消息；`ENDED`/`CANCELLED` 后不可再发；同一会话同时只有一名接诊医生 | `WAITING → IN_PROGRESS → ENDED / CANCELLED` | 单聚合 |
-| 2 | `Prescription` | `PrescriptionItem`、`RxStatus`、`Signature`、`RxNo`、`Version` | 仅 `DRAFT` 可编辑；`APPROVED` 后内容锁定；明细非空才可提交；状态只能经聚合方法迁移 | 8 状态（见 §8.1） | 单聚合 + 同事务写审计与 outbox |
+| 2 | `Prescription` | `PrescriptionItem`、`RxStatus`、`Signature`、`RxNo`、`Version` | 仅 `DRAFT` 可编辑；`APPROVED` 后内容锁定；明细非空才可提交；状态只能经聚合方法迁移 | 8 状态（见 §8.1） | 单聚合；v1 同事务写处方、明细与审核记录（审计/outbox 未实现） |
 | 3 | `CirculationOrder` | `DispenseRecord`、`DispenseEvidence`、`CirculationStatus`、`IdempotencyKey` | 一张处方最多一张流转单；核销幂等；核销必须携带有效凭证且在有效期内 | `CREATED → ACCEPTED → REDEEMED / REJECTED` | 单聚合 |
 | 4 | `Drug` | `DrugSpec`、`RxLimit`、`DrugCategory` | 停用药品不可新增到处方；特殊管理药品禁止进入互联网处方 | `ACTIVE / SUSPENDED` | 单聚合 |
 | 5 | `Pharmacy` | `PharmacyStatus`、`ServiceScope`、`AccessKey` | 资质无效不可接方；服务范围决定可接科室/药品 | `PENDING / ACTIVE / SUSPENDED` | 单聚合 |
 | 6 | `User` | `RoleAssignment`、`ConsentRecord`、`DataScope` | 角色与数据范围变更即时生效；未签署当前版本知情同意不可发起问诊 | `ENABLED / DISABLED` | 单聚合 |
 | 7 | `AuditLog` | `AuditAction`、`HashChain` | 只追加、不可改；哈希链可校验；保留 ≥ 6 个月 | 无状态（追加） | 直接写入，独立表 |
-| 8 | `OutboxEvent` / `IdempotencyRecord` | 事件载荷、`(bizType,bizId,operation,key)` | 与业务数据同事务写入；重复键返回首次结果 | `NEW / SENT / FAILED` | 与业务聚合同事务 |
+| 8 | `OutboxEvent` / `IdempotencyRecord` | 事件载荷、`(bizType,bizId,operation,key)` | `IdempotencyRecord` 已实现；`OutboxEvent` 仅建表，没有投递器 | `NEW / SENT / FAILED` | 幂等记录与业务同事务；outbox 未接入 |
 
 ### 4.2 聚合划分原则
 
@@ -181,7 +183,7 @@ flowchart LR
 | `addItem(drugId, dose, frequency, days, quantity)` | `status == DRAFT`；药品有效且非特殊管理 | 追加明细并重算数量 |
 | `updateItem(itemId, ...)` / `removeItem(itemId)` | `status == DRAFT` | 替换/删除明细 |
 | `submit(doctor, policy)` | `status == DRAFT`；明细非空；目录/剂量/配伍/过敏校验通过；医生有处方权 | `PENDING_REVIEW`，锁定内容，`version+1`，发 `PrescriptionSubmitted` |
-| `approve(pharmacist, signature)` | `status == PENDING_REVIEW`；药师有 `rx:approve` 且药房匹配 | `APPROVED`，写 `signedHash`，`version+1` |
+| `approve(pharmacist, signature)` | `status == PENDING_REVIEW`；药师有 `rx:approve`；v1 不校验药房（审核阶段处方未绑定药房） | `APPROVED`，写 `signedHash`，`version+1` |
 | `reject(pharmacist, reason)` | `status == PENDING_REVIEW`；理由 ≥ 10 字 | `REJECTED`，保留版本链 |
 | `revise(doctorId)` | `status == REJECTED`；操作者为原开方医生 | `DRAFT`，清空审核意见，`version+1` |
 | `cancel(operator, reason)` | `status ∈ {DRAFT, PENDING_REVIEW}` | `CANCELLED`（终态） |
@@ -202,7 +204,7 @@ flowchart LR
 
 ### 5.3 CirculationOrder（处方流转单聚合根）
 
-**职责**：处方到药房的“一次性交付凭证”。一张处方一张流转单（`uk_rx`），核销必须幂等。
+**职责**：处方到药房的“一次性交付凭证”。一张处方一张流转单（`uk_rx`），核销必须幂等。v1 由患者（本人已通过处方）、药师（本药房）或管理员发起流转；药师在审核阶段不绑定药房，流转时才落到具体药房。
 
 | 属性 | 类型 | 说明 |
 |---|---|---|
@@ -256,10 +258,10 @@ flowchart LR
 
 | 对象 | 类型 | 关键规则 |
 |---|---|---|
-| `User` | 聚合根 | 登录名唯一；密码仅存 Argon2id 哈希；`DISABLED` 立即失效且令牌拉黑 |
+| `User` | 聚合根 | 登录名唯一；密码仅存 BCrypt 哈希；`DISABLED` 立即失效；v1 没有令牌拉黑 |
 | `RoleAssignment` | 聚合内实体 | 一个用户可有多个角色，但**主数据范围唯一**（如“本人”或“本药房”） |
 | `ConsentRecord` | 聚合内实体 | 记录隐私政策版本、同意时间、撤回时间；撤回后保留历史，不回删 |
-| `DataScope` | 值对象 | `SELF / DEPARTMENT / PHARMACY / ALL`，决定 SQL 追加条件 |
+| `DataScope` | 值对象 | `SELF / DEPARTMENT / PHARMACY / ALL`；v1 只落地 SELF、PHARMACY、ALL，DEPARTMENT 未启用 |
 
 **不变量**：I-20 未签署当前版本知情同意不可发起问诊（`CONSENT_REQUIRED`）；I-21 角色/权限变更即时生效，不依赖重新登录；I-22 管理员不得直接开方或修改处方内容（权限点层面无 `rx:write`）。
 
@@ -267,10 +269,10 @@ flowchart LR
 
 | 对象 | 归属 | 说明 |
 |---|---|---|
-| `AuditLog` | 审计上下文 | 只追加；`hashChain = SHA256(prevHash + 本条规范化内容)`；不设业务外键 |
-| `OutboxEvent` | 基础设施 | 与业务聚合同事务写入；后台轮询投递；失败指数退避 |
-| `IdempotencyRecord` | 基础设施 | 唯一键 `(bizType, bizId, operation, idemKey)`；重复请求回放首次结果 |
-| `Notification` | 通知上下文 | 事件订阅方，只接收最小必要字段（不含诊断与明细） |
+| `AuditLog` | 审计上下文 | 目标设计：只追加；`hashChain = SHA256(prevHash + 本条规范化内容)`；不设业务外键。v1 只有表，没有写入 |
+| `OutboxEvent` | 基础设施 | 目标设计：与业务聚合同事务写入；后台轮询投递；失败指数退避。v1 未实现 |
+| `IdempotencyRecord` | 基础设施 | 已实现：唯一键 `(bizType, bizId, operation, idemKey)`；重复请求回放首次结果 |
+| `Notification` | 通知上下文 | 目标设计：事件订阅方，只接收最小必要字段；v1 未实现 |
 
 ---
 
@@ -504,12 +506,14 @@ stateDiagram-v2
 |---|---|---|
 | 处方编辑/提交/审核 | 乐观锁 `version` | `Prescription.version`，`UPDATE ... WHERE id=? AND version=?` 影响 0 行即 409 |
 | 医生并发接诊 | 条件更新 | `UPDATE session SET doctor_id=?, status='IN_PROGRESS' WHERE id=? AND status='WAITING'` |
-| 流转/核销重放 | 幂等键 + 唯一索引 | `IdempotencyRecord` + `circulation_order.uk_idem` |
+| 流转/核销重放 | 幂等键 + 唯一索引 | `IdempotencyRecord` + `circulation_order.uk_idem`；v1 只对核销强制要求 `Idempotency-Key`，流转按处方唯一键幂等 |
 | 消息重复发送 | 客户端消息 ID 去重 | `Message.clientMsgId` + 会话内唯一 |
 
 ---
 
 ## 9. 领域事件与一致性
+
+> 下表是目标事件模型。v1 没有事件总线/outbox 投递器，状态迁移在应用服务内同步完成；不要按“已发事件、已通知”答辩。
 
 | 事件 | 发布聚合 | 触发时机 | 订阅方 | 一致性 |
 |---|---|---|---|---|
@@ -518,20 +522,20 @@ stateDiagram-v2
 | `SessionEnded` | `ConsultationSession` | 结束问诊 | 通知、审计 | 异步 |
 | `PrescriptionDrafted` | `Prescription` | 创建/编辑草稿 | 无（本地） | — |
 | `PrescriptionSubmitted` | `Prescription` | 提交 | 药师待办、通知 | 异步 |
-| `PrescriptionApproved` | `Prescription` | 审核通过 | 流转、通知 | 异步 |
-| `PrescriptionRejected` | `Prescription` | 驳回 | 医生待办、通知 | 异步 |
-| `PrescriptionCirculated` | `Prescription` | 流转 | 药房网关、通知 | 异步（药房调用在 outbox 之后） |
+| `PrescriptionApproved` | `Prescription` | 审核通过 | 无自动订阅；患者/药师/管理员后续单独发起流转 | 同步 |
+| `PrescriptionRejected` | `Prescription` | 驳回 | 医生在列表中看到驳回态 | 同步 |
+| `PrescriptionCirculated` | `Prescription` | 流转 | 药房工作台可见；外部药房网关未接入 | 同步 |
 | `CirculationAccepted` | `CirculationOrder` | 药房接方 | 通知、审计 | 异步 |
-| `PrescriptionRedeemed` | `CirculationOrder` | 核销 | 处方（置 `REDEEMED`）、审计、通知 | 异步 + 幂等 |
+| `PrescriptionRedeemed` | `CirculationOrder` | 核销 | 处方同步置 `REDEEMED`；审计/通知未接入 | 同一本地事务 + 幂等 |
 | `PrescriptionExpired` | `Prescription` | 定时扫描超期 | 通知 | 异步 |
 | `ConsentWithdrawn` | `User` | 撤回授权 | 通知、风控 | 异步 |
 
 一致性策略：
 
-- **同事务**：聚合状态、明细、审计、outbox 一起提交；
+- **同事务**：v1 聚合状态、明细、审核记录、流转单、发药记录与幂等记录一起提交；审计与 outbox 是目标设计，尚未接入；
 - **最终一致**：跨聚合通过事件驱动，消费者必须幂等（按 `eventId` 去重）；
 - **顺序**：同一聚合的事件按 `version` 升序消费，乱序时丢弃旧版本；
-- **失败处理**：outbox 指数退避；超过阈值转人工告警，不静默丢弃。
+- **失败处理**：目标设计为 outbox 指数退避、超阈值转人工告警；v1 没有 outbox 投递器，外部通知未接入。
 
 ---
 

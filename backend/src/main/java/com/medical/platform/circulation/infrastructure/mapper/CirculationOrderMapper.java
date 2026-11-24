@@ -18,6 +18,10 @@ public interface CirculationOrderMapper extends BaseMapper<CirculationOrderPO> {
     @Select("SELECT pharmacy_id FROM pharmacist_profile WHERE user_id = #{userId} LIMIT 1")
     Long selectPharmacistPharmacyId(@Param("userId") Long userId);
 
+    /** 药房存在且 status=1 才算可用，供患者选择取药药房时校验。 */
+    @Select("SELECT COUNT(*) FROM pharmacy WHERE id = #{pharmacyId} AND status = 1")
+    int countActivePharmacy(@Param("pharmacyId") Long pharmacyId);
+
     @Select("<script>"
             + "SELECT o.* FROM circulation_order o JOIN prescription p ON p.id = o.rx_id"
             + " WHERE p.patient_id = #{patientId}"

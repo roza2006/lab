@@ -20,9 +20,9 @@ def build() -> Canvas:
     cv = Canvas(W, H)
     title_block(
         cv,
-        "系统部署图",
-        "互联网区 / DMZ / 应用区 / 数据区，合作药房通过 mTLS 接入（R1 部署基线 v0.1）",
-        right="",
+        "目标部署架构（规划）",
+        "四区划分：互联网区 / DMZ / 应用区 / 数据区；当前 v1 演示环境见 deployment-local.png",
+        right="未落地",
     )
 
     # ---------- 区域 ----------
@@ -103,6 +103,57 @@ def build() -> Canvas:
     return cv
 
 
+def build_local() -> Canvas:
+    """v1 实际演示环境：单机 Docker Compose + 局域网浏览器。"""
+    cv = Canvas(2400, 1350)
+    title_block(
+        cv,
+        "v1 演示环境部署（单机）",
+        "一台电脑跑全部服务；客户端只访问 5173；不需要云服务器，也不需要独立数据库服务器",
+        right="2026-11-24",
+    )
+
+    zone(cv, 60, 200, 1460, 760, "主机 A（Windows / macOS / Linux）", NAVY, "运行全部服务")
+    zone(cv, 1620, 200, 700, 760, "局域网客户端", BLUE, "只开浏览器")
+
+    node(cv, 100, 300, 360, 110, "浏览器 A", "患者 / 医生 / 药师", NAVY, "本机")
+    node(cv, 540, 300, 900, 420, "Docker Compose 网络", "服务名互连，端口默认只绑 127.0.0.1", TEAL)
+    node(cv, 580, 380, 360, 120, "Spring Boot 后端", "127.0.0.1:8080", TEAL, "单实例")
+    node(cv, 1010, 380, 390, 120, "MySQL 8", "127.0.0.1:3306", GOLD, "业务库")
+    node(cv, 1010, 540, 390, 120, "Redis 7", "127.0.0.1:6379", GOLD, "预留")
+    node(cv, 580, 720, 860, 110, "Vite 开发服务器", "0.0.0.0:5173，/api 反向代理到 8080", BLUE, "唯一对外端口")
+
+    node(cv, 1660, 330, 580, 120, "电脑 B", "医生 + 药师", BLUE, "浏览器")
+    node(cv, 1660, 510, 580, 120, "电脑 C", "患者 / 第三人", BLUE, "浏览器")
+    node(cv, 1660, 690, 580, 120, "手机 / 平板", "同一 Wi-Fi 即可", BLUE, "可选")
+
+    cv.arrow([(280, 410), (280, 760), (570, 775)], BLUE, 3)
+    cv.label(300, 700, "HTTP", anchor="ls")
+    cv.arrow([(760, 720), (760, 500)], BLUE, 3)
+    cv.label(780, 620, "代理 /api", anchor="ls")
+    cv.arrow([(940, 440), (1010, 440)], BLUE, 3)
+    cv.label(975, 420, "JDBC", anchor="ms")
+    cv.arrow([(940, 600), (1010, 600)], BLUE, 3)
+    cv.label(975, 580, "6379", anchor="ms")
+
+    cv.arrow([(1660, 390), (1440, 760)], BLUE, 3)
+    cv.arrow([(1660, 570), (1440, 790)], BLUE, 3)
+    cv.arrow([(1660, 750), (1440, 815)], BLUE, 3)
+    cv.label(1545, 470, "http://A-IP:5173", anchor="ls")
+
+    cv.text(100, 1030, "部署要点", 20, NAVY, bold=True)
+    notes = [
+        "① 只有 5173 需要对局域网开放；MySQL 3306、Redis 6379、后端 8080 默认绑 127.0.0.1，不暴露。",
+        "② 浏览器只访问 Vite，Vite 在主机 A 内把 /api 代理到后端，因此不需要 CORS，也不需要给前端配后端地址。",
+        "③ 一台电脑就够：多开 Chrome 普通 / 无痕 / Edge 分别登录三个角色；两台或三台只是演示更直观。",
+        "④ 没有云服务器：同一 Wi-Fi / 手机热点即可；跨城市用 Tailscale/ZeroTier，不需要公网 IP。",
+    ]
+    for i, line in enumerate(notes):
+        cv.text(100, 1070 + i * 36, line, 17, TEXT)
+    cv.text(100, 1240, "详细步骤见 docs/demo/local-network-test.md", 16, MUTED)
+    return cv
+
+
 def main() -> int:
     out_dir = os.path.join("docs", "database", "diagrams")
     os.makedirs(out_dir, exist_ok=True)
@@ -110,12 +161,21 @@ def main() -> int:
     cv.save_png(os.path.join(out_dir, "deployment.png"))
     cv.save_svg(
         os.path.join(out_dir, "deployment.svg"),
-        "系统部署图（四区划分）",
-        "互联网区 / DMZ / 应用区 / 数据区，含 Nginx、Spring Boot 集群、MySQL 主从、Redis、对象存储与备份。",
+        "目标部署架构（规划）",
+        "四区划分，含 Nginx、Spring Boot 集群、MySQL 主从、Redis、对象存储与备份；未落地。",
     )
-    print(f"png : {os.path.getsize(os.path.join(out_dir, 'deployment.png'))} bytes")
-    print(f"svg : {os.path.getsize(os.path.join(out_dir, 'deployment.svg'))} bytes")
-    print("warn:", cv.warnings or "none")
+
+    local = build_local()
+    local.save_png(os.path.join(out_dir, "deployment-local.png"))
+    local.save_svg(
+        os.path.join(out_dir, "deployment-local.svg"),
+        "v1 演示环境部署（单机）",
+        "单机 Docker Compose + 局域网浏览器；只有 Vite 5173 对外，无需云服务器。",
+    )
+
+    for name in ("deployment.png", "deployment.svg", "deployment-local.png", "deployment-local.svg"):
+        print(f"{name}: {os.path.getsize(os.path.join(out_dir, name))} bytes")
+    print("warn:", (cv.warnings + local.warnings) or "none")
     return 0
 
 

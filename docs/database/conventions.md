@@ -68,7 +68,7 @@
 |---|---|
 | 敏感字段加密 | 身份证、手机号、住址用 AES-GCM，密文列 `_enc`；密钥由 KMS/环境变量注入，不入库 |
 | 等值检索 | HMAC-SHA256 盲索引 `_hash`，加盐密钥与加密密钥分离 |
-| 密码 | Argon2id 或 bcrypt，`password_hash VARCHAR(255)`；禁止 MD5/SHA1 |
+| 密码 | BCrypt（v1 实现），`password_hash VARCHAR(255)`；禁止 MD5/SHA1；Argon2id 仅作后续升级选项 |
 | 最小权限 | 应用账号仅有 `SELECT/INSERT/UPDATE/DELETE`，无 `DROP/GRANT/ALTER` |
 | 审计 | 审计表只增不改不删；`hash_chain` 串链，保留 ≥ 6 个月 |
 | 数据脱敏 | 导出、日志、报错信息均不出现明文手机号/身份证号 |

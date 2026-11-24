@@ -209,7 +209,7 @@ def build() -> Canvas:
     cv.text(100, 78, "智慧医疗在线问诊与处方流转平台 · 核心 ER 图", 46, NAVY, bold=True)
     cv.text(
         100, 118,
-        "第 1 轮 · 数据库设计 v0.1｜14 张核心表 + 9 张支撑表｜字段见 database/schema.sql",
+        "v1.0 · 2026-11-24｜14 张核心表 + 9 张支撑表｜字段以 database/schema.sql 为准",
         18, MUTED,
     )
     cv.line([(100, 138), (2500, 138)], LIGHT, 2)
@@ -263,8 +263,8 @@ def build() -> Canvas:
         ]),
         Card("处方明细", "prescription_item", 3, 1, GOLD, [
             ("id", "BIGINT", "PK"), ("prescription_id", "BIGINT", "FK"),
-            ("drug_id", "BIGINT", "FK"), ("dosage", "DECIMAL(10,3)", ""),
-            ("days", "INT", ""),
+            ("drug_code", "VARCHAR(64)", ""), ("dosage", "VARCHAR(32)", ""),
+            ("duration", "VARCHAR(32)", ""),
         ]),
         Card("合作药房", "pharmacy", 4, 1, BLUE, [
             ("id", "BIGINT", "PK"), ("pharmacy_code", "VARCHAR(32)", "UK"),
@@ -320,7 +320,7 @@ def build() -> Canvas:
     # 处方
     rel("consultation_session", "r", 0.42, "prescription", "l", 0.42, "1", "N")
     rel("prescription", "b", 0.50, "prescription_item", "t", 0.50, "1", "N")
-    rel("prescription_item", "l", 0.55, "drug", "r", 0.30, "N", "1")
+    # 明细存 drug_code / drug_name 快照，不建 drug 外键，因此不画物理关系线
     rel("drug", "l", 0.62, "drug_category", "r", 0.62, "N", "1")
     # 流转
     rel("prescription", "r", 0.42, "circulation_order", "l", 0.42, "1", "0..1")
@@ -373,11 +373,11 @@ def build() -> Canvas:
     )
     cv.text(
         100, 1426,
-        "说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 关联药师档案；"
-        "问诊会话在 v1 直接挂 sys_user，这几条关系用文字说明。",
+        "说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 与问诊会话"
+        "在 v1 直接挂 sys_user；明细存药品快照，不建 drug 外键。",
         15, MUTED,
     )
-    cv.text(2500, 1426, "v0.2 · 第 3 轮", 15, MUTED, anchor="rs")
+    cv.text(2500, 1426, "v1.0 · 2026-11-24", 15, MUTED, anchor="rs")
 
     return cv
 
@@ -396,7 +396,7 @@ def main() -> int:
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">\n'
         f"  <title>智慧医疗在线问诊与处方流转平台 · 核心 ER 图</title>\n"
-        f"  <desc>数据库设计：14 张核心表与 9 张支撑表，含主外键与基数标注。</desc>\n"
+        f"  <desc>v1 数据库设计：14 张核心表与 9 张支撑表，含主外键与基数标注。</desc>\n"
         f'  <rect width="{W}" height="{H}" fill="{BG}"/>\n'
         f"  {body}\n</svg>\n"
     )

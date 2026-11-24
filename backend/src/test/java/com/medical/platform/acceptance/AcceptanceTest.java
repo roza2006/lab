@@ -77,6 +77,7 @@ class AcceptanceTest {
         jdbcTemplate.update("DELETE FROM idempotency_record");
         jdbcTemplate.update("DELETE FROM dispense_record");
         jdbcTemplate.update("DELETE FROM circulation_order");
+        jdbcTemplate.update("DELETE FROM pharmacy");
         jdbcTemplate.update("DELETE FROM prescription_review");
         jdbcTemplate.update("DELETE FROM prescription_item");
         jdbcTemplate.update("DELETE FROM prescription");
@@ -94,6 +95,8 @@ class AcceptanceTest {
         jdbcTemplate.update("INSERT INTO pharmacist_profile "
                         + "(user_id, real_name, pharmacy_id, license_no, review_right, status) "
                         + "VALUES (5, '药师甲', 1, 'LIC-5', 1, 1)");
+        jdbcTemplate.update("INSERT INTO pharmacy "
+                        + "(id, pharmacy_code, name, license_no, status) VALUES (1, 'PH001', '验收药房', 'PH-LIC-1', 1)");
     }
 
     @Test
@@ -312,9 +315,9 @@ class AcceptanceTest {
 
     private long createCirculation(long rxId) throws Exception {
         MvcResult result = mockMvc.perform(post(BASE + "/circulations")
-                        .header("Authorization", bearer("pharmacist01"))
+                        .header("Authorization", bearer("patient01"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"rxId\":" + rxId + "}"))
+                        .content("{\"rxId\":" + rxId + ",\"pharmacyId\":1}"))
                 .andReturn();
         int httpStatus = result.getResponse().getStatus();
         assertThat(httpStatus).as("流转单首次创建 201、命中已有 200").isIn(200, 201);

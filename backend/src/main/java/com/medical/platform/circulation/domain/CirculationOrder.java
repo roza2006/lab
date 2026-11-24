@@ -58,7 +58,7 @@ public class CirculationOrder {
     }
 
     /**
-     * 创建流转单：处方审核通过后由药房或管理员发起，初始状态 {@code CREATED}。
+     * 创建流转单：处方审核通过后由患者（本人）、药房或管理员发起，初始状态 {@code CREATED}。
      */
     public static CirculationOrder create(Long rxId,
                                           Long pharmacyId,

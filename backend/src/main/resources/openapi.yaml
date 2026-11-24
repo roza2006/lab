@@ -329,7 +329,7 @@ paths:
         - $ref: '#/components/parameters/SizeParam'
       responses:
         '200':
-          description: 待审核处方分页列表（PENDING_REVIEW）
+          description: 全平台待审核处方分页列表（PENDING_REVIEW）；v1 审核阶段不按药房过滤，药房隔离从流转单开始
           content:
             application/json:
               schema:
@@ -510,7 +510,7 @@ paths:
     post:
       tags: [Circulation]
       summary: 创建流转单
-      description: 处方必须已审核通过；同一处方重复创建返回已存在的那张。
+      description: 处方必须已审核通过。患者可为自己名下处方选择药房发起，药师只能使用本人所属药房，管理员可指定药房。同一处方重复创建返回已存在的那张（201 新建 / 200 命中）。
       parameters:
         - name: Idempotency-Key
           in: header
@@ -1229,7 +1229,8 @@ components:
         pharmacyId:
           type: integer
           format: int64
-          description: 管理员指定药房；药师账号以自己绑定的药房为准
+          minimum: 1
+          description: 患者必填，且只能选择启用中的药房；管理员可指定；药师账号忽略此字段，以自己的 pharmacy_id 为准
           example: 1
 
     RejectCirculationRequest:

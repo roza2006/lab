@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2600" height="1480" viewBox="0 0 2600 1480">
   <title>智慧医疗在线问诊与处方流转平台 · 核心 ER 图</title>
-  <desc>数据库设计：14 张核心表与 9 张支撑表，含主外键与基数标注。</desc>
+  <desc>v1 数据库设计：14 张核心表与 9 张支撑表，含主外键与基数标注。</desc>
   <rect width="2600" height="1480" fill="#FFFFFF"/>
   <text x="100" y="78" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="46" font-weight="bold" fill="#1F4E79" text-anchor="start">智慧医疗在线问诊与处方流转平台 · 核心 ER 图</text>
-  <text x="100" y="118" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="normal" fill="#7A8B9A" text-anchor="start">第 1 轮 · 数据库设计 v0.1｜14 张核心表 + 9 张支撑表｜字段见 database/schema.sql</text>
+  <text x="100" y="118" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="normal" fill="#7A8B9A" text-anchor="start">v1.0 · 2026-11-24｜14 张核心表 + 9 张支撑表｜字段以 database/schema.sql 为准</text>
   <polyline points="100,138 2500,138" fill="none" stroke="#DEEAF6" stroke-width="2" stroke-linejoin="round"/>
   <polyline points="400,277 520,277" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
   <polyline points="413.0,268.0 413.0,286.0" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
@@ -47,11 +47,6 @@
   <polyline points="1510.0,467.0 1503.0,480.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
   <polyline points="1510.0,467.0 1510,480" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
   <polyline points="1510.0,467.0 1517.0,480.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
-  <polyline points="1360,606 1240,849" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
-  <polyline points="1354.2438559380898,617.656191725368 1366.2764109290442,609.0994621871823" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
-  <polyline points="1354.2438559380898,617.656191725368 1360,606" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
-  <polyline points="1354.2438559380898,617.656191725368 1353.7235890709558,602.9005378128177" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
-  <polyline points="1237.6864728674245,833.3587854625404 1253.8258152563958,841.3288310867237" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
   <polyline points="940,923 820,923" fill="none" stroke="#2E75B6" stroke-width="3" stroke-linejoin="round"/>
   <polyline points="927.0,923.0 940.0,930.0" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
   <polyline points="927.0,923.0 940,923" fill="none" stroke="#2E75B6" stroke-width="2" stroke-linejoin="round"/>
@@ -346,17 +341,15 @@
   <text x="1629.0" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
   <text x="1602" y="593" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
   <polyline points="1370,604 1650,604" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
-  <text x="1376" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">drug_id</text>
-  <rect x="1612" y="611" width="34" height="18" rx="4" ry="4" fill="#2F8F83"/>
-  <text x="1629.0" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">FK</text>
-  <text x="1602" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">BIGINT</text>
+  <text x="1376" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">drug_code</text>
+  <text x="1646" y="625" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(64)</text>
   <rect x="1362" y="636" width="296" height="32" rx="0" ry="0" fill="#F7FAFD"/>
   <polyline points="1370,636 1650,636" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
   <text x="1376" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">dosage</text>
-  <text x="1646" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">DECIMAL(10,3)</text>
+  <text x="1646" y="657" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(32)</text>
   <polyline points="1370,668 1650,668" fill="none" stroke="#EAF1F8" stroke-width="1" stroke-linejoin="round"/>
-  <text x="1376" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">days</text>
-  <text x="1646" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">INT</text>
+  <text x="1376" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#1F2D3D" text-anchor="start">duration</text>
+  <text x="1646" y="689" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="13" font-weight="normal" fill="#7A8B9A" text-anchor="end">VARCHAR(32)</text>
   <rect x="1785" y="486" width="300" height="230" rx="12" ry="12" fill="#E8EEF5"/>
   <rect x="1780" y="480" width="300" height="230" rx="12" ry="12" fill="#FFFFFF" stroke="#C4D6E7" stroke-width="2"/>
   <rect x="1780" y="480" width="300" height="56" rx="12" ry="12" fill="#2E75B6"/>
@@ -550,6 +543,6 @@
   <text x="977" y="1352" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">UK</text>
   <text x="1002" y="1358" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#1F2D3D" text-anchor="start">唯一键</text>
   <text x="100" y="1396" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">线端标注：竖线「│」＝ 1，分叉「&lt;」＝ 多，圆圈「○」＝ 可为空（0..1）；卡片内 PK/FK/UK 为键类型。</text>
-  <text x="100" y="1426" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 关联药师档案；问诊会话在 v1 直接挂 sys_user，这几条关系用文字说明。</text>
-  <text x="2500" y="1426" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="end">v0.2 · 第 3 轮</text>
+  <text x="100" y="1426" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="start">说明：患者/医生/药师档案经 user_id 关联 sys_user；prescription.reviewer_id 与问诊会话在 v1 直接挂 sys_user；明细存药品快照，不建 drug 外键。</text>
+  <text x="2500" y="1426" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="end">v1.0 · 2026-11-24</text>
 </svg>

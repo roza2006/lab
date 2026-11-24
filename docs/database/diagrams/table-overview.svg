@@ -150,5 +150,5 @@
   <text x="2200" y="760" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="18" font-weight="bold" fill="#1F2D3D" text-anchor="start">条 CHECK</text>
   <text x="2200" y="786" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="14" font-weight="normal" fill="#7A8B9A" text-anchor="start">状态列枚举约束</text>
   <text x="100" y="900" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="16" font-weight="normal" fill="#7A8B9A" text-anchor="start">统一约定：主键 BIGINT 自增；时间 DATETIME(3)；状态 VARCHAR + CHECK 枚举；敏感字段 _enc 密文 + _hash 盲索引；审计/事件/幂等表不建外键。</text>
-  <text x="2500" y="900" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="end">v0.3 · 第 4 轮</text>
+  <text x="2500" y="900" font-family="Microsoft YaHei,Segoe UI,sans-serif" font-size="15" font-weight="normal" fill="#7A8B9A" text-anchor="end">v1.0 · 2026-11-24</text>
 </svg>

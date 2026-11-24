@@ -163,6 +163,12 @@ public class MyBatisCirculationRepository implements CirculationRepository {
         return Optional.ofNullable(orderMapper.selectPharmacistPharmacyId(userId));
     }
 
+    @Override
+    public boolean isActivePharmacy(Long pharmacyId) {
+        return pharmacyId != null && pharmacyId > 0
+                && orderMapper.countActivePharmacy(pharmacyId) > 0;
+    }
+
     private CirculationOrderPO toPO(CirculationOrder order) {
         CirculationOrderPO po = new CirculationOrderPO();
         po.setId(order.getId());

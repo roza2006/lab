@@ -65,9 +65,9 @@
 
 ## 3. 核心 ER 图
 
-下图覆盖 25 张表中的 16 张主干表；`sys_permission`、`consent_record`、`notification`、
-`outbox_event`、`idempotency_record`、`audit_log` 等支撑表为单向逻辑关联，为避免连线过密未绘出，
-其字段与索引见 `schema.sql`。
+下图覆盖 14 张核心表；`sys_role`、`sys_permission`、`sys_user_role`、`sys_role_permission`、
+`consent_record`、`notification`、`outbox_event`、`idempotency_record`、`audit_log` 9 张支撑表
+只做逻辑关联，为避免连线过密未绘出，其字段与索引见 `schema.sql`。
 
 ```mermaid
 erDiagram
@@ -163,15 +163,17 @@ erDiagram
         varchar status "8 状态"
         int version "乐观锁"
         char signed_hash
-        datetime expires_at
+        datetime valid_until "审核通过后 72h"
     }
     PRESCRIPTION_ITEM {
         bigint id PK
         bigint prescription_id FK
-        bigint drug_id FK
-        decimal dosage
-        int days "1-30"
+        varchar drug_code "药品快照"
+        varchar drug_name "药品快照"
+        varchar dosage "含单位"
+        varchar duration
         int quantity
+        decimal subtotal
     }
     DRUG {
         bigint id PK

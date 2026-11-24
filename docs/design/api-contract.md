@@ -25,13 +25,14 @@
 
 本文档定义平台 v1 版本对外 HTTP API 的设计约定、接口清单、错误模型、权限边界与验证方式，作为前后端并行开发的"合同"：前端（角色 代香晰）按契约调用，后端（角色 刘飞燕/李梓语/郝佳鑫）按契约实现，测试（角色 郝佳鑫）按契约推导用例。契约合并后，任何破坏兼容性的修改均须走版本升级或 PR 评审。
 
-本轮契约覆盖三个业务域：
+当前契约覆盖四个业务域：
 
-1. **认证域（Auth）**：注册、登录、登出、当前用户；
+1. **认证域（Auth）**：登录、当前用户（注册/登出/刷新未实现）；
 2. **问诊域（Consultation）**：会话发起、接诊、消息收发、会话结束；
-3. **处方与审核域（Prescription / Review）**：开方、修改、提交、撤销、药师审核通过/驳回、审核记录。
+3. **处方与审核域（Prescription / Review）**：开方、修改、提交、撤销、药师审核通过/驳回、审核记录；
+4. **流转与核销域（Circulation）**：流转单创建/列表/详情、药房接方/拒接、核销、处方追踪。
 
-流转、核销相关接口属第 5 轮范围，本契约仅预留 `/prescriptions/{id}` 状态扩展，不定义核销端点。
+审核阶段 v1 不绑定药房，`review-queue` 返回全平台 `PENDING_REVIEW`；药房隔离从流转单开始。
 
 ---
 
@@ -164,11 +165,11 @@ http(s)://{host}:{port}/api/v1
 
 | 方法 | 路径 | 权限 | 说明 |
 |---|---|---|---|
-| POST | `/auth/register/patient` | 公开 | 患者注册（含实名信息） |
-| POST | `/auth/register/staff` | 公开 | 医生/药师注册（含执业资质，待管理员审核） |
-| POST | `/auth/login` | 公开 | 账号密码登录，返回 JWT 与用户信息 |
-| POST | `/auth/logout` | 已认证 | 登出，令牌加入失效列表 |
-| GET | `/auth/me` | 已认证 | 获取当前登录用户详情 |
+| POST | `/auth/register/patient` | 公开 | **设计预留，v1 未实现**；患者注册与实名认证 |
+| POST | `/auth/register/staff` | 公开 | **设计预留，v1 未实现**；医生/药师注册与资质 |
+| POST | `/auth/login` | 公开 | 账号密码登录，返回 JWT 与用户信息（已实现） |
+| POST | `/auth/logout` | 已认证 | **设计预留，v1 未实现**；当前无令牌吊销 |
+| GET | `/auth/me` | 已认证 | 获取当前登录用户详情（已实现） |
 
 ### 5.2 问诊域（Consultation）
 
@@ -197,7 +198,7 @@ http(s)://{host}:{port}/api/v1
 
 | 方法 | 路径 | 权限 | 说明 |
 |---|---|---|---|
-| GET | `/prescriptions/review-queue` | 药师 | 待审核队列（PENDING_REVIEW） |
+| GET | `/prescriptions/review-queue` | 药师 | 全平台待审核队列（PENDING_REVIEW）；v1 审核阶段不绑定药房 |
 | POST | `/prescriptions/{id}/reviews/approve` | 药师 | 审核通过并电子签名，→ APPROVED |
 | POST | `/prescriptions/{id}/reviews/reject` | 药师 | 驳回并必填意见，→ REJECTED |
 | GET | `/prescriptions/{id}/reviews` | 医生/药师 | 审核记录追溯 |
@@ -206,8 +207,15 @@ http(s)://{host}:{port}/api/v1
 
 | 方法 | 路径 | 权限 | 说明 |
 |---|---|---|---|
+| POST | `/circulations` | 患者（本人 `APPROVED`）/药师（本药房）/管理员 | 创建流转单；同一处方重复调用返回已有单（201 新建 / 200 命中） |
+| GET | `/circulations` | 全角色（按数据范围） | 流转单分页列表；患者本人、医生本人开具、药师本药房、管理员全部 |
+| GET | `/circulations/{id}` | 相关方 | 流转单详情，含处方摘要与发药记录 |
+| POST | `/circulations/{id}/accept` | 药师（本药房） | 接方，`CREATED → ACCEPTED` |
+| POST | `/circulations/{id}/reject` | 药师（本药房） | 拒接，`CREATED → REJECTED`，原因 ≥ 2 字 |
 | POST | `/circulations/{id}/redeem` | 药师（本药房） | 核销并发药，`ACCEPTED → REDEEMED`；**强制** `Idempotency-Key` |
 | GET | `/prescriptions/{id}/trace` | 患者（本人）/医生（本人开具）/药师（本药房）/管理员（只读） | 处方“开方 → 审核 → 流转 → 接方 → 核销”时间线 |
+
+创建流转单时，患者必须在请求体带 `pharmacyId`，且只能操作本人 `APPROVED` 处方；药师忽略请求体药房、以 `pharmacist_profile.pharmacy_id` 为准；管理员可指定药房。药房必须是启用状态，否则 400 `CIRC_PHARMACY_INVALID`。
 
 核销请求体：
 
@@ -253,6 +261,11 @@ sequenceDiagram
     D->>S: POST /prescriptions/{id}/submit
     PH->>S: POST /prescriptions/{id}/reviews/approve（电子签名）
     S-->>P: 处方(APPROVED)
+    P->>S: POST /circulations（选择药房）
+    S-->>P: 201 流转单(CREATED)
+    PH->>S: POST /circulations/{id}/accept
+    PH->>S: POST /circulations/{id}/redeem（Idempotency-Key）
+    S-->>P: 处方(REDEEMED)
     P->>S: POST /consultations/{id}/end
 ```
 
@@ -262,12 +275,13 @@ sequenceDiagram
 
 | 端点 | 患者 | 医生 | 药师 | 管理员 |
 |---|---|---|---|---|
-| 注册/登录 | ● | ● | ● | － |
+| 登录（注册未实现） | ● | ● | ● | ● |
 | POST /consultations | ● | － | － | － |
 | POST /consultations/{id}/accept | － | ● | － | － |
 | 会话消息 | ●（本人会话） | ●（本人接诊） | － | 只读监管 |
 | 开方/修改/提交/撤销 | － | ● | － | － |
-| 审核队列/通过/驳回 | － | － | ● | － |
+| 审核队列/通过/驳回 | － | － | ●（全平台待审） | － |
+| 创建流转 `/circulations` | ●（本人已通过） | － | ●（本药房） | ●（指定药房） |
 | 核销 `/circulations/{id}/redeem` | － | － | ●（本药房） | － |
 | 处方轨迹 `/prescriptions/{id}/trace` | ●（本人） | ●（本人开具） | ●（本药房） | ●（只读） |
 | GET /prescriptions | ●（本人） | ●（本人开具） | ● | ●（脱敏） |
@@ -284,6 +298,7 @@ sequenceDiagram
 | FR-CONS-01~05 | `/consultations*` 全部端点 |
 | FR-RX-01~04 | `/consultations/{id}/prescriptions`、`/prescriptions/*` |
 | FR-REV-01~04 | `/prescriptions/review-queue`、`/prescriptions/{id}/reviews/*` |
+| FR-CIRC-01~05 | `/circulations*`、`/prescriptions/{id}/trace` |
 | NFR-SEC-03（越权拒绝） | 权限矩阵 + 403 错误码 |
 | NFR-SEC-05（幂等） | `Idempotency-Key` 约定、核销端点与 `idempotency_record` |
 

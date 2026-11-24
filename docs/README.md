@@ -6,30 +6,31 @@
 
 | 目录/文件 | 内容 | 计划负责人 | 状态 |
 |---|---|---|---|
-| `requirements/requirements.md` | 项目范围、角色、约束、非功能需求 | 李梓语 | 已提交（R1，待评审） |
-| `requirements/use-cases.md` | 29 个用例、优先级、权限边界 | 代香晰 | 已提交（R1-代香晰，v1.0 待评审） |
-| `design/domain-model.md` | 聚合根、实体、值对象、关系 | 郝佳鑫 | 已提交（R1，v0.1 待评审） |
-| `design/architecture.md` | DDD 分层、模块化单体、架构决策 | 刘飞燕 | 已提交（R2，v1.0 待评审） |
-| `design/api-contract.md` | 认证/问诊/处方 API 契约 | 李梓语 | 已提交（R2，v1.0 待评审） |
+| `requirements/requirements.md` | 项目范围、角色、约束、非功能需求 | 李梓语 | v1.0 基线；2026-11-24 冻结 v1 交付边界 |
+| `requirements/use-cases.md` | 29 个用例、优先级、权限边界 | 代香晰 | v1.1 已对齐患者流转/审核范围 |
+| `design/domain-model.md` | 聚合根、实体、值对象、关系 | 郝佳鑫 | v1.1 已回写实现边界 |
+| `design/architecture.md` | DDD 分层、模块化单体、架构决策 | 刘飞燕 | v1.1 已接受（ADR-001） |
+| `design/api-contract.md` | 认证/问诊/处方/流转 API 契约 | 李梓语 | v1.1 已对齐实现 |
 | `design/consultation.md` | 问诊模块实现说明：状态机、数据范围、错误码、验证记录 | 李梓语 | 已提交（R3，v1.0） |
 | `design/prescription-review.md` | 处方审核模块实现说明：队列、电子签名、驳回、记录追溯 | 李梓语 | 已提交（R4，v1.0） |
 | `design/circulation-redeem.md` | 流转核销模块实现说明：核销、幂等键、发药记录、全链路追踪 | 李梓语 | 已提交（R5，v1.0） |
 | `design/circulation-order.md` | 流转单创建、药房接方/拒接、状态与数据范围 | 刘飞燕 | 已提交（R5，v1.0） |
-| `design/er.md` | ER 图与表关系 | 魏宇佳 | 待 R2 |
+| `database/er.md` | ER 图与表关系 | 魏宇佳 | v1.0 已与 V004 字段同步 |
 | `design/adr/` | 架构决策记录 | 刘飞燕 | 已提交 ADR-001（R2） |
-| `test/test-plan.md` | 测试策略、环境、进入/退出准则 | 班国勇 | 已提交（R1，待评审） |
-| `test/test-report.md` | 回归执行、缺陷与结论 | 刘飞燕 | 已提交（R6） |
-| `test/acceptance.md` | 最终验收用例 | 郝佳鑫 | 待 R6 |
+| `test/test-plan.md` | 测试策略、环境、进入/退出准则 | 班国勇 | 已提交（R1） |
+| `test/test-report.md` | 回归执行、缺陷与结论 | 刘飞燕 | 已提交（R6，最终 82 例） |
+| `test/acceptance.md` | 最终验收用例 | 郝佳鑫 | 已提交（R6，最终 82 例） |
 | `process/sprint-01.md` | 第 1 次迭代目标与完成情况 | 班国勇 | 已提交（R3） |
 | `process/review-01.md` | 需求/设计评审记录 | 班国勇 | 已提交（R3） |
 | `process/sprint-03.md` | 第 3 次迭代记录 | 班国勇 | 已提交（R5） |
-| `process/release-notes.md` | 版本与演示说明 | 班国勇 | 已提交（R5） |
-| `security/threat-model.md` | STRIDE、信任边界、威胁清单 | 班国勇 | 待 R4 |
-| `security/checklist.md` | 隐私与安全检查表 | 班国勇 | 待 R4 |
+| `process/release-notes.md` | 版本与演示说明 | 班国勇 | v1.0.0（2026-11-24） |
+| `security/threat-model.md` | STRIDE、信任边界、威胁清单 | 班国勇 | 已提交（R4） |
+| `security/checklist.md` | 隐私与安全检查表 | 班国勇 | 已提交（R4） |
 | `security/r6-hardening.md` | R6 限流、越权与处方状态边界修复说明 | 李梓语 | 已提交（R6） |
-| `report/` | 最终实验报告与过程证据包 | 魏宇佳 | 待 R6 |
-| `demo/demo-script.md` | 答辩演示脚本 | 班国勇 | 待 R6 |
+| `report/` | 最终实验报告与过程证据包 | 魏宇佳 | 待最终交付 |
+| `demo/demo-script.md` | 答辩演示脚本 | 班国勇 | 已合入（R6，PR #42） |
 | `demo/ui-walkthrough.md` | 四端演示走查与截图（R6-C） | 代香晰 | 已提交（R6） |
+| `demo/local-network-test.md` | 局域网多机测试与连接说明 | 刘飞燕 | 已提交（v1.0.0） |
 | `ai-usage.md` | AI 工具、范围、人工修改、验证 | 全员 | 持续更新 |
 
 ## 2. 文档之间的追踪
@@ -59,7 +60,7 @@ process/sprint-*.md + test/test-report.md
 
 | 文件（仓库根目录相对） | 内容 | 状态 |
 |---|---|---|
-| `database/schema.sql` | 当前完整结构：主外键、索引、CHECK 枚举、安全列 | v0.2（第 3 轮同步） |
+| `database/schema.sql` | 当前完整结构：主外键、索引、CHECK 枚举、安全列 | v1.0（2026-11-24 与代码同步） |
 | `database/migrations/V002__core.sql` | 建 24 张表，Flyway 基线 | 第 2 轮 |
 | `database/migrations/V003__auth_consult.sql` | 问诊字段调整与认证/问诊索引 | 第 3 轮 |
 | `database/migrations/V004__prescription.sql` | 处方、明细与审核记录表 | 第 4 轮 |
@@ -68,14 +69,15 @@ process/sprint-*.md + test/test-report.md
 | `database/README.md` | 数据库目录说明、本地验证、与报告的差异 | 持续更新 |
 | `docs/database/table-list.md` | 25 张表清单与核心表字段要点 | 持续更新 |
 | `docs/database/dictionary.xlsx` | 数据字典：表清单、248 个字段、索引、外键 | 由 DDL 生成 |
-| `docs/database/er.md` | 表关系说明与核心 ER 图 | R1 |
-| `docs/database/diagrams/er-core.png` | ER 图，2600×1480，可直接插入报告 | R1 |
-| `docs/database/diagrams/table-overview.png` | 25 张表按业务域分组的总览图 | 第 4 轮更新 |
-| `docs/database/diagrams/deployment.png` | 系统部署图：四区分区、MySQL 主从、备份 | R1 |
+| `docs/database/er.md` | 表关系说明与核心 ER 图 | v1.0（已按 V004 同步） |
+| `docs/database/diagrams/er-core.png` | ER 图，2600×1480，可直接插入报告 | v1.0（2026-11-24） |
+| `docs/database/diagrams/table-overview.png` | 25 张表按业务域分组的总览图 | v1.0（2026-11-24） |
+| `docs/database/diagrams/deployment.png` | 目标部署图：四区分区、MySQL 主从、备份（未落地） | v1.0（标注目标态） |
+| `docs/database/diagrams/deployment-local.png` | 当前 v1 单机 Compose + 局域网访问 | 新增（2026-11-24） |
 | `docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | R1 |
 | `deploy/README.md` | 部署结构、端口、环境变量、备份策略 | R1 |
 | `scripts/check_schema.py` | 无数据库环境下的静态结构自检 | R1 |
 | `scripts/render_er_diagram.py` | 生成 ER 图 | R1 |
 | `scripts/render_table_overview.py` | 生成表总览图 | R1 |
-| `scripts/render_deployment.py` | 生成部署图 | R1 |
+| `scripts/render_deployment.py` | 生成目标部署图与单机部署图 | v1.0 |
 | `scripts/build_dictionary.py` | 解析 DDL 生成数据字典 | R1 |

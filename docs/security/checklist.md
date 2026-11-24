@@ -56,7 +56,7 @@
 | D-03 | 输出转义，防存储型 XSS | 部分落实 | Vue 模板默认转义；无 `v-html`；但未设 CSP | 代香晰 |
 | D-04 | 不信任请求体里的身份字段（只认 JWT） | 已落实 | `@AuthenticationPrincipal CurrentUser` 取 `sub` | 全员 |
 | D-05 | 状态机非法迁移被拒绝 | 已落实 | `PrescriptionStatus.canApply` → `RX_STATE_INVALID(409)` | 刘飞燕 |
-| D-06 | 写接口幂等（`Idempotency-Key`） | 未落实 | 契约 §3.7 有约定，代码未实现；`idempotency_record` 表就绪（S-03） | 李梓语 |
+| D-06 | 写接口幂等（`Idempotency-Key`） | 部分落实 | 核销强制 `Idempotency-Key` 并有三层防线；流转按处方唯一键幂等；其他普通写接口未统一接入幂等表 | 李梓语 |
 | D-07 | 错误响应不包含堆栈/SQL 细节 | 已落实 | 统一错误码 + `ExceptionHandler` | 全员 |
 
 ## E. 审计与可追溯

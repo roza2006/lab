@@ -1,154 +1,141 @@
-# deploy —— 部署配置与本地编排（魏宇佳、班国勇）
+# deploy —— 本地编排与演示环境
 
-`docker-compose.yml` 在第 2 轮打好底（MySQL + Redis + 后端），第 5 轮把建表脚本和演示数据
-挂进 MySQL 初始化目录，`up` 一次就能带数据启动。
+`docker-compose.yml` 起 **MySQL 8 + Redis 7 + Spring Boot 后端** 三个容器。v1 不包含 Nginx、TLS、MySQL 主从和对象存储；四区部署图是目标架构，不是当前环境。
 
-## 1. 部署图
+## 1 当前实际部署（v1）
 
-![系统部署图](../docs/database/diagrams/deployment.png)
+![v1 演示环境部署](../docs/database/diagrams/deployment-local.png)
 
-- 位图：[`deployment.png`](../docs/database/diagrams/deployment.png)
-- 矢量：[`deployment.svg`](../docs/database/diagrams/deployment.svg)
-- 生成脚本：[`scripts/render_deployment.py`](../scripts/render_deployment.py)
+- 位图：[`deployment-local.png`](../docs/database/diagrams/deployment-local.png)
+- 矢量：[`deployment-local.svg`](../docs/database/diagrams/deployment-local.svg)
+- 多机连接步骤：[`docs/demo/local-network-test.md`](../docs/demo/local-network-test.md)
 
-## 1.1 一条命令起演示环境
+| 组件 | 位置 | 默认端口 | 说明 |
+|---|---|---|---|
+| MySQL 8 | 主机 A（容器） | `127.0.0.1:3306` | 业务库，首次启动执行 V002–V005 与 `seed.sql` |
+| Redis 7 | 主机 A（容器） | `127.0.0.1:6379` | 预留；v1 业务代码未使用 |
+| 后端 | 主机 A（容器） | `127.0.0.1:8080` | Spring Boot 单实例 |
+| 前端 | 主机 A（Vite） | `0.0.0.0:5173` | 唯一对局域网开放的端口，`/api` 代理到 8080 |
+| MySQL/Redis/后端 | 不对局域网开放 | — | 避免把数据库暴露给同网段 |
+
+## 2 一条命令起演示环境
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d --build
 docker compose -f deploy/docker-compose.yml ps
+docker compose -f deploy/docker-compose.yml logs -f backend
 ```
 
-MySQL 第一次初始化（数据卷为空）会按文件名顺序执行
-`10-core → 20-auth-consult → 30-prescription → 40-circulation → 90-seed`，
-建完表直接带演示数据。想重置数据就 `down -v` 后再 `up`。
+MySQL 第一次初始化（数据卷为空）会按文件名顺序执行：
+
+```text
+10-core → 20-auth-consult → 30-prescription → 40-circulation → 90-seed
+```
+
+建完表直接带演示数据。重置数据：
+
+```bash
+docker compose -f deploy/docker-compose.yml down -v
+docker compose -f deploy/docker-compose.yml up -d --build
+```
+
+> `down -v` 会删数据库卷，只在演示数据可丢时使用。
 
 演示账号（密码都是 `Demo@2026`）：
 
 | 账号 | 角色 | 能做什么 |
 |---|---|---|
-| `patient01` | 患者 | 发起问诊、查看处方 |
-| `doctor01` | 医生 | 接诊、开方 |
-| `pharmacist01` | 药师 | 审核、流转、核销 |
+| `patient01` | 患者 | 发起问诊、查看处方、选择药房发起流转 |
+| `doctor01` | 医生 | 接诊、发消息、开方、提交审核 |
+| `pharmacist01` | 药师 | 审核、接方、核销 |
 | `admin` | 管理员 | 查看全部数据 |
 
-种子里有一条进行中的问诊和一张待审核处方，登录药师账号就能直接演示审核。
-
-## 2. 分区与职责
-
-| 分区 | 放什么 | 访问策略 |
-|---|---|---|
-| 互联网区 | 患者 H5、医生/药师工作站、管理后台 | 仅经 HTTPS 443 访问，不直连数据库 |
-| DMZ | Nginx / WAF，负责 TLS 终止、限流、访问日志 | 只做转发，不落业务数据 |
-| 应用区 | Spring Boot 实例（无状态，可多副本）、事务发件箱任务 | 只经内网访问数据区，8080 不对外 |
-| 数据区 | MySQL 主从、Redis、对象存储、备份存储 | 仅应用区可达，运维走跳板机 |
-| 外部系统 | 合作药房 | mTLS 双向认证 + 报文签名 |
-
-## 3. 端口与连接
-
-| 连接 | 端口 | 协议/要求 |
-|---|---|---|
-| 浏览器 → Nginx | 443 | HTTPS（TLS 1.3），80 端口只做 301 跳转 |
-| Nginx → 应用 | 8080 | 内网 HTTP，不经公网 |
-| 应用 → MySQL 主库 | 3306 | JDBC，写操作与事务 |
-| 应用 → MySQL 从库 | 3306 | 只读查询、报表、审计检索 |
-| 应用 → Redis | 6379 | 会话、缓存、幂等键 |
-| 应用 → 药房 | 443 | mTLS + 签名，经事务发件箱异步投递 |
-
-## 4. 关键设计
-
-1. **应用无状态**：会话放 Redis，文件放对象存储，实例可水平扩容；数据库变更由 Flyway 管理，启动时不自动改表。
-2. **不阻塞主事务**：处方流转写入 `outbox_event`，后台任务投递药房，失败按指数退避重试，超过阈值告警。
-3. **读写分离**：主库承担写与状态迁移，从库承担列表、报表与审计检索；主从延迟超过阈值时降级为读主库。
-4. **备份**：每日全量 + binlog 增量，备份文件加密后异地保存；每学期做一次恢复演练。
-5. **审计独立**：`audit_log` 单独归档，保留不少于 6 个月，业务库清理不影响审计。
-
-## 5. 环境变量约定
-
-配置通过环境变量注入，仓库不保存任何密钥：
-
-| 变量 | 用途 |
-|---|---|
-| `DB_HOST` / `DB_PORT` / `DB_NAME` | 主库地址 |
-| `DB_USER` / `DB_PASSWORD` | 应用账号（只有增删改查权限，无 DDL） |
-| `REDIS_HOST` / `REDIS_PORT` | 缓存与幂等 |
-| `JWT_SECRET` | 令牌签名密钥 |
-| `PHARMACY_MTLS_CERT` / `PHARMACY_MTLS_KEY` | 药房双向认证证书（本地用自签） |
-
-## 6. 第 5 轮要做的事
-
-- [ ] `docker-compose.yml`：MySQL 8 + Redis 7 + 应用 + Nginx
-- [ ] `nginx.conf`：TLS、限流、静态资源
-- [ ] `init/01-schema.sql`：导入 `database/schema.sql`
-- [ ] `init/02-seed.sql`：演示种子数据（虚构）
-- [ ] 一键启动脚本与健康检查
-
----
-
-## 7. 本地编排（R2-F）
-
-第 2 轮由 F 负责：把"起本地环境"这件事从口口相传变成可执行文件。
-
-### 包含什么
-
-| 文件 | 作用 |
-|---|---|
-| `docker-compose.yml` | MySQL 8 + Redis 7 + 后端三个服务，一条命令起停 |
-| `README.md` | 端口、环境变量、常用命令与排错 |
-
-后端镜像使用 `backend/Dockerfile` 构建（多阶段：Maven 编译 → JRE 运行），
-所以 `deploy/` 与 `backend/Dockerfile` 需要一起 review。
-
-### 快速开始
+## 3 前端与局域网
 
 ```bash
-# 仓库根目录执行
-docker compose -f deploy/docker-compose.yml up -d --build
-
-# 看状态：三个容器应为 running，mysql/redis 为 healthy
-docker compose -f deploy/docker-compose.yml ps
-
-# 跟踪后端日志，出现 Started PlatformApplication 即启动完成
-docker compose -f deploy/docker-compose.yml logs -f backend
-
-# 停止；加 -v 连数据卷一起删
-docker compose -f deploy/docker-compose.yml down
+cd frontend
+pnpm install
+pnpm dev
 ```
 
-启动后：
+`vite.config.ts` 已设置 `host: '0.0.0.0'`，Vite 会打印：
 
-| 地址 | 说明 |
-|---|---|
-| `http://127.0.0.1:8080` | 后端 HTTP 端口 |
-| `127.0.0.1:3306` | MySQL，账号 `root` / 密码见环境变量 |
-| `127.0.0.1:6379` | Redis，无密码（仅本地） |
+```text
+Local:   http://localhost:5173/
+Network: http://192.168.1.23:5173/
+```
 
-### 环境变量
+其他电脑打开 `Network` 那一行即可。Windows 防火墙放行 `5173`：
 
-所有变量都有演示用默认值，不需要 `.env` 也能跑；需要覆盖时在 `deploy/`
-下新建 `.env`（已被 `.gitignore` 忽略，**不要提交**）。
+```powershell
+New-NetFirewallRule -DisplayName "Medical Demo 5173" `
+  -Direction Inbound -Protocol TCP -LocalPort 5173 -Action Allow -Profile Private
+```
+
+浏览器不需要知道后端地址，也不需要 CORS：所有 `/api` 请求由 Vite 在主机 A 内转发到 `127.0.0.1:8080`。
+
+## 4 端口绑定与覆盖
+
+`docker-compose.yml` 用 `BIND_HOST` 控制三个服务绑定的网卡，默认 `127.0.0.1`：
+
+```yaml
+ports:
+  - "${BIND_HOST:-127.0.0.1}:${SERVER_PORT:-8080}:8080"
+```
+
+只有在你确实需要“其他电脑直接访问后端 8080”时，才这样起：
+
+```powershell
+$env:BIND_HOST='0.0.0.0'
+docker compose -f deploy/docker-compose.yml up -d
+```
+
+正常多机演示不需要改；浏览器统一走 5173。
+
+## 5 环境变量
+
+所有变量都有演示默认值，不需要 `.env` 也能跑。需要覆盖时在 `deploy/` 下新建 `.env`（已被 `.gitignore` 忽略，不要提交）。
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
-| `SERVER_PORT` | `8080` | 后端对外端口 |
+| `BIND_HOST` | `127.0.0.1` | 端口绑定网卡；局域网直连后端时才改 `0.0.0.0` |
+| `SERVER_PORT` | `8080` | 后端宿主端口 |
 | `DB_ROOT_PASSWORD` | `root` | MySQL root 密码，仅本地演示 |
-| `DB_NAME` | `medical_platform` | 初始化库名（`MYSQL_DATABASE`） |
-| `DB_PORT` | `3306` | MySQL 对外端口 |
-| `REDIS_PORT` | `6379` | Redis 对外端口 |
+| `DB_NAME` | `medical_platform` | 初始化库名 |
+| `DB_PORT` | `3306` | MySQL 宿主端口 |
+| `REDIS_PORT` | `6379` | Redis 宿主端口 |
+| `JWT_SECRET` | 代码内演示默认值 | 生产/公网必须覆盖 |
 
-容器内后端通过服务名连接：`DB_HOST=mysql`、`REDIS_HOST=redis`，
-对应 `backend/src/main/resources/application.yml` 里的 `${DB_HOST}` / `${REDIS_HOST}`。
+容器内后端通过服务名连接：`DB_HOST=mysql`、`REDIS_HOST=redis`。
 
-### 与数据库的关系
+## 6 目标部署（未落地）
 
-- `database/schema.sql` 是第 1 轮的表结构草案，**不会**被 compose 自动执行：
-  首次起来后按需手动导入（`docker compose exec -T mysql mysql -uroot -proot < database/schema.sql`）。
-- Flyway 目前 `FLYWAY_ENABLED=false`，等 E 把 `database/migrations/` 落地后再打开。
+![目标部署架构](../docs/database/diagrams/deployment.png)
 
-### 排错
+- 位图：[`deployment.png`](../docs/database/diagrams/deployment.png)
+- 矢量：[`deployment.svg`](../docs/database/diagrams/deployment.svg)
+- 生成脚本：[`scripts/render_deployment.py`](../scripts/render_deployment.py)
+
+目标态包括互联网区 / DMZ / 应用区 / 数据区、Nginx/WAF、两个后端实例、MySQL 主从、Redis、对象存储、合作药房 mTLS。当前 compose 没有这些，答辩时按“目标方案”讲。
+
+| 分区 | 目标职责 | 当前状态 |
+|---|---|---|
+| 互联网区 | 患者 H5、医生/药师工作站、管理后台 | 浏览器直连 Vite |
+| DMZ | Nginx/WAF、TLS 终止、限流 | 未实现 |
+| 应用区 | Spring Boot 多副本、outbox 任务 | 单实例，无 outbox |
+| 数据区 | MySQL 主从、Redis、对象存储、备份 | 单 MySQL + 单 Redis |
+| 外部系统 | 合作药房 mTLS | 未接入 |
+
+目标态端口规划：浏览器 → Nginx 443；Nginx → 应用 8080；应用 → MySQL 3306；应用 → Redis 6379；应用 → 药房 443（mTLS）。这些是规划，不是当前 compose 的实际端口。
+
+## 7 排错
 
 | 现象 | 处理 |
 |---|---|
-| `port is already allocated` | 本机 3306/6379/8080 被占用，改 `.env` 里的 `DB_PORT`/`REDIS_PORT`/`SERVER_PORT` |
+| `port is already allocated` | 本机 3306/6379/8080 被占用，改 `.env` 的 `DB_PORT`/`REDIS_PORT`/`SERVER_PORT`；后端换端口时前端要同步 `VITE_PROXY_TARGET` |
+| `docker` 报 named pipe 找不到 | Docker Desktop 没启动，先启动再 compose |
 | `backend` 一直 restarting | 先看 `logs backend`：多数是 MySQL 还没 healthy，等 30s 或 `up -d` 重试 |
-| `docker: command not found` | 本机没装 Docker Desktop，CI 里只用 `docker compose config` 做静态校验 |
+| 其他电脑打不开 5173 | 确认同一网段、`host: '0.0.0.0'`、防火墙放行 5173；公司/学校 Wi-Fi 可能开了 AP 隔离 |
+| 页面能开但接口 502 | Vite 代理找不到后端；`docker compose ps` 看 backend 是否 running |
+| `docker: command not found` | 本机没装 Docker Desktop；也可用本机 MySQL + `mvn spring-boot:run` |
 | 想彻底重来 | `docker compose -f deploy/docker-compose.yml down -v` 后重新 `up` |

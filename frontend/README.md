@@ -13,12 +13,14 @@
 ```bash
 cd frontend
 pnpm install
-pnpm dev          # http://127.0.0.1:5173
+pnpm dev          # 本机 http://localhost:5173；局域网看 Network 地址
 pnpm build        # 类型检查 + 生产构建，产物在 dist/
 ```
 
-开发服务器把 `/api` 代理到 `http://127.0.0.1:8080`（Spring Boot，R2 后端骨架）；如后端端口不同，改 `vite.config.ts` 的 `server.proxy`。
+开发服务器把 `/api` 代理到 `http://127.0.0.1:8080`（Spring Boot）；如后端端口不同，改 `vite.config.ts` 的 `server.proxy` 或设 `VITE_PROXY_TARGET`。
 接口前缀可用环境变量 `VITE_API_BASE_URL` 覆盖，默认 `/api/v1`。
+
+`server.host` 已设为 `0.0.0.0`，同一局域网的电脑可以用 `http://<主机IP>:5173` 访问；MySQL、Redis、后端不需要暴露。完整步骤见 `docs/demo/local-network-test.md`。
 
 ### 没有后端时：本地 mock
 

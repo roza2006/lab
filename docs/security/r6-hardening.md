@@ -88,7 +88,7 @@ mvn -B -ntp test
 | `RateLimitFilterTest#loginAttemptsAreLimitedPerIp` | 同一 IP 前两次登录失败 401，第三次 429，`code=RATE_LIMITED`，`Retry-After` 存在 |
 | `PrescriptionApiTest#rejectedPrescriptionCanBeRevisedAndResubmitted` | 提交 → 驳回 → PUT 改明细后状态 `DRAFT`、`version=5`、明细替换为 1 条、驳回理由清空 → 再提交成功 `PENDING_REVIEW` |
 | `PrescriptionApiTest#otherDoctorCannotReviseRejectedPrescription` | 非开方医生 PUT 驳回态处方返回 403 `RX_SCOPE_DENIED` |
-| 既有 77 例 | 认证、问诊、处方状态机、审核、流转、核销、验收用例保持通过 |
+| 合入后 82 例 | 认证、问诊、处方状态机、审核、流转、核销、限流、验收用例保持通过 |
 
 > 具体通过数在与 R6-A/R6-D 的测试合并后由 `docs/test/test-report.md`、`docs/test/acceptance.md` 统一记录；本文件只声明本线新增用例的断言。
 

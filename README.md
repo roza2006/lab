@@ -6,6 +6,8 @@
 
 本项目面向常见病复诊与轻症健康咨询，提供在线图文问诊、电子处方开具与审核、处方流转至合作药房、身份核验与核销、用药指导等功能。系统不替代实体医疗机构的首次诊断，不承担急诊救治职能；首版不接入医保结算、在线支付与检验检查预约。
 
+v1 实际交付 **Identity、Consultation、Prescription、Circulation 四个核心上下文**。药品目录、审计、通知、运营管理只保留表结构、页面骨架或设计说明，不作为已实现功能。
+
 ## 2. 核心业务闭环
 
 ```text
@@ -38,10 +40,10 @@
 
 ## 4. 技术栈
 
-- 后端：Java 17、Spring Boot 3、Spring Security 6、MyBatis-Plus、MySQL 8、Redis 7
+- 后端：Java 17、Spring Boot 3、Spring Security 6、MyBatis-Plus、MySQL 8、Redis 7（预留，业务代码未使用）
 - 前端：Vue 3、TypeScript、Vite、Element Plus、Pinia
 - 文档：Markdown、OpenAPI 3.0、Mermaid / draw.io
-- 部署：Docker Compose、Nginx
+- 部署：Docker Compose（单机演示）；Nginx/TLS/MySQL 主从为目标方案，未落地
 
 ## 5. 目录结构
 
@@ -59,6 +61,8 @@ deploy/      docker-compose、Nginx、部署说明
 - [提交计划](COMMIT_PLAN.md)：6 轮 × 6 人，每轮的任务、目录与 commit message
 - [文档索引](docs/README.md)：需求、设计、测试、过程、安全、报告
 - [核销与幂等设计](docs/design/circulation-redeem.md)：处方核销、幂等键与发药记录
+- [局域网多机测试](docs/demo/local-network-test.md)：没有云服务器时怎么让 2–3 台电脑连同一套服务
+- [发布说明](docs/process/release-notes.md)：v1.0.0 范围、限制与运行方式
 - [AI 使用记录](docs/ai-usage.md)：工具、范围、人工修改与验证
 - [远程仓库重置说明](RESET_GUIDE.md)：已完成记录与回滚参考
 
@@ -67,8 +71,8 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] 仓库重置与目录骨架
 - [x] R1-刘飞燕：README、目录规范、文档索引
 - [x] R1-李梓语：需求范围与角色
-- [x] R1-代香晰：用例清单（`docs/requirements/use-cases.md`，v1.0 待评审）
-- [x] R1-郝佳鑫：领域模型（`docs/design/domain-model.md`，v0.1 待评审）
+- [x] R1-代香晰：用例清单（`docs/requirements/use-cases.md`，v1.1 已对齐 v1 实现）
+- [x] R1-郝佳鑫：领域模型（`docs/design/domain-model.md`，v1.1 已回写实现边界）
 - [x] R1-魏宇佳：数据库表清单与数据字典（`database/schema.sql`、`docs/database/dictionary.xlsx`）
 - [x] R1-魏宇佳：核心 ER 图、表总览图、系统部署图（`docs/database/diagrams/`、`deploy/`）
 - [x] R1-班国勇：测试计划与协作模板
@@ -94,11 +98,16 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R5-刘飞燕：流转单创建、列表、药房接方与拒接（`backend/src/main/java/com/medical/platform/circulation`、`docs/design/circulation-order.md`）
 - [x] R5-魏宇佳：V005 流转索引、seed.sql 演示数据与 compose 初始化（`database/migrations/`、`database/seed.sql`、`deploy/docker-compose.yml`）
 - [x] R4-班国勇：安全文档（STRIDE 与隐私检查表）
-- [x] R6-刘飞燕：后端回归与测试报告（`docs/test/test-report.md`，72 例全绿）
-- [x] R6-郝佳鑫：最终验收用例与覆盖统计（`docs/test/acceptance.md`、`backend/src/test/java/com/medical/platform/acceptance/AcceptanceTest.java`，77 例全绿）
+- [x] R6-刘飞燕：后端回归与测试报告（`docs/test/test-report.md`，最终 82 例全绿）
+- [x] R6-李梓语：限流、越权复核与驳回后修改重提（`docs/security/r6-hardening.md`）
+- [x] R6-郝佳鑫：最终验收用例与覆盖统计（`docs/test/acceptance.md`、`AcceptanceTest`，最终 82 例全绿）
 - [x] R6-代香晰：演示流程打磨与截图（`docs/demo/ui-walkthrough.md`、`docs/demo/screenshots/`）
-- [ ] R2：演示种子数据
-- [ ] R6：驳回后修改重提（验收 §5-1 阻断项）、前端端到端验收、发布标签
+- [x] R6-魏宇佳：seed.sql 演示数据与 compose 初始化（`database/seed.sql`、`deploy/docker-compose.yml`）
+- [x] R6-班国勇：答辩演示脚本（`docs/demo/demo-script.md`）
+- [x] R6-刘飞燕：患者流转口径、ER/部署图、文档状态统一（本提交）
+- [x] 局域网多机测试说明与 Vite 监听配置（`docs/demo/local-network-test.md`）
+- [ ] 前端端到端验收、真实 MySQL 联调、干净机器部署演练（答辩前待办）
+- [x] 发布标签 `v1.0.0`
 
 ## 8. 本地开发
 

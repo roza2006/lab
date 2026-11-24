@@ -21,8 +21,8 @@
 | 10 | `consultation_session` | 问诊会话表 | 核心 | `id` | `session_no` | → `sys_user`（v1）；← `consultation_message`、`medical_record`、`prescription` |
 | 11 | `consultation_message` | 问诊消息表 | 核心 | `id` | `(session_id, client_msg_id)` | → `consultation_session` |
 | 12 | `medical_record` | 病历表 | 核心 | `id` | `session_id`（一会话一病历） | → `consultation_session` |
-| 13 | `prescription` | 处方主表 | 核心 | `id` | `rx_no` | → `consultation_session`、`patient_profile`、`doctor_profile` |
-| 14 | `prescription_item` | 处方明细表 | 核心 | `id` | `(prescription_id, drug_id)` | → `prescription`、`drug` |
+| 13 | `prescription` | 处方主表 | 核心 | `id` | `rx_no` | → `consultation_session`、`sys_user`（患者/医生，v1） |
+| 14 | `prescription_item` | 处方明细表 | 核心 | `id` | `(prescription_id, drug_code)` | → `prescription`；药品编码/名称做快照，不建 `drug` 外键 |
 | 15 | `drug` | 药品目录表 | 核心 | `id` | `drug_code` | ← `prescription_item` |
 | 16 | `drug_category` | 药品分类表 | 支撑 | `id` | `category_code` | ← `drug` |
 | 17 | `pharmacy` | 合作药房表 | 核心 | `id` | `pharmacy_code`、`license_no` | ← `circulation_order`、`pharmacist_profile` |
@@ -104,8 +104,8 @@
 
 ### 3.7 `sys_user` 用户账号表
 
-`username` 唯一；`password_hash` 存 Argon2id/bcrypt；`phone_enc` 为 AES-GCM 密文；
-`phone_hash` 为 HMAC 盲索引并唯一，用于手机号等值登录/检索。
+`username` 唯一；`password_hash` 存 BCrypt 哈希；`phone_enc` 为预留密文列；
+`phone_hash` 为预留盲索引列；v1 没有接入加密服务，演示数据不含真实手机号。
 
 ### 3.8 `prescription_review` 处方审核记录表
 

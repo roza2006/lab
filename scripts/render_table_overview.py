@@ -112,7 +112,7 @@ def build() -> Canvas:
         "敏感字段 _enc 密文 + _hash 盲索引；审计/事件/幂等表不建外键。",
         16, MUTED,
     )
-    cv.text(2500, 900, "v0.3 · 第 4 轮", 15, MUTED, anchor="rs")
+    cv.text(2500, 900, "v1.0 · 2026-11-24", 15, MUTED, anchor="rs")
 
     return cv
 

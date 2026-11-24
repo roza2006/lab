@@ -10,6 +10,9 @@
 # 约定：
 # - 仓库内不出现真实密码；可调项统一用 ${VAR:-默认值} 覆盖，默认值仅供本地演示。
 # - 数据只落在命名卷里，不写进仓库；.env 已在 .gitignore 中，可本地自行创建。
+# - 默认只把端口绑到 127.0.0.1；多机演示只让前端 Vite 的 5173 对局域网开放。
+#   需要其他电脑直连后端时显式设置 BIND_HOST=0.0.0.0。
+#   局域网步骤见 docs/demo/local-network-test.md。
 
 name: medical-platform
 
@@ -28,7 +31,8 @@ services:
       - --collation-server=utf8mb4_0900_ai_ci
       - --default-time-zone=+08:00
     ports:
-      - "${DB_PORT:-3306}:3306"
+      # 默认只绑本机，避免把数据库暴露到局域网；需要外部直连时显式 BIND_HOST=0.0.0.0
+      - "${BIND_HOST:-127.0.0.1}:${DB_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       # 首次初始化（数据卷为空时）按文件名顺序建表并导入演示数据；
@@ -51,7 +55,7 @@ services:
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${BIND_HOST:-127.0.0.1}:${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
     healthcheck:
@@ -84,7 +88,8 @@ services:
       FLYWAY_ENABLED: "false"
       TZ: Asia/Shanghai
     ports:
-      - "${SERVER_PORT:-8080}:8080"
+      # 浏览器统一走 Vite 的 /api 代理，后端默认不需要暴露到局域网。
+      - "${BIND_HOST:-127.0.0.1}:${SERVER_PORT:-8080}:8080"
     # healthcheck 留到第 3 轮：当前 /actuator/health 受 Spring Security 默认保护，
     # A 放行 health 端点后再补上，避免这里写死一个必然失败的探针。
 

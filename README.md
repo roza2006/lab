@@ -95,8 +95,9 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R5-魏宇佳：V005 流转索引、seed.sql 演示数据与 compose 初始化（`database/migrations/`、`database/seed.sql`、`deploy/docker-compose.yml`）
 - [x] R4-班国勇：安全文档（STRIDE 与隐私检查表）
 - [x] R6-刘飞燕：后端回归与测试报告（`docs/test/test-report.md`，72 例全绿）
+- [x] R6-郝佳鑫：最终验收用例与覆盖统计（`docs/test/acceptance.md`、`backend/src/test/java/com/medical/platform/acceptance/AcceptanceTest.java`，77 例全绿）
 - [ ] R2：演示种子数据
-- [ ] R6：测试与发布
+- [ ] R6：驳回后修改重提（验收 §5-1 阻断项）、前端端到端验收、发布标签
 
 ## 8. 本地开发
 

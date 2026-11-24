@@ -31,6 +31,7 @@
 | 2026-11-22 | 刘飞燕 | DeepSeek Harness（deepseek 模型） | 执行 R6 回归并写 `docs/test/test-report.md`：汇总 72 例结果、环境、覆盖范围与未覆盖项；修复重复创建流转单仍返回 201 的缺陷 | 回归报告初稿、缺陷 D-01 的修复、OpenAPI 200 响应与接口测试断言 | 人工核对：测试数来自 surefire 报告而非估算；未执行的前端、MySQL、部署演练如实列为限制；缺陷修复后重跑全量 | `mvn verify`：72 例通过、0 跳过；第二次创建流转单返回 200，接口测试断言通过 |
 | 2026-11-22 | 魏宇佳 | DeepSeek Harness（deepseek 模型） | 写 `V005__circulation.sql` 与 `seed.sql`：按流转 Mapper 的查询换索引，准备一套可登录、可审核的演示数据，并把建表与种子挂进 compose 初始化目录 | 迁移脚本、种子数据、compose 挂载改动 | 对照 `CirculationOrderMapper` 的 join 与排序调整索引；用 bcrypt 生成 4 个账号哈希并逐个校验；把固定 ID 只能空库执行写进文件头 | 临时 MySQL 按 V002~V005 建表后导入 seed，账号/科室/药房/药品/问诊/处方计数正确，处方与明细可联查；4 个 bcrypt 哈希用 `Demo@2026` 校验通过 |
 | 2026-11-24 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 编写 R6 最终验收用例：`docs/test/acceptance.md`（AT-01~AT-10、覆盖统计、未通过项）与 `AcceptanceTest`（主链路/驳回/数据范围/幂等/撤销 5 个端到端场景） | 验收用例表、判定标准（以数据库事实为准）、77 例覆盖统计、阻断项与修复建议 | 待郝佳鑫复核：验收范围裁剪是否合理、§5-1「驳回后无法修改重提」的判定、前端与 MySQL 未执行项的表述 | JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B test`：77 例运行、0 失败、0 跳过；新增 `AcceptanceTest` 5 例全绿（主链路到 `REDEEMED` 且发药记录恰 1 条） |
+| 2026-11-24 | 班国勇 | DeepSeek Harness（deepseek 模型） | 编写 `docs/demo/demo-script.md`：按 `database/seed.sql` 的演示账号与真实接口写 8 幕演示脚本、兜底方案与常见提问回答 | 演示脚本、接口调用示例、时间分配、8 条问答 | 人工核对接口路径与请求字段（`ConsultationCreateRequest`、`PrescriptionSaveRequest`、`CreateCirculationRequest`、`RedeemRequest`）、流转单 4 个状态、幂等头为选填、72 例回归结果 | 逐条对照 main 上的 Controller 与 DTO；文档不使用符号标记；本 PR 仅新增文档 |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

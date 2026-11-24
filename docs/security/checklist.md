@@ -18,7 +18,7 @@
 | A-05 | 服务端 RBAC：角色不符返回 403 | 已落实 | `ROLE_DOCTOR`/`ROLE_PHARMACIST` 判断；`AuthTest` 覆盖 | 刘飞燕 |
 | A-06 | 资源归属校验（防水平越权） | 已落实 | `SCOPE_DENIED`、`RX_SCOPE_DENIED`；`ConsultationTest` 越权用例 | 李梓语 |
 | A-07 | 未认证请求统一 401，不泄漏内部信息 | 已落实 | `SecurityConfig` 的 `HttpStatusEntryPoint(401)` | 刘飞燕 |
-| A-08 | 登录失败限流 / 账号锁定 | 部分落实 | R6-B 新增 `RateLimitFilter`：登录 20 次/分钟/IP、消息 60 次/分钟/用户、全局 300 次/分钟/IP，超限 429 `RATE_LIMITED`；**账号锁定与验证码仍未实现**（S-06 部分完成） | 李梓语 |
+| A-08 | 登录失败限流 / 账号锁定 | 部分落实 | R6 由李梓语新增 `RateLimitFilter`：登录 20 次/分钟/IP、消息 60 次/分钟/用户、全局 300 次/分钟/IP，超限 429 `RATE_LIMITED`；**账号锁定与验证码仍未实现**（S-06 部分完成） | 李梓语 |
 | A-09 | 令牌可吊销（登出、改密、禁用账号） | 未落实 | 无状态 JWT，无吊销名单（Redis 未接入） | 刘飞燕 |
 | A-10 | 管理员接口单独授权 | 计划中 | `audit` 查询未实现，实现时必须 `ROLE_ADMIN` | 班国勇 |
 

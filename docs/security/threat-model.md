@@ -59,7 +59,7 @@
 | 编号 | 类别 | 威胁场景 | 受影响资产/接口 | 现有缓解（代码证据） | 残余风险 | 优先级 |
 |---|---|---|---|---|---|---|
 | T-01 | S 仿冒 | 用默认密钥伪造合法 JWT，冒充任意角色 | 全部 `/api/v1/**` | 验签走 `Jwts.parser().verifyWith(key)`，`exp` 自动校验；密钥可 `JWT_SECRET` 注入（`application.yml`） | 未注入环境变量时使用仓库默认密钥，攻击者可自行签发 | **P0** |
-| T-02 | S 仿冒 | 撞库/暴力破解登录 | `POST /api/v1/auth/login` | BCrypt 校验，失败统一返回，不区分账号是否存在；R6-B 增加登录 IP 限流（20 次/分钟） | 无账号锁定、无验证码；换 IP 可绕过 | P1 |
+| T-02 | S 仿冒 | 撞库/暴力破解登录 | `POST /api/v1/auth/login` | BCrypt 校验，失败统一返回，不区分账号是否存在；R6 增加登录 IP 限流（20 次/分钟） | 无账号锁定、无验证码；换 IP 可绕过 | P1 |
 | T-03 | S 仿冒 | 令牌重放：登出后旧令牌在 `exp` 前仍可用 | 全部接口 | 无状态 JWT，无服务端吊销名单（Redis 未接入） | 令牌泄露后最长 120 分钟内无法失效 | P1 |
 | T-04 | T 篡改 | 请求体里伪造 `patientId`/`doctorId`/`pharmacyId` 越权操作 | 问诊创建/接诊、处方创建 | 服务端从 JWT 的 `sub` 取当前用户，业务层校验归属（`SCOPE_DENIED`、`RX_SCOPE_DENIED`） | 新增接口若忘记走 `CurrentUser` 会回到信任入参 | P1 |
 | T-05 | T 篡改 | 客户端篡改处方明细/金额后提交 | `PUT /api/v1/prescriptions/{id}`、`/submit` | 只允许 `DRAFT`/`REJECTED` 修订；`RX_ITEM_LIMIT`、`RX_DUPLICATE_DRUG`、`RX_DOSAGE_INVALID` 校验；版本号乐观锁 `RX_VERSION_CONFLICT` | 无药品价格快照，篡改“药品名→价格”无法事后发现 | P1 |
@@ -71,7 +71,7 @@
 | T-11 | I 泄漏 | 日志/异常打印令牌、密码、健康信息 | 服务端日志 | 过滤器不打印令牌（`JwtAuthenticationFilter` 仅清上下文）；异常统一走错误码 | `logging.level.com.medical.platform: DEBUG`，后续新增日志无脱敏约束 | P1 |
 | T-12 | I 泄漏 | 数据库/备份被拖走导致 PII 外泄 | `patient_profile`、`sys_user` | 手机号/身份证/住址用 AES-GCM 密文 + HMAC 盲索引（`schema.sql`） | **`real_name` 等字段仍有明文列**；密钥与库同机；备份未加密 | P1 |
 | T-13 | I 泄漏 | 本地/演示环境被公网访问 | `docker-compose.yml` | 文档要求仅本机访问；容器非 root 运行 | compose 直接映射 `3306/6379/8080`，误暴露到 0.0.0.0 即裸奔 | P1 |
-| T-14 | D 拒绝服务 | 刷登录/刷消息/刷列表 | `login`、`POST /consultations/{id}/messages`、列表接口 | 消息正文限 4000 字（`@Size`），分页参数有边界；R6-B 增加登录/消息/全局限流，超限 429 `RATE_LIMITED` | 计数为单机内存、多实例不共享；JSON body 无总量上限 | P1 |
+| T-14 | D 拒绝服务 | 刷登录/刷消息/刷列表 | `login`、`POST /consultations/{id}/messages`、列表接口 | 消息正文限 4000 字（`@Size`），分页参数有边界；R6 增加登录/消息/全局限流，超限 429 `RATE_LIMITED` | 计数为单机内存、多实例不共享；JSON body 无总量上限 | P1 |
 | T-15 | E 提权 | 患者调用医生接口（接诊/开方） | `accept`、`prescriptions` | 业务层校验 `ROLE_DOCTOR`/`ROLE_PHARMACIST`；单测覆盖 | 权限判定散落在应用服务，新增接口易漏 | P1 |
 | T-16 | E 提权 | 药师审核/操作其他药房的处方 | R5 流转与核销 | 本期未实现药房域，`pharmacy`/`pharmacist_profile` 表已就绪 | R5 必须补“药房归属”校验，否则跨药房越权 | **P0（R5 前置）** |
 | T-17 | E 提权 | 管理员接口（审计查询）无角色限制 | `GET /api/v1/audits`（规划） | 未实现 | 实现时须 `ROLE_ADMIN` + 审计查询本身不可改 | P1 |

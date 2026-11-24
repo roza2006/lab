@@ -32,7 +32,7 @@
 | 2026-11-22 | 魏宇佳 | DeepSeek Harness（deepseek 模型） | 写 `V005__circulation.sql` 与 `seed.sql`：按流转 Mapper 的查询换索引，准备一套可登录、可审核的演示数据，并把建表与种子挂进 compose 初始化目录 | 迁移脚本、种子数据、compose 挂载改动 | 对照 `CirculationOrderMapper` 的 join 与排序调整索引；用 bcrypt 生成 4 个账号哈希并逐个校验；把固定 ID 只能空库执行写进文件头 | 临时 MySQL 按 V002~V005 建表后导入 seed，账号/科室/药房/药品/问诊/处方计数正确，处方与明细可联查；4 个 bcrypt 哈希用 `Demo@2026` 校验通过 |
 | 2026-11-24 | 郝佳鑫 | DeepSeek Harness（deepseek 模型） | 编写 R6 最终验收用例：`docs/test/acceptance.md`（AT-01~AT-10、覆盖统计、未通过项）与 `AcceptanceTest`（主链路/驳回/数据范围/幂等/撤销 5 个端到端场景） | 验收用例表、判定标准（以数据库事实为准）、77 例覆盖统计、阻断项与修复建议 | 待郝佳鑫复核：验收范围裁剪是否合理、§5-1「驳回后无法修改重提」的判定、前端与 MySQL 未执行项的表述 | JDK 17.0.11 + Maven 3.9.6 实机 `mvn -B test`：77 例运行、0 失败、0 跳过；新增 `AcceptanceTest` 5 例全绿（主链路到 `REDEEMED` 且发药记录恰 1 条） |
 | 2026-11-24 | 代香晰 | DeepSeek Harness（deepseek 模型） | 打磨演示流程：补医生队列/接诊会话、患者选药房流转，按 R5 后端流转实现对齐接口，并生成四端演示截图与走查文档 | 页面与 API 适配、mock 接诊/流转接口、`docs/demo/ui-walkthrough.md` 与 12 张截图 | 待代香晰复核：真实后端联调、演示脚本与答辩口径 | `pnpm build` 通过；mock 实测医生接诊→开方→药师审核→患者流转→药房核销全链路 |
-| 2026-11-24 | 李梓语 | DeepSeek Harness（deepseek 模型） | 实现 R6-B 安全加固：新增登录/消息/全局限流过滤器，放行驳回态处方修改并补 OpenAPI、测试与 `docs/security/r6-hardening.md` | 限流过滤器、阈值配置、`REJECTED→DRAFT` 修改链路、测试与文档初稿 | 人工确认阈值与单机实现取舍、复用 PUT 而非新增端点、驳回态版本与字段清空、残余风险表述 | `mvn -B -ntp test`：80 例运行、0 失败、0 跳过；新增 3 例（登录 429、驳回后修改重提、非本人修改 403） |
+| 2026-11-24 | 李梓语 | DeepSeek Harness（deepseek 模型） | 实现 R6 安全加固：新增登录/消息/全局限流过滤器，放行驳回态处方修改并补 OpenAPI、测试与 `docs/security/r6-hardening.md` | 限流过滤器、阈值配置、`REJECTED→DRAFT` 修改链路、测试与文档初稿 | 人工确认阈值与单机实现取舍、复用 PUT 而非新增端点、驳回态版本与字段清空、残余风险表述 | `mvn -B -ntp test`：80 例运行、0 失败、0 跳过；新增 3 例（登录 429、驳回后修改重提、非本人修改 403） |
 |  |  |  |  |  |  |  |
 
 ## 记录要求

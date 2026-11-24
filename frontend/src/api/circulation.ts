@@ -80,10 +80,12 @@ export interface CreateCirculationPayload {
   pharmacyId: number
 }
 
-/** 合作药房演示数据；R5 尚未提供药房目录接口 */
+/**
+ * 合作药房演示数据；v1 尚未提供药房目录接口，选项必须与 database/seed.sql 的药房 ID 对齐。
+ * 目前 seed 只有 id=1，后端会拒绝不存在/停用的药房。
+ */
 export const PHARMACY_OPTIONS = [
-  { id: 1, name: '仁和药房' },
-  { id: 2, name: '惠民药房' },
+  { id: 1, name: '示例大药房（虚构）' },
 ] as const
 
 export const CIRCULATION_STATUS_LABELS: Record<CirculationStatus, string> = {

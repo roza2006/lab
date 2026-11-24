@@ -281,7 +281,7 @@ function canAccessPrescription(user, prescription) {
   return true
 }
 
-const PHARMACIES = { 1: '仁和药房', 2: '惠民药房' }
+const PHARMACIES = { 1: '示例大药房（虚构）' }
 
 const circulations = [
   {

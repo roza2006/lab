@@ -60,6 +60,8 @@ deploy/      docker-compose、Nginx、部署说明
 
 - [提交计划](COMMIT_PLAN.md)：6 轮 × 6 人，每轮的任务、目录与 commit message
 - [文档索引](docs/README.md)：需求、设计、测试、过程、安全、报告
+- [交付物索引](docs/report/README.md)：按报告章节找图表、数据库、演示材料
+- [部署说明](docs/report/deployment.md)：环境要求、一键启动、演示账号、排错
 - [核销与幂等设计](docs/design/circulation-redeem.md)：处方核销、幂等键与发药记录
 - [局域网多机测试](docs/demo/local-network-test.md)：没有云服务器时怎么让 2–3 台电脑连同一套服务
 - [发布说明](docs/process/release-notes.md)：v1.0.0 范围、限制与运行方式
@@ -103,30 +105,62 @@ deploy/      docker-compose、Nginx、部署说明
 - [x] R6-郝佳鑫：最终验收用例与覆盖统计（`docs/test/acceptance.md`、`AcceptanceTest`，最终 82 例全绿）
 - [x] R6-代香晰：演示流程打磨与截图（`docs/demo/ui-walkthrough.md`、`docs/demo/screenshots/`）
 - [x] R6-魏宇佳：seed.sql 演示数据与 compose 初始化（`database/seed.sql`、`deploy/docker-compose.yml`）
+- [x] R6-魏宇佳：部署说明与交付物索引（`docs/report/`、`deploy/env.example`）
 - [x] R6-班国勇：答辩演示脚本（`docs/demo/demo-script.md`）
 - [x] R6-刘飞燕：患者流转口径、ER/部署图、文档状态统一（本提交）
 - [x] 局域网多机测试说明与 Vite 监听配置（`docs/demo/local-network-test.md`）
 - [ ] 前端端到端验收、真实 MySQL 联调、干净机器部署演练（答辩前待办）
 - [x] 发布标签 `v1.0.0`
 
-## 8. 本地开发
+## 8. 本地开发与演示
 
-> 第 2 轮起后端为可编译的 Spring Boot 3.2 工程（Java 17 + Maven）；运行需要 MySQL 8 与 Redis 7，前端骨架随第 2 轮前端任务加入。
+后端是 Spring Boot 3.2（Java 17 + Maven），前端是 Vue 3 + Vite；运行需要 MySQL 8.0.16+ 与 Redis 7。
+完整的部署步骤、演示账号和排错见 [部署说明](docs/report/deployment.md)。
+
+### 8.1 一键起演示环境
 
 ```bash
-# 后端（Java 17 + Maven 3.9）
-cd backend
-mvn spring-boot:run            # 默认 8080；未启动 MySQL/Redis 时会在数据源阶段失败，属预期
+docker compose -f deploy/docker-compose.yml up -d --build
+docker compose -f deploy/docker-compose.yml ps
+```
 
-# 打包与测试
+MySQL 首次初始化（数据卷为空）会按顺序执行 `database/migrations/V002~V005` 和 `seed.sql`，
+起来就有 4 个演示账号（`admin` / `doctor01` / `patient01` / `pharmacist01`，密码 `Demo@2026`）和一条待审核处方。
+想重置数据：`down -v` 后再 `up`。
+
+### 8.2 手动起后端
+
+```bash
+cd backend
+mvn spring-boot:run            # 默认 8080；MySQL/Redis 没起会在数据源阶段失败，属预期
 mvn -DskipTests package
 mvn test
-
-# 存活探针（启用安全配置后需放行）
 curl http://127.0.0.1:8080/actuator/health
 ```
 
-配置全部支持环境变量覆盖，仓库内不含真实密钥：
+### 8.3 手动起前端
+
+```bash
+cd frontend
+pnpm install
+pnpm dev                       # 默认 5173，代理到 8080
+```
+
+### 8.4 准备数据库
+
+```bash
+mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS medical_platform \
+  DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
+
+# 按迁移顺序建表，再导演示数据
+for f in database/migrations/V00*.sql database/seed.sql; do
+  mysql -uroot -p medical_platform < "$f"
+done
+```
+
+不想要演示数据就只跑 `database/migrations/`；`seed.sql` 用固定 ID，只能空库执行一次。
+
+配置支持环境变量覆盖，仓库内不含真实密钥：
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
@@ -134,14 +168,7 @@ curl http://127.0.0.1:8080/actuator/health
 | `DB_HOST` / `DB_PORT` / `DB_NAME` | `127.0.0.1` / `3306` / `medical_platform` | MySQL 连接 |
 | `DB_USER` / `DB_PASSWORD` | `root` / `root` | 本地开发账号 |
 | `REDIS_HOST` / `REDIS_PORT` | `127.0.0.1` / `6379` | Redis 连接 |
-| `FLYWAY_ENABLED` | `false` | 迁移脚本落地后再开启 |
+| `FLYWAY_ENABLED` | `false` | 打开后由 Flyway 执行 `database/migrations`（compose 默认关，走初始化目录） |
+| `FLYWAY_LOCATIONS` | `filesystem:../database/migrations` | 换启动目录时覆盖 |
 
-```bash
-# 前端（第 2 轮前端骨架加入后）
-cd frontend
-pnpm install
-pnpm dev
-
-# 数据库（schema 见第 1 轮 database/schema.sql）
-mysql -u root -p < database/schema.sql
-```
+compose 侧的可调项见 [`deploy/env.example`](deploy/env.example)，复制为 `deploy/.env` 即可生效。

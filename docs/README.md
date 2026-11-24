@@ -27,7 +27,7 @@
 | `security/threat-model.md` | STRIDE、信任边界、威胁清单 | 班国勇 | 已提交（R4） |
 | `security/checklist.md` | 隐私与安全检查表 | 班国勇 | 已提交（R4） |
 | `security/r6-hardening.md` | R6 限流、越权与处方状态边界修复说明 | 李梓语 | 已提交（R6） |
-| `report/` | 最终实验报告与过程证据包 | 魏宇佳 | 待最终交付 |
+| `report/` | 交付物索引与部署说明（报告正文按学校模板单独提交） | 魏宇佳 | 已提交（R6） |
 | `demo/demo-script.md` | 答辩演示脚本 | 班国勇 | 已合入（R6，PR #42） |
 | `demo/ui-walkthrough.md` | 四端演示走查与截图（R6-C） | 代香晰 | 已提交（R6） |
 | `demo/local-network-test.md` | 局域网多机测试与连接说明 | 刘飞燕 | 已提交（v1.0.0） |
@@ -76,6 +76,9 @@ process/sprint-*.md + test/test-report.md
 | `docs/database/diagrams/deployment-local.png` | 当前 v1 单机 Compose + 局域网访问 | 新增（2026-11-24） |
 | `docs/database/conventions.md` | 命名、类型、索引、外键、安全与迁移规范 | R1 |
 | `deploy/README.md` | 部署结构、端口、环境变量、备份策略 | R1 |
+| `deploy/env.example` | compose 可调项示例，复制为 `.env` 生效 | R6 |
+| `docs/report/deployment.md` | 部署说明：环境、一键启动、演示账号、排错 | R6 |
+| `docs/report/README.md` | 交付物索引：按报告章节找图表、数据库与演示材料 | R6 |
 | `scripts/check_schema.py` | 无数据库环境下的静态结构自检 | R1 |
 | `scripts/render_er_diagram.py` | 生成 ER 图 | R1 |
 | `scripts/render_table_overview.py` | 生成表总览图 | R1 |

@@ -18,6 +18,9 @@ app:
   jwt:
     secret: test-only-secret-key-do-not-use-outside-tests-2026
     expiration-minutes: 30
+  # 默认关闭，避免大量登录/建单用例互相触发限流；RateLimitFilterTest 用 properties 单独打开
+  rate-limit:
+    enabled: false
 
 logging:
   level:

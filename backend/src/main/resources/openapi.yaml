@@ -4,6 +4,7 @@ info:
   description: |
     平台 v1 版本 HTTP API 契约，覆盖认证、图文问诊、电子处方、药师审核与处方流转核销五个业务域。
     契约设计说明见 docs/design/api-contract.md。
+    R6 起认证、消息与全局限流生效，超限统一返回 429 `RATE_LIMITED`（见 docs/security/r6-hardening.md）。
   version: 1.0.0
   contact:
     name: 李梓语（问诊域、处方域负责人）
@@ -94,6 +95,8 @@ paths:
           $ref: '#/components/responses/Unauthorized401'
         '422':
           $ref: '#/components/responses/ValidationError422'
+        '429':
+          $ref: '#/components/responses/RateLimited429'
 
   /auth/logout:
     post:
@@ -353,7 +356,10 @@ paths:
           $ref: '#/components/responses/NotFound404'
     put:
       tags: [Prescription]
-      summary: 修改草稿/驳回态处方
+      summary: 修改草稿或驳回态处方
+      description: |
+        仅开方医生可调用。`DRAFT` 直接替换诊断与明细；`REJECTED` 先按状态机退回 `DRAFT`
+        再替换，版本号连续递增，原驳回理由清空。其他状态返回 409 `RX_STATE_INVALID`。
       parameters:
         - $ref: '#/components/parameters/PrescriptionId'
       requestBody:

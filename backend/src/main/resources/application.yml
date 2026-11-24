@@ -64,6 +64,12 @@ app:
   jwt:
     secret: ${JWT_SECRET:dev-only-change-me-32bytes-minimum-secret-key-2026}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+  # 单机固定窗口限流（R6-B）。多实例/网关部署时计数不共享，生产应改为 Redis 或网关限流。
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    login-per-minute: ${RATE_LIMIT_LOGIN_PER_MINUTE:20}
+    message-per-minute: ${RATE_LIMIT_MESSAGE_PER_MINUTE:60}
+    global-per-minute: ${RATE_LIMIT_GLOBAL_PER_MINUTE:300}
 
 management:
   endpoints:
